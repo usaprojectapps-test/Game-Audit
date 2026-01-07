@@ -1,0 +1,27 @@
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js";
+
+  const supabase = createClient(
+    "https://kjfzdmmloryzbuiixceh.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZnpkbW1sb3J5emJ1aWl4Y2VoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Nzc5OTI4NCwiZXhwIjoyMDgzMzc1Mjg0fQ.Gwnp1ccE2b2Vl0GclKUViYmMM_z6AhRafvpFzFI8bCc"
+  );
+
+  async function updateMetadata() {
+    const { data, error } = await supabase.auth.admin.updateUserById(
+      "df03b7b5-ee98-4289-9e5b-c415e4fb73c7", // your UID
+      {
+        user_metadata: {
+          name: "Shekar Reddy",
+          role: "SuperAdmin",
+          location_id: "GLOBAL"
+        }
+      }
+    );
+
+    console.log("DONE:", data, error);
+  }
+
+  updateMetadata();
+</script>
+
+<h2>Super Admin Metadata Updated</h2>

@@ -1,0 +1,100 @@
+<div class="module-wrapper horizontal">
+
+  <!-- LEFT SIDE (slimmer) -->
+  <div class="module-table slim">
+
+    <!-- SEARCH + FILTERS -->
+    <div class="vendor-search-bar">
+  <input id="vendorSearch" type="text" placeholder="Search vendor name / ID">
+  <select id="vendorFilterStatus">
+    <option value="">All Status</option>
+    <option value="Active">Active</option>
+    <option value="Inactive">Inactive</option>
+  </select>
+</div>
+
+
+    <!-- TABLE -->
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Vendor ID</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="vendorTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination-bar">
+      <div id="vendorPageInfo" class="page-info"></div>
+      <div class="pagination-buttons">
+        <button id="vendorPrevPage" class="btn btn-secondary">Prev</button>
+        <button id="vendorNextPage" class="btn btn-secondary">Next</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT SIDE (wider) -->
+  <div class="module-form wide">
+
+    <div class="card-header">Vendor Details</div>
+   
+    <!-- FORM GRID -->
+    <div class="form-grid" style="margin-top: 20px;">
+
+      <div class="form-group">
+        <label>Vendor ID</label>
+        <input id="vendorFormId" type="text">
+      </div>
+
+      <div class="form-group">
+        <label>Vendor Name</label>
+        <input id="vendorFormName" type="text">
+      </div>
+
+      <div class="form-group">
+        <label>Contact Person</label>
+        <input id="vendorFormContactPerson" type="text">
+      </div>
+
+      <div class="form-group">
+        <label>Phone</label>
+        <input id="vendorFormPhone" type="tel" maxlength="12" placeholder="123-456-7890">
+
+      </div>
+
+      <div class="form-group full">
+        <label>Address</label>
+        <input id="vendorFormAddress" type="text">
+      </div>
+
+      <div class="form-group">
+        <label>Status</label>
+        <select id="vendorFormStatus">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Notes</label>
+        <input id="vendorFormNotes" type="text">
+      </div>
+
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="form-actions">
+      <button id="vendorDeleteBtn" class="btn btn-danger">Delete</button>
+      <button id="vendorSaveBtn" class="btn btn-primary">Save</button>
+    </div>
+
+  </div>
+
+</div>

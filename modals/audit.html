@@ -1,0 +1,41 @@
+<div class="audit-module" style="max-width:600px; margin:auto;">
+
+  <h3>Audit Entry</h3>
+
+  <div class="form-row">
+    <label>Machine No</label>
+    <input id="auditMachineNo" type="text">
+  </div>
+
+  <div class="form-row">
+    <label>Date</label>
+    <input id="auditDate" type="date">
+  </div>
+
+  <div class="form-row">
+    <label>Previous Meter IN</label>
+    <input id="auditPrevIn" type="number" readonly>
+  </div>
+
+  <div class="form-row">
+    <label>Previous Meter OUT</label>
+    <input id="auditPrevOut" type="number" readonly>
+  </div>
+
+  <div class="form-row">
+    <label>Current Meter IN</label>
+    <input id="auditCurIn" type="number">
+  </div>
+
+  <div class="form-row">
+    <label>Current Meter OUT</label>
+    <input id="auditCurOut" type="number">
+  </div>
+
+  <div id="auditStatus" style="margin-top:6px;"></div>
+
+  <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+    <button id="auditSaveBtn" class="btn btn-primary">Save</button>
+  </div>
+
+</div>

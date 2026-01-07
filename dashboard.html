@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+
+  <link rel="stylesheet" href="CSS/dashboard.css" />
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <h2>Dashboard</h2>
+    </div>
+
+    <div class="header-right">
+      <span><strong>Name:</strong> <span id="userName"></span></span>
+      <span><strong>Role:</strong> <span id="userRole"></span></span>
+      <span><strong>Location:</strong> <span id="userLocation"></span></span>
+
+      <button id="logoutBtn" class="logout-btn">Logout</button>
+    </div>
+  </header>
+
+  <!-- MAIN DASHBOARD GRID -->
+  <div class="dashboard-container">
+    <div class="grid">
+
+      <!-- USERS MODULE -->
+      <div class="card" id="cardUsers" onclick="window.location.href='users.html'">
+        <h3>Users</h3>
+      </div>
+
+      <!-- VENDORS MODULE -->
+      <div class="card" id="cardVendors" onclick="window.location.href='vendors.html'">
+        <h3>Vendors</h3>
+      </div>
+
+      <!-- MACHINES MODULE -->
+      <div class="card" id="cardMachines" onclick="window.location.href='machines.html'">
+        <h3>Machines</h3>
+      </div>
+
+      <!-- REPORTS MODULE -->
+      <div class="card" id="cardReports" onclick="window.location.href='reports.html'">
+        <h3>Reports</h3>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- AUTH CHECK -->
+  <script type="module" src="js_new/auth.js"></script>
+
+  <!-- DASHBOARD LOGIC -->
+  <script type="module" src="js_new/dashboard.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<div class="msp-module" style="max-width:600px; margin:auto;">
+
+  <h3>MSP Entry</h3>
+
+  <div class="form-row">
+    <label>Machine No</label>
+    <input id="mspMachineNo" type="text">
+  </div>
+
+  <div class="form-row">
+    <label>Date</label>
+    <input id="mspDate" type="date">
+  </div>
+
+  <div class="form-row">
+    <label>Amount</label>
+    <input id="mspAmount" type="number">
+  </div>
+
+  <div class="form-row">
+    <label>Type</label>
+    <select id="mspType">
+      <option value="MSP">MSP</option>
+      <option value="EOD">EOD</option>
+    </select>
+  </div>
+
+  <div class="form-row">
+    <label>Remarks</label>
+    <input id="mspRemarks" type="text">
+  </div>
+
+  <div id="mspTotalBox" style="margin-top:10px; font-weight:600;">
+    Total MSP Today: $0.00
+  </div>
+
+  <div id="mspEntryList" style="margin-top:12px; display:flex; flex-direction:column; gap:10px;"></div>
+
+  <div id="mspStatus" style="margin-top:8px;"></div>
+
+  <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+    <button id="mspSaveBtn" class="btn btn-primary">Save</button>
+  </div>
+
+</div>

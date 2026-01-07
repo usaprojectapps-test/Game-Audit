@@ -1,0 +1,188 @@
+<div class="module-container" style="display:flex; gap:20px; align-items:flex-start; max-width:1400px; margin:auto;">
+
+  <!-- LEFT SIDE -->
+<div style="flex:1.2; display:flex; flex-direction:column; gap:12px;">
+
+  <!-- SEARCH + FILTERS -->
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+    
+    <!-- Search bar -->
+    <div style="flex:1; display:flex; align-items:center; gap:8px;">
+      <input id="machineSearch" type="text" placeholder="Search machine no / vendor" style="flex:1; padding:8px 12px; border-radius:6px; border:1px solid #ccc; font-size:14px; box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+      <button class="btn-icon">🔍</button>
+    </div>
+
+    <!-- Filters -->
+    <div style="display:flex; gap:8px;">
+      <select id="machineFilterVendor" style="padding:6px 10px; border-radius:6px; border:1px solid #ccc; font-size:14px;">
+        <option value="">All Vendors</option>
+      </select>
+
+      <select id="machineFilterStatus" style="padding:6px 10px; border-radius:6px; border:1px solid #ccc; font-size:14px;">
+        <option value="">All Status</option>
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+        <option value="Repair">Repair</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card" style="padding:0; overflow-x:auto;">
+  <table class="machine-table">
+    <thead>
+      <tr>
+        <th>Machine No</th>
+        <th>Vendor</th>
+        <th>Type</th>
+        <th>Status</th>
+        <th>Health</th>
+      </tr>
+    </thead>
+    <tbody id="machineTableBody"></tbody>
+  </table>
+</div>
+
+  <!-- PAGINATION -->
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+    <div id="machinePageInfo" style="font-size:12px; color:var(--text-light); font-weight:500;"></div>
+    <div style="display:flex; gap:6px;">
+      <button id="machinePrevPage" class="btn btn-secondary">Prev</button>
+      <button id="machineNextPage" class="btn btn-secondary">Next</button>
+    </div>
+  </div>
+
+</div>
+
+  <!-- RIGHT SIDE -->
+  <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
+
+    <!-- ADD / EDIT FORM -->
+    <div class="card">
+      <div class="card-header">Add / Edit Machine</div>
+
+      <!-- Row 1: Machine No + Vendor -->
+      <div class="form-row-2col">
+        <div class="form-group">
+          <label>Machine No</label>
+          <input id="machineFormNo" type="text">
+        </div>
+
+        <div class="form-group">
+          <label>Vendor</label>
+          <select id="machineFormVendor">
+            <option value="">Select Vendor</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Row 2: Type + Location -->
+      <div class="form-row-2col">
+        <div class="form-group">
+          <label>Type</label>
+          <select id="machineFormType">
+            <option value="">Select Type</option>
+            <option value="777">777</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Location</label>
+          <input id="machineFormLocation" type="text">
+        </div>
+      </div>
+
+      <!-- Row 3: Machine Model + Serial Number -->
+      <div class="form-row-2col">
+        <div class="form-group">
+          <label>Machine Model</label>
+          <input id="machineFormModel" type="text">
+        </div>
+
+        <div class="form-group">
+          <label>Serial Number</label>
+          <input id="machineFormSerial" type="text">
+        </div>
+      </div>
+
+      <!-- Row 4: Status + Install Date -->
+      <div class="form-row-2col">
+        <div class="form-group">
+          <label>Status</label>
+          <select id="machineFormStatus">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="Repair">Repair</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Installation Date</label>
+          <input id="machineFormInstallDate" type="date">
+        </div>
+      </div>
+
+      <!-- Row 5: Notes -->
+      <div class="form-row-2col">
+        <div class="form-group" style="flex:1;">
+          <label>Notes</label>
+          <input id="machineFormNotes" type="text">
+        </div>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
+        <button id="machineDeleteBtn" class="btn btn-danger">Delete</button>
+        <button id="machineSaveBtn" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+
+    <!-- DETAILS HEADER -->
+    <div class="card">
+      <div class="card-header" id="machineDetailTitle">Select a machine</div>
+      <div class="card-subtitle" id="machineDetailSubtitle">
+        Machine details, QR, performance & timeline will appear here.
+      </div>
+    </div>
+
+    <!-- QR + ACTIONS -->
+    <div style="display:flex; gap:10px;">
+
+      <!-- QR -->
+      <div class="card" style="flex:0 0 150px; text-align:center;">
+        <div style="font-size:13px; margin-bottom:6px;">Machine QR</div>
+        <canvas id="machineQrCanvas" width="128" height="128"></canvas>
+      </div>
+
+      <!-- SUMMARY PLACEHOLDER -->
+      <div class="card" style="flex:1;">
+        <div class="card-header">Performance Summary</div>
+        <div id="machineSummaryContent" style="font-size:13px; color:var(--text-light);">
+          Summary will be available in Reports.
+        </div>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+        <button id="machinePrintQrBtn" class="btn btn-secondary">Print QR</button>
+        <button id="machineExportBtn" class="btn btn-secondary">Download QR</button>
+      </div>
+
+    </div>
+
+    <!-- TIMELINE PLACEHOLDER -->
+    <div class="card" style="max-height:260px; overflow-y:auto;">
+      <div class="card-header">Activity Timeline</div>
+      <div id="machineTimelineList" style="display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--text-light);">
+        Activity timeline will be available in Reports.
+      </div>
+    </div>
+
+  </div>
+
+</div>
+<!-- Firebase -->
+<script type="module" src="/js_new/firebase.js"></script>
+
+<!-- Machines Logic -->
+<script type="module" src="/js_new/machines.js"></script>

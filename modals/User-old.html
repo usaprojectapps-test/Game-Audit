@@ -1,0 +1,107 @@
+<div class="modal">
+  <div class="modal-content" style="max-width:700px; width:95%;">
+    <div class="modal-header">
+      <h3>User Management</h3>
+      <span class="close">&times;</span>
+    </div>
+
+    <div class="modal-body" style="flex-direction:row; gap:20px; align-items:flex-start;">
+
+      <!-- LEFT SIDE: User List -->
+      <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
+
+        <!-- Search -->
+        <input id="userSearch" type="text" placeholder="Search name / username / ID">
+
+        <!-- Table -->
+        <div style="max-height:300px; overflow-y:auto; background:#f8f9fb; padding:6px; border-radius:10px;">
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Dept</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div style="display:flex; justify-content:space-between; margin-top:6px;">
+          <div id="userPageInfo" style="font-size:12px; color:#666;"></div>
+          <div style="display:flex; gap:6px;">
+            <button id="userPrevPage" class="btn btn-secondary" style="padding:4px 10px;">Prev</button>
+            <button id="userNextPage" class="btn btn-secondary" style="padding:4px 10px;">Next</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT SIDE: Add/Edit Form -->
+      <div style="flex:1; padding:10px; background:#fff; border-radius:10px; box-shadow:var(--shadow-soft);">
+
+        <h4 style="margin-bottom:8px;">Add / Edit User</h4>
+
+        <div class="form-row">
+          <label>User ID</label>
+          <input id="userId" type="text" placeholder="U001">
+        </div>
+
+        <div class="form-row">
+          <label>Name</label>
+          <input id="userName" type="text">
+        </div>
+
+        <div class="form-row">
+          <label>Username</label>
+          <input id="userUsername" type="text">
+        </div>
+
+        <div class="form-row">
+          <label>Password</label>
+          <input id="userPassword" type="password" placeholder="Leave blank to keep existing">
+        </div>
+
+        <div class="form-row">
+          <label>Department</label>
+          <select id="userDepartment">
+            <option value="Admin">Admin</option>
+            <option value="Audit">Audit</option>
+            <option value="Cash">Cash</option>
+            <option value="Silver">Silver</option>
+            <option value="Agents">Agents</option>
+            <option value="Managers">Managers</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label>Phone</label>
+          <input id="userPhone" type="text">
+        </div>
+
+        <div class="form-row">
+          <label>Status</label>
+          <select id="userStatus">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+
+        <div id="userFormStatus" style="margin-top:4px; font-size:13px;"></div>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
+          <button id="userDeleteBtn" class="btn btn-secondary">Delete</button>
+          <button id="userSaveBtn" class="btn btn-primary">Save</button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary close">Close</button>
+    </div>
+  </div>
+</div>
