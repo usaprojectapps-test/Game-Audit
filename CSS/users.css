@@ -146,3 +146,47 @@ tr:hover {
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
+<div class="glass-card" style="padding: 20px; margin-top: 20px;">
+  <div class="card-header">User Management</div>
+  <div class="card-subtitle">Create User</div>
+
+  <div class="form-group">
+    <label>Name</label>
+    <input type="text" id="userName" class="input" />
+  </div>
+
+  <div class="form-group">
+    <label>Email</label>
+    <input type="email" id="userEmail" class="input" />
+  </div>
+
+  <div class="form-group">
+    <label>Password</label>
+    <input type="password" id="userPassword" class="input" />
+  </div>
+
+  <div class="form-group">
+    <label>Role</label>
+    <select id="userRole" class="dropdown">
+      <option value="">Select Role</option>
+      <option value="Admin">Admin</option>
+      <option value="Manager">Manager</option>
+      <option value="Audit">Audit</option>
+      <!-- Add more roles as needed -->
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label>Location</label>
+    <select id="userLocation" class="dropdown">
+      <option value="">Select Location</option>
+      <!-- Populate dynamically from Supabase -->
+    </select>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn-danger">Delete</button>
+    <button class="btn btn-primary">Save</button>
+  </div>
+</div>
+

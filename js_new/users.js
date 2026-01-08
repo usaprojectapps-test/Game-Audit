@@ -1,26 +1,35 @@
+// users.js
+
+// ---------------------------------------------------------
+// 0️⃣ Imports & logged-in user context
+// ---------------------------------------------------------
 import { supabase } from "./supabaseClient.js";
 
-// Logged-in user info
-const loggedInRole = sessionStorage.getItem("role");
-const loggedInLocation = sessionStorage.getItem("locationId");
+// These are set at login time
+const loggedInRole = sessionStorage.getItem("role");          // e.g. "Super Admin", "Location Admin", "Manager", etc.
+const loggedInLocation = sessionStorage.getItem("locationId"); // e.g. "LOC001" (code from locations table)
+const loggedInUserId = sessionStorage.getItem("userId");       // optional but used for delete requests
 
-// UI elements
+// ---------------------------------------------------------
+// 1️⃣ DOM references
+// ---------------------------------------------------------
 const nameInput = document.getElementById("name");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const roleSelect = document.getElementById("role");
+const departmentSelect = document.getElementById("department");
 const locationSelect = document.getElementById("location");
-const locationRow = document.getElementById("locationRow");
 const createUserBtn = document.getElementById("createUserBtn");
 const createMsg = document.getElementById("createMsg");
 const usersBody = document.getElementById("usersBody");
 
-// Modal elements
+// Update modal
 const updateModal = document.getElementById("updateUserModal");
 const editUserId = document.getElementById("editUserId");
 const editName = document.getElementById("editName");
 const editEmail = document.getElementById("editEmail");
 const editRole = document.getElementById("editRole");
+const editDepartment = document.getElementById("editDepartment");
 const editLocation = document.getElementById("editLocation");
 const editStatus = document.getElementById("editStatus");
 const updateMsg = document.getElementById("updateMsg");
@@ -28,23 +37,115 @@ const saveUserChanges = document.getElementById("saveUserChanges");
 const closeUpdateModal = document.getElementById("closeUpdateModal");
 
 // ---------------------------------------------------------
-// 1️⃣ ROLE-BASED UI CONTROL
+// 2️⃣ Constants: roles & departments
+// ---------------------------------------------------------
+const ROLES = [
+  "Super Admin",
+  "Location Admin",
+  "Manager",
+  "Audit",
+  "MSP",
+  "Silver",
+  "SilverAgents"
+];
+
+const DEPARTMENTS = [
+  "Audit",
+  "MSP",
+  "Silver",
+  "SilverAgents",
+  "Admin",
+  "Machine",
+  "Agents",
+  "Manager"
+];
+
+// ---------------------------------------------------------
+// 3️⃣ Populate dropdowns (roles, departments, locations)
+// ---------------------------------------------------------
+async function loadLocations() {
+  // locations table: id (uuid), code (e.g. "LOC001"), name
+  const { data, error } = await supabase
+    .from("locations")
+    .select("code, name")
+    .order("code", { ascending: true });
+
+  if (error) {
+    console.error("Failed to load locations:", error);
+    return;
+  }
+
+  locationSelect.innerHTML = `<option value="">Select Location</option>`;
+  editLocation.innerHTML = `<option value="">Select Location</option>`;
+
+  data.forEach(loc => {
+    const opt1 = document.createElement("option");
+    opt1.value = loc.code; // store code in users.location_id
+    opt1.textContent = `${loc.code} - ${loc.name}`;
+    locationSelect.appendChild(opt1);
+
+    const opt2 = document.createElement("option");
+    opt2.value = loc.code;
+    opt2.textContent = `${loc.code} - ${loc.name}`;
+    editLocation.appendChild(opt2);
+  });
+}
+
+function populateRoleDropdowns() {
+  roleSelect.innerHTML = `<option value="">Select Role</option>`;
+  editRole.innerHTML = "";
+
+  ROLES.forEach(r => {
+    // Only Super Admin can assign Super Admin
+    if (loggedInRole !== "Super Admin" && r === "Super Admin") return;
+
+    const opt1 = document.createElement("option");
+    opt1.value = r;
+    opt1.textContent = r;
+    roleSelect.appendChild(opt1);
+
+    const opt2 = document.createElement("option");
+    opt2.value = r;
+    opt2.textContent = r;
+    editRole.appendChild(opt2);
+  });
+}
+
+function populateDepartmentDropdowns() {
+  departmentSelect.innerHTML = `<option value="">Select Department</option>`;
+  editDepartment.innerHTML = "";
+
+  DEPARTMENTS.forEach(d => {
+    const opt1 = document.createElement("option");
+    opt1.value = d;
+    opt1.textContent = d;
+    departmentSelect.appendChild(opt1);
+
+    const opt2 = document.createElement("option");
+    opt2.value = d;
+    opt2.textContent = d;
+    editDepartment.appendChild(opt2);
+  });
+}
+
+// ---------------------------------------------------------
+// 4️⃣ ROLE-BASED UI CONTROL
 // ---------------------------------------------------------
 function setupRoleBasedUI() {
-  if (loggedInRole !== "SuperAdmin") {
-    locationSelect.value = loggedInLocation;
+  // Location control
+  if (loggedInRole !== "Super Admin") {
+    if (loggedInLocation) {
+      locationSelect.value = loggedInLocation;
+    }
     locationSelect.disabled = true;
-
-    const locAdminOption = [...roleSelect.options].find(
-      opt => opt.value === "LocationAdmin"
-    );
-    if (locAdminOption) locAdminOption.remove();
+    editLocation.disabled = true;
+  } else {
+    locationSelect.disabled = false;
+    editLocation.disabled = false;
   }
 }
-setupRoleBasedUI();
-
 // ---------------------------------------------------------
-// 2️⃣ CREATE USER
+// 5️⃣ CREATE USER (Auth + DB)
 // ---------------------------------------------------------
 createUserBtn.addEventListener("click", async () => {
   createMsg.textContent = "";
@@ -53,76 +154,103 @@ createUserBtn.addEventListener("click", async () => {
   const email = emailInput.value.trim();
   const password = passwordInput.value.trim();
   const role = roleSelect.value;
+  const department = departmentSelect.value;
   let locationId = locationSelect.value;
 
-  if (!name || !email || !password || !role) {
-    createMsg.textContent = "Please fill all fields.";
+  if (!name || !email || !password || !role || !department) {
+    createMsg.textContent = "Please fill all fields (name, email, password, role, department, location).";
     return;
   }
 
-  if (loggedInRole !== "SuperAdmin") {
+  if (loggedInRole !== "Super Admin") {
+    // Non Super Admin is locked to their own location
     locationId = loggedInLocation;
   }
 
-  const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+  if (!locationId) {
+    createMsg.textContent = "Location is required.";
+    return;
+  }
+
+  // Create user in Auth
+  const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
-    user_metadata: {
-      name,
-      role,
-      location_id: locationId
+    options: {
+      data: {
+        name,
+        role,
+        department,
+        location_id: locationId,
+        status: "Active"
+      }
     }
   });
 
   if (authError) {
+    console.error("Auth signUp error:", authError);
     createMsg.textContent = "Failed to create user (Auth).";
-    console.error(authError);
     return;
   }
 
-  const userId = authUser.user.id;
+  const authUser = authData.user;
+  if (!authUser) {
+    createMsg.textContent = "User not returned from Auth.";
+    return;
+  }
 
+  const userId = authUser.id;
+
+  // Insert into users table
   const { error: dbError } = await supabase.from("users").insert({
     id: userId,
     name,
     email,
     role,
+    department,
     location_id: locationId,
-    status: "active"
+    status: "Active"
   });
 
   if (dbError) {
+    console.error("DB insert error:", dbError);
     createMsg.textContent = "User created in Auth but failed in DB.";
-    console.error(dbError);
     return;
   }
 
   createMsg.textContent = "User created successfully.";
+  nameInput.value = "";
+  emailInput.value = "";
+  passwordInput.value = "";
+  roleSelect.value = "";
+  departmentSelect.value = "";
+  if (loggedInRole === "Super Admin") locationSelect.value = "";
+
   loadUsers();
 });
 
 // ---------------------------------------------------------
-// 3️⃣ LOAD USERS
+// 6️⃣ LOAD USERS (with location-based filtering)
 // ---------------------------------------------------------
 async function loadUsers() {
-  usersBody.innerHTML = "<tr><td colspan='6'>Loading...</td></tr>";
+  usersBody.innerHTML = "<tr><td colspan='7'>Loading...</td></tr>";
 
   let query = supabase.from("users").select("*");
 
-  if (loggedInRole !== "SuperAdmin") {
+  if (loggedInRole !== "Super Admin") {
     query = query.eq("location_id", loggedInLocation);
   }
 
-  const { data, error } = await query;
+  const { data, error } = await query.order("name", { ascending: true });
 
   if (error) {
-    usersBody.innerHTML = "<tr><td colspan='6'>Failed to load users.</td></tr>";
-    console.error(error);
+    console.error("Failed to load users:", error);
+    usersBody.innerHTML = "<tr><td colspan='7'>Failed to load users.</td></tr>";
     return;
   }
 
-  if (!data.length) {
-    usersBody.innerHTML = "<tr><td colspan='6'>No users found.</td></tr>";
+  if (!data || !data.length) {
+    usersBody.innerHTML = "<tr><td colspan='7'>No users found.</td></tr>";
     return;
   }
 
@@ -131,19 +259,30 @@ async function loadUsers() {
   data.forEach(user => {
     const row = document.createElement("tr");
 
+    let actionButtons = `
+      <button class="editBtn" data-id="${user.id}">Edit</button>
+      <button class="resetBtn" data-id="${user.id}" data-email="${user.email}">Reset Password</button>
+    `;
+
+    // Delete / Request Delete logic
+    if (loggedInRole === "Super Admin" || loggedInRole === "Location Admin") {
+      actionButtons += `
+        <button class="deleteBtn" data-id="${user.id}" data-email="${user.email}">Delete</button>
+      `;
+    } else if (loggedInRole === "Manager") {
+      actionButtons += `
+        <button class="requestDeleteBtn" data-id="${user.id}" data-email="${user.email}">Request Delete</button>
+      `;
+    }
+
     row.innerHTML = `
       <td>${user.name}</td>
       <td>${user.email}</td>
       <td>${user.role}</td>
+      <td>${user.department || ""}</td>
       <td>${user.location_id}</td>
       <td>${user.status}</td>
-      <td>
-        <button class="editBtn" data-id="${user.id}">Edit</button>
-        <button class="resetBtn" data-id="${user.id}" data-email="${user.email}">Reset Password</button>
-        <button class="disableBtn" data-id="${user.id}">
-          ${user.status === "active" ? "Disable" : "Activate"}
-        </button>
-      </td>
+      <td>${actionButtons}</td>
     `;
 
     usersBody.appendChild(row);
@@ -151,67 +290,126 @@ async function loadUsers() {
 
   attachEditHandlers();
   attachResetHandlers();
-  attachDisableHandlers();
+  attachDeleteHandlers();
+  attachRequestDeleteHandlers();
 }
-loadUsers();
-
 // ---------------------------------------------------------
-// 4️⃣ DISABLE / ACTIVATE USER
-// ---------------------------------------------------------
-function attachDisableHandlers() {
-  const buttons = document.querySelectorAll(".disableBtn");
-
-  buttons.forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const userId = btn.dataset.id;
-      const newStatus = btn.textContent === "Disable" ? "inactive" : "active";
-
-      const { error } = await supabase
-        .from("users")
-        .update({ status: newStatus })
-        .eq("id", userId);
-
-      if (error) {
-        alert("Failed to update user status.");
-        console.error(error);
-        return;
-      }
-
-      loadUsers();
-    });
-  });
-}
-
-// ---------------------------------------------------------
-// 5️⃣ RESET PASSWORD
+// 7️⃣ RESET PASSWORD (via Edge Function)
 // ---------------------------------------------------------
 function attachResetHandlers() {
   const resetButtons = document.querySelectorAll(".resetBtn");
 
   resetButtons.forEach(btn => {
     btn.addEventListener("click", async () => {
+      const userId = btn.dataset.id;
       const email = btn.dataset.email;
 
       const newPassword = prompt("Enter new password for " + email);
       if (!newPassword) return;
 
-      const { error } = await supabase.auth.admin.updateUserByEmail(email, {
-        password: newPassword
-      });
+      try {
+        const res = await fetch("/functions/v1/reset-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: userId,
+            new_password: newPassword
+          })
+        });
 
-      if (error) {
-        alert("Failed to reset password");
-        console.error(error);
-        return;
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error("Reset password error:", errText);
+          alert("Failed to reset password.");
+          return;
+        }
+
+        alert("Password reset successfully.");
+      } catch (err) {
+        console.error("Reset password fetch error:", err);
+        alert("Failed to reset password (network error).");
       }
-
-      alert("Password reset successfully");
     });
   });
 }
 
 // ---------------------------------------------------------
-// 6️⃣ UPDATE USER (MODAL)
+// 8️⃣ DELETE USER (Super Admin / Location Admin only)
+// ---------------------------------------------------------
+function attachDeleteHandlers() {
+  const deleteButtons = document.querySelectorAll(".deleteBtn");
+
+  deleteButtons.forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const userId = btn.dataset.id;
+      const email = btn.dataset.email;
+
+      const confirmDelete = confirm(`Are you sure you want to delete user: ${email}?`);
+      if (!confirmDelete) return;
+
+      try {
+        const res = await fetch("/functions/v1/delete-user", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: userId
+          })
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error("Delete user error:", errText);
+          alert("Failed to delete user.");
+          return;
+        }
+
+        alert("User deleted successfully.");
+        loadUsers();
+      } catch (err) {
+        console.error("Delete user fetch error:", err);
+        alert("Failed to delete user (network error).");
+      }
+    });
+  });
+}
+
+// ---------------------------------------------------------
+// 9️⃣ REQUEST DELETE (Manager → approval by Location Admin)
+// ---------------------------------------------------------
+function attachRequestDeleteHandlers() {
+  const requestButtons = document.querySelectorAll(".requestDeleteBtn");
+
+  requestButtons.forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const userId = btn.dataset.id;
+      const email = btn.dataset.email;
+
+      const confirmReq = confirm(`Request delete for user: ${email}?`);
+      if (!confirmReq) return;
+
+      const requestedBy = loggedInUserId || null;
+
+      const { error } = await supabase.from("delete_requests").insert({
+        user_id: userId,
+        requested_by: requestedBy,
+        requested_by_role: loggedInRole,
+        status: "pending",
+        requested_at: new Date().toISOString()
+      });
+
+      if (error) {
+        console.error("Failed to create delete request:", error);
+        alert("Failed to create delete request.");
+        return;
+      }
+
+      alert("Delete request submitted for approval.");
+    });
+  });
+}
+
+// ---------------------------------------------------------
+// 🔟 EDIT USER (open modal)
 // ---------------------------------------------------------
 function attachEditHandlers() {
   const editButtons = document.querySelectorAll(".editBtn");
@@ -226,69 +424,85 @@ function attachEditHandlers() {
         .eq("id", userId)
         .single();
 
-      if (error) return alert("Failed to load user");
+      if (error) {
+        console.error("Failed to load user:", error);
+        alert("Failed to load user.");
+        return;
+      }
 
       editUserId.value = data.id;
       editName.value = data.name;
       editEmail.value = data.email;
-      editStatus.value = data.status;
+      editEmail.disabled = true; // email read-only
 
-      editRole.innerHTML = "";
-      const roles = ["LocationAdmin", "Manager", "Viewer", "Operator"];
-
-      roles.forEach(r => {
-        if (loggedInRole !== "SuperAdmin" && r === "LocationAdmin") return;
-        const opt = document.createElement("option");
-        opt.value = r;
-        opt.textContent = r;
-        if (data.role === r) opt.selected = true;
-        editRole.appendChild(opt);
+      // Role
+      [...editRole.options].forEach(opt => {
+        opt.selected = opt.value === data.role;
       });
 
-      editLocation.innerHTML = "";
-      const locations = ["LOC001", "LOC002", "LOC003"];
-
-      locations.forEach(loc => {
-        const opt = document.createElement("option");
-        opt.value = loc;
-        opt.textContent = loc;
-        if (data.location_id === loc) opt.selected = true;
-        editLocation.appendChild(opt);
+      // Department
+      [...editDepartment.options].forEach(opt => {
+        opt.selected = opt.value === data.department;
       });
 
-      if (loggedInRole !== "SuperAdmin") {
-        editLocation.disabled = true;
+      // Location
+      if (data.location_id) {
+        editLocation.value = data.location_id;
       }
 
+      // Status
+      editStatus.value = data.status || "Active";
+
+      // Location control
+      if (loggedInRole !== "Super Admin") {
+        editLocation.disabled = true;
+      } else {
+        editLocation.disabled = false;
+      }
+
+      updateMsg.textContent = "";
       updateModal.style.display = "flex";
     });
   });
 }
-
-// Save changes
+// ---------------------------------------------------------
+// 1️⃣1️⃣ SAVE USER CHANGES
+// ---------------------------------------------------------
 saveUserChanges.addEventListener("click", async () => {
   const id = editUserId.value;
-  const name = editName.value;
+  const name = editName.value.trim();
   const role = editRole.value;
+  const department = editDepartment.value;
   const status = editStatus.value;
-  const locationId = editLocation.value;
+  let locationId = editLocation.value;
+
+  if (!name || !role || !department || !status) {
+    updateMsg.textContent = "Please fill all fields (name, role, department, status).";
+    return;
+  }
+
+  if (loggedInRole !== "Super Admin") {
+    locationId = loggedInLocation;
+  }
 
   const { error } = await supabase
     .from("users")
     .update({
       name,
       role,
+      department,
       status,
       location_id: locationId
     })
     .eq("id", id);
 
   if (error) {
-    updateMsg.textContent = "Failed to update user";
+    console.error("Failed to update user:", error);
+    updateMsg.textContent = "Failed to update user.";
     return;
   }
 
-  updateMsg.textContent = "Updated successfully";
+  updateMsg.textContent = "Updated successfully.";
 
   setTimeout(() => {
     updateModal.style.display = "none";
@@ -296,7 +510,20 @@ saveUserChanges.addEventListener("click", async () => {
   }, 800);
 });
 
-// Close modal
+// ---------------------------------------------------------
+// 1️⃣2️⃣ CLOSE MODAL
+// ---------------------------------------------------------
 closeUpdateModal.addEventListener("click", () => {
   updateModal.style.display = "none";
 });
+
+// ---------------------------------------------------------
+// 1️⃣3️⃣ INIT
+// ---------------------------------------------------------
+(async function init() {
+  populateRoleDropdowns();
+  populateDepartmentDropdowns();
+  await loadLocations();
+  setupRoleBasedUI();
+  loadUsers();
+})();

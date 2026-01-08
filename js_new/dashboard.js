@@ -33,13 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
       error,
     } = await supabase.auth.getSession();
 
-    if (error) {
-      console.error("Error getting session:", error);
-      window.location.href = "/login.html";
-      return;
-    }
-
-    if (!session) {
+    if (error || !session) {
       window.location.href = "/login.html";
       return;
     }
@@ -65,19 +59,22 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("headerUserName").textContent = name;
     document.getElementById("headerUserDept").textContent = role;
 
-    // Persist to sessionStorage for other pages if needed
+    // Persist to sessionStorage
     sessionStorage.setItem("name", name);
     sessionStorage.setItem("role", role);
     if (locationId) {
       sessionStorage.setItem("location_id", locationId);
     }
 
-    // Apply permissions based on role (same as old "department")
+    // Apply permissions
     applyPermissions(role);
+
+    // Load widget
+    loadPendingRequestsCount();
   }
 
   // -------------------------------------------------------------
-  // PERMISSIONS (UNCHANGED LOGIC, NOW USING ROLE)
+  // PERMISSIONS
   // -------------------------------------------------------------
   function applyPermissions(deptOrRole) {
     tiles.forEach((tile) => {
@@ -145,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // -------------------------------------------------------------
-  // MODULE LOADING (UNCHANGED)
+  // MODULE LOADING
   // -------------------------------------------------------------
   async function loadModule(moduleName) {
     moduleContainer.innerHTML = `
@@ -160,39 +157,8 @@ document.addEventListener("DOMContentLoaded", () => {
       moduleContainer.innerHTML = html;
 
       // Load JS AFTER HTML is inserted
-      if (moduleName === "vendors") {
-        import(`/js_new/vendors.js?v=${Date.now()}`);
-      }
-
-      if (moduleName === "machines") {
-        import(`/js_new/machines.js?v=${Date.now()}`);
-      }
-
-      if (moduleName === "users") {
-        import(`/js_new/users.js?v=${Date.now()}`);
-      }
-
-      if (moduleName === "auditEntry" || moduleName === "auditDaily") {
-        import(`/js_new/audit.js?v=${Date.now()}`);
-      }
-
-      if (moduleName === "mspEntry" || moduleName === "mspDaily") {
-        import(`/js_new/msp.js?v=${Date.now()}`);
-      }
-
-      if (moduleName === "silverEntry" || moduleName === "silverDaily") {
-        import(`/js_new/silver.js?v=${Date.now()}`);
-      }
-
-      if (moduleName === "reports") {
-        import(`/js_new/reports.js?v=${Date.now()}`);
-      }
-
-      if (moduleName === "general") {
-        import(`/js_new/general.js?v=${Date.now()}`);
-      }
+      import(`/js_new/${moduleName}.js?v=${Date.now()}`).catch(() => {});
     } catch (error) {
-      console.error(error);
       moduleContainer.innerHTML = `
         <div class="glass-card" style="padding: 20px; margin-top: 20px;">
           <div style="color: #ef4444;">Failed to load module: ${moduleName}</div>
@@ -202,24 +168,75 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // -------------------------------------------------------------
-  // LOGOUT (SUPABASE)
+  // LOGOUT
   // -------------------------------------------------------------
-  document
-    .getElementById("btnLogout")
-    .addEventListener("click", async () => {
-      try {
-        await supabase.auth.signOut();
-      } catch (e) {
-        console.error("Error during sign out:", e);
-      }
-      sessionStorage.clear();
-      window.location.href = "/login.html";
-    });
+  document.getElementById("btnLogout").addEventListener("click", async () => {
+    await supabase.auth.signOut();
+    sessionStorage.clear();
+    window.location.href = "/login.html";
+  });
 
   // CHANGE PASSWORD
-  document
-    .getElementById("btnChangePassword")
-    .addEventListener("click", () => {
-      window.location.href = "/modals/changePassword.html";
-    });
+  document.getElementById("btnChangePassword").addEventListener("click", () => {
+    window.location.href = "/modals/changePassword.html";
+  });
+
+  // -------------------------------------------------------------
+  // ⭐ PENDING DELETE REQUESTS WIDGET
+  // -------------------------------------------------------------
+  const pendingRequestsCard = document.getElementById("pendingRequestsCard");
+  const pendingRequestsCount = document.getElementById("pendingRequestsCount");
+  const pendingBadge = document.getElementById("pendingBadge");
+
+  // Make widget clickable → open approval screen
+  pendingRequestsCard.style.cursor = "pointer";
+  pendingRequestsCard.addEventListener("click", () => {
+    window.location.href = "/approval.html";
+  });
+
+  async function loadPendingRequestsCount() {
+    const role = sessionStorage.getItem("role");
+    const locationId = sessionStorage.getItem("location_id");
+
+    if (!pendingRequestsCard) return;
+
+    // Hide for non-admin roles
+    if (role !== "Super Admin" && role !== "Location Admin") {
+      pendingRequestsCard.style.display = "none";
+      return;
+    }
+
+    let query = supabase
+      .from("delete_requests")
+      .select(`
+        id,
+        user_id,
+        users:user_id (location_id)
+      `)
+      .eq("status", "pending");
+
+    if (role === "Location Admin") {
+      query = query.eq("users.location_id", locationId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) return;
+
+    const count = data.length;
+    pendingRequestsCount.textContent = count;
+
+    // Badge + pulse logic
+    if (count > 0) {
+      pendingBadge.textContent = count;
+      pendingBadge.classList.remove("hidden");
+      pendingRequestsCard.classList.add("pulse");
+    } else {
+      pendingBadge.classList.add("hidden");
+      pendingRequestsCard.classList.remove("pulse");
+    }
+  }
+
+  // Auto-refresh every 10 seconds
+  setInterval(loadPendingRequestsCount, 10000);
 });

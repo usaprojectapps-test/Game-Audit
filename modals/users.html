@@ -1,134 +1,102 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Users Management</title>
+<div class="module-wrapper users-module">
 
-  <link rel="stylesheet" href="CSS/users.css" />
-</head>
+  <!-- LEFT SIDE (65%) -->
+  <div class="left-panel glass-card">
 
-<body>
+    <div class="card-header">User Management</div>
+    <div class="card-subtitle">Search, filter & manage users</div>
 
-  <div class="container">
-
-    <h2>User Management</h2>
-
-    <!-- Create User Form -->
-    <div class="form-card">
-      <h3>Create User</h3>
-
-      <div class="form-row">
-        <label>Name</label>
-        <input type="text" id="name" placeholder="Enter full name" />
-      </div>
-
-      <div class="form-row">
-        <label>Email</label>
-        <input type="email" id="email" placeholder="Enter email" />
-      </div>
-
-      <div class="form-row">
-        <label>Password</label>
-        <input type="password" id="password" placeholder="Enter password" />
-      </div>
-
-      <div class="form-row">
-        <label>Role</label>
-        <select id="role">
-          <option value="">Select Role</option>
-          <option value="LocationAdmin">Location Admin</option>
-          <option value="Manager">Manager</option>
-          <option value="Viewer">Viewer</option>
-          <option value="Operator">Operator</option>
-        </select>
-      </div>
-
-      <div class="form-row" id="locationRow">
-        <label>Location</label>
-        <select id="location">
-          <option value="">Select Location</option>
-          <option value="LOC001">Location 1</option>
-          <option value="LOC002">Location 2</option>
-          <option value="LOC003">Location 3</option>
-        </select>
-      </div>
-
-      <button id="createUserBtn">Create User</button>
-      <p id="createMsg" class="msg"></p>
-    </div>
-
-    <!-- Users Table -->
-    <div class="table-card">
-      <h3>Users List</h3>
-
-      <table id="usersTable">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Location</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-
-        <tbody id="usersBody">
-          <!-- Filled by users.js -->
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-
-  <!-- Supabase Client -->
-  <script type="module" src="js_new/supabaseClient.js"></script>
-
-  <!-- Users Logic -->
-  <script type="module" src="js_new/users.js"></script>
-
-
-<!-- Update User Modal -->
-<div id="updateUserModal" class="modal" style="display:none;">
-  <div class="modal-content">
-    <h3>Update User</h3>
-
-    <input type="hidden" id="editUserId" />
-
-    <div class="form-row">
-      <label>Name</label>
-      <input type="text" id="editName" />
-    </div>
-
-    <div class="form-row">
-      <label>Email (read-only)</label>
-      <input type="email" id="editEmail" disabled />
-    </div>
-
-    <div class="form-row">
-      <label>Role</label>
-      <select id="editRole"></select>
-    </div>
-
-    <div class="form-row" id="editLocationRow">
-      <label>Location</label>
-      <select id="editLocation"></select>
-    </div>
-
-    <div class="form-row">
-      <label>Status</label>
-      <select id="editStatus">
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
+    <!-- SEARCH + FILTER -->
+    <div class="search-row">
+      <input type="text" id="searchUser" class="input" placeholder="Search name / email" />
+      <select id="filterRole" class="dropdown">
+        <option value="">All Roles</option>
+        <option value="Admin">Admin</option>
+        <option value="Manager">Manager</option>
+        <option value="Audit">Audit</option>
+        <option value="Owner">Owner</option>
+        <option value="Agents">Agents</option>
       </select>
     </div>
 
-    <button id="saveUserChanges">Save Changes</button>
-    <button id="closeUpdateModal">Cancel</button>
+    <!-- USER TABLE -->
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>NAME</th>
+            <th>EMAIL</th>
+            <th>ROLE</th>
+            <th>LOCATION</th>
+            <th>STATUS</th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+      </table>
 
-    <p id="updateMsg" class="msg"></p>
+      <div class="pagination">
+        <button id="prevUsers" class="btn btn-secondary">Prev</button>
+        <button id="nextUsers" class="btn btn-secondary">Next</button>
+      </div>
+    </div>
+
   </div>
+
+  <!-- RIGHT SIDE (35%) -->
+  <div class="right-panel glass-card">
+
+    <div class="card-header">User Details</div>
+
+    <div class="form-group">
+      <label>Name</label>
+      <input type="text" id="userName" class="input" />
+    </div>
+
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="userEmail" class="input" />
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="userPassword" class="input" placeholder="Leave blank to keep same" />
+    </div>
+
+    <div class="form-group">
+      <label>Role</label>
+      <select id="userRole" class="dropdown">
+        <option value="">Select Role</option>
+        <option value="Admin">Admin</option>
+        <option value="Manager">Manager</option>
+        <option value="Audit">Audit</option>
+        <option value="Owner">Owner</option>
+        <option value="Agents">Agents</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Department</label>
+      <input type="text" id="userDepartment" class="input" placeholder="Optional" />
+    </div>
+
+    <div class="form-group">
+      <label>Location</label>
+      <select id="userLocation" class="dropdown"></select>
+    </div>
+
+    <div class="form-group">
+      <label>Status</label>
+      <select id="userStatus" class="dropdown">
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <button id="deleteUser" class="btn btn-danger">Delete</button>
+      <button id="saveUser" class="btn btn-primary">Save</button>
+    </div>
+
+  </div>
+
 </div>
-</body>
-</html>
