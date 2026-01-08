@@ -63,26 +63,50 @@ async function loadUserProfile() {
 }
 
 // -------------------------------------------------------------
+// MODULE LOADER (HTML + JS)
+// -------------------------------------------------------------
+async function loadModule(moduleName) {
+  try {
+    // Load HTML
+    const htmlResponse = await fetch(`/modals/${moduleName}.html`);
+    if (!htmlResponse.ok) {
+      console.error(`Failed to load HTML for module: ${moduleName}`);
+      alert(`Module HTML not found: ${moduleName}.html`);
+      return;
+    }
+
+    const html = await htmlResponse.text();
+    document.getElementById("moduleContainer").innerHTML = html;
+
+    // Load JS
+    await import(`/js_new/${moduleName}.js`);
+  } catch (err) {
+    console.error("Module load error:", err);
+    alert("Failed to load module.");
+  }
+}
+
+// -------------------------------------------------------------
 // NAVIGATION HANDLERS
 // -------------------------------------------------------------
 function setupNavigation() {
   const navMap = {
-    "tile-locations": "locations.html",
-    "tile-vendors": "vendors.html",
-    "tile-machines": "machines.html",
-    "tile-users": "users.html",
-    "tile-audit": "audit.html",
-    "tile-msp": "msp.html",
-    "tile-silver": "silver.html",
-    "tile-silverAgent": "silverAgent.html",
-    "tile-silverPurchase": "silverPurchase.html"
+    "tile-locations": "locations",
+    "tile-vendors": "vendors",
+    "tile-machines": "machines",
+    "tile-users": "users",
+    "tile-audit": "audit",
+    "tile-msp": "msp",
+    "tile-silver": "silver",
+    "tile-silverAgent": "silverAgent",
+    "tile-silverPurchase": "silverPurchase"
   };
 
   Object.keys(navMap).forEach(tileId => {
     const tile = document.getElementById(tileId);
     if (tile) {
       tile.addEventListener("click", () => {
-        window.location.href = navMap[tileId];
+        loadModule(navMap[tileId]);
       });
     }
   });
@@ -92,7 +116,7 @@ function setupNavigation() {
 // LOGOUT HANDLER
 // -------------------------------------------------------------
 function setupLogout() {
-  const logoutBtn = document.getElementById("logoutBtn");
+  const logoutBtn = document.getElementById("btnLogout");
   if (!logoutBtn) return;
 
   logoutBtn.addEventListener("click", async () => {
