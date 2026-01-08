@@ -37,63 +37,64 @@
   <div class="dashboard-grid">
 
     <!-- ROW 1 -->
-    <div class="dashboard-tile" data-module="vendors" data-dept="Admin,Owner,Audit,Manager">
+    <div class="dashboard-tile" data-module="vendors" data-dept="Super Admin,Location Admin,Manager,Audit">
       <div class="tile-icon">🏪</div>
       <div class="tile-title">Vendors</div>
     </div>
 
-    <div class="dashboard-tile" data-module="machines" data-dept="Admin,Owner,Audit,Manager">
+    <div class="dashboard-tile" data-module="machines" data-dept="Super Admin,Location Admin,Manager,Audit">
       <div class="tile-icon">🖥️</div>
       <div class="tile-title">Machines</div>
     </div>
 
-    <div class="dashboard-tile" data-module="users" data-dept="Admin,Owner,Manager">
+    <div class="dashboard-tile" data-module="users" data-dept="Super Admin,Location Admin,Manager">
       <div class="tile-icon">👥</div>
       <div class="tile-title">Users</div>
     </div>
 
-    <div class="dashboard-tile expandable" data-module="audit" data-dept="Admin,Owner,Audit,Manager">
+    <div class="dashboard-tile expandable" data-module="audit" data-dept="Audit,Super Admin,Location Admin,Manager">
       <div class="tile-icon">📊</div>
       <div class="tile-title">Audit <span class="tile-arrow">▶</span></div>
     </div>
 
-    <div class="dashboard-tile expandable" data-module="msp" data-dept="Admin,Owner,Cash,Manager">
+    <div class="dashboard-tile expandable" data-module="msp" data-dept="MSP,Super Admin,Location Admin,Manager">
       <div class="tile-icon">💰</div>
       <div class="tile-title">MSP <span class="tile-arrow">▶</span></div>
     </div>
 
     <!-- ROW 2 -->
-    <div class="dashboard-tile expandable" data-module="silver" data-dept="Admin,Owner,Silver,Manager">
+    <div class="dashboard-tile expandable" data-module="silver" data-dept="Silver,Super Admin,Location Admin,Manager">
       <div class="tile-icon">🥈</div>
       <div class="tile-title">Silver <span class="tile-arrow">▶</span></div>
     </div>
 
-    <div class="dashboard-tile" data-module="agentSilver" data-dept="Admin,Owner,Agents">
+    <div class="dashboard-tile" data-module="agentSilver" data-dept="SilverAgents,Super Admin,Location Admin,Manager">
       <div class="tile-icon">🧾</div>
-      <div class="tile-title">Agent Silver</div>
+      <div class="tile-title">Silver Agents</div>
     </div>
 
-    <div class="dashboard-tile" data-module="silverPurchase" data-dept="Admin,Owner,Silver,Manager">
+    <div class="dashboard-tile" data-module="silverPurchase" data-dept="Silver,Super Admin,Location Admin,Manager">
       <div class="tile-icon">💳</div>
       <div class="tile-title">Silver Purchase</div>
     </div>
 
-    <div class="dashboard-tile" data-module="reports" data-dept="Admin,Owner">
+    <div class="dashboard-tile" data-module="reports" data-dept="Super Admin,Location Admin,Manager">
       <div class="tile-icon">📑</div>
       <div class="tile-title">Reports</div>
     </div>
 
-    <div class="dashboard-tile" data-module="general" data-dept="Admin,Owner,Manager">
+    <div class="dashboard-tile" data-module="general" data-dept="Super Admin,Location Admin,Manager,Audit,MSP,Silver,SilverAgents">
       <div class="tile-icon">⚙️</div>
       <div class="tile-title">General</div>
     </div>
-    <div class="dashboard-card" id="pendingRequestsCard">
-    <h3>
-      Pending Delete Requests
-      <span id="pendingBadge" class="pending-badge hidden"></span>
-    </h3>
 
-    <div class="count" id="pendingRequestsCount">0</div>
+    <!-- PENDING REQUESTS WIDGET -->
+    <div class="dashboard-card" id="pendingRequestsCard">
+      <h3>
+        Pending Delete Requests
+        <span id="pendingBadge" class="pending-badge hidden"></span>
+      </h3>
+      <div class="count" id="pendingRequestsCount">0</div>
     </div>
 
     <!-- SUB‑TILES -->
