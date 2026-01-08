@@ -5,66 +5,73 @@
 // ---------------------------------------------------------
 import { supabase } from "./supabaseClient.js";
 
-// These are set at login time
-const loggedInRole = sessionStorage.getItem("role");          // e.g. "Super Admin", "Location Admin", "Manager", etc.
-const loggedInLocation = sessionStorage.getItem("locationId"); // e.g. "LOC001" (code from locations table)
-const loggedInUserId = sessionStorage.getItem("userId");       // optional but used for delete requests
+const loggedInRole = sessionStorage.getItem("role");          // e.g. "SuperAdmin"
+const loggedInLocation = sessionStorage.getItem("locationId"); // e.g. "LOC001"
+const loggedInUserId = sessionStorage.getItem("userId");
 
 // ---------------------------------------------------------
-// 1️⃣ DOM references
+// 1️⃣ DOM references (matching your NEW HTML)
 // ---------------------------------------------------------
-const nameInput = document.getElementById("name");
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
-const roleSelect = document.getElementById("role");
-const departmentSelect = document.getElementById("department");
-const locationSelect = document.getElementById("location");
-const createUserBtn = document.getElementById("createUserBtn");
-const createMsg = document.getElementById("createMsg");
-const usersBody = document.getElementById("usersBody");
+const searchInput = document.getElementById("searchUser");
+const filterRoleSelect = document.getElementById("filterRole");
+const userTableBody = document.getElementById("userTableBody");
 
-// Update modal
-const updateModal = document.getElementById("updateUserModal");
-const editUserId = document.getElementById("editUserId");
-const editName = document.getElementById("editName");
-const editEmail = document.getElementById("editEmail");
-const editRole = document.getElementById("editRole");
-const editDepartment = document.getElementById("editDepartment");
-const editLocation = document.getElementById("editLocation");
-const editStatus = document.getElementById("editStatus");
-const updateMsg = document.getElementById("updateMsg");
-const saveUserChanges = document.getElementById("saveUserChanges");
-const closeUpdateModal = document.getElementById("closeUpdateModal");
+const userNameInput = document.getElementById("userName");
+const userEmailInput = document.getElementById("userEmail");
+const userPasswordInput = document.getElementById("userPassword");
+const userRoleSelect = document.getElementById("userRole");
+const userDepartmentInput = document.getElementById("userDepartment");
+const userLocationSelect = document.getElementById("userLocation");
+const userStatusSelect = document.getElementById("userStatus");
+
+const deleteUserBtn = document.getElementById("deleteUser");
+const saveUserBtn = document.getElementById("saveUser");
 
 // ---------------------------------------------------------
-// 2️⃣ Constants: roles & departments
+// 2️⃣ State
+// ---------------------------------------------------------
+let currentEditingUserId = null; // null = creating new, not editing
+
+// ---------------------------------------------------------
+// 3️⃣ Constants: roles
 // ---------------------------------------------------------
 const ROLES = [
-  "Super Admin",
-  "Location Admin",
+  "SuperAdmin",
+  "LocationAdmin",
   "Manager",
   "Audit",
   "MSP",
   "Silver",
-  "SilverAgents"
-];
-
-const DEPARTMENTS = [
-  "Audit",
-  "MSP",
-  "Silver",
-  "SilverAgents",
-  "Admin",
-  "Machine",
-  "Agents",
-  "Manager"
+  "SilverAgent"
 ];
 
 // ---------------------------------------------------------
-// 3️⃣ Populate dropdowns (roles, departments, locations)
+// 4️⃣ Populate dropdowns (roles, locations)
 // ---------------------------------------------------------
+function populateRoleDropdown() {
+  userRoleSelect.innerHTML = `<option value="">Select Role</option>`;
+
+  ROLES.forEach(role => {
+    // Only SuperAdmin can assign SuperAdmin
+    if (loggedInRole !== "SuperAdmin" && role === "SuperAdmin") return;
+
+    const opt = document.createElement("option");
+    opt.value = role;
+    opt.textContent = role;
+    userRoleSelect.appendChild(opt);
+  });
+
+  // Also sync filterRole dropdown to same list (except "All Roles")
+  filterRoleSelect.innerHTML = `<option value="">All Roles</option>`;
+  ROLES.forEach(role => {
+    const opt = document.createElement("option");
+    opt.value = role;
+    opt.textContent = role;
+    filterRoleSelect.appendChild(opt);
+  });
+}
+
 async function loadLocations() {
-  // locations table: id (uuid), code (e.g. "LOC001"), name
   const { data, error } = await supabase
     .from("locations")
     .select("code, name")
@@ -72,107 +79,209 @@ async function loadLocations() {
 
   if (error) {
     console.error("Failed to load locations:", error);
+    userLocationSelect.innerHTML = `<option value="">Select Location</option>`;
     return;
   }
 
-  locationSelect.innerHTML = `<option value="">Select Location</option>`;
-  editLocation.innerHTML = `<option value="">Select Location</option>`;
+  userLocationSelect.innerHTML = `<option value="">Select Location</option>`;
 
   data.forEach(loc => {
-    const opt1 = document.createElement("option");
-    opt1.value = loc.code; // store code in users.location_id
-    opt1.textContent = `${loc.code} - ${loc.name}`;
-    locationSelect.appendChild(opt1);
-
-    const opt2 = document.createElement("option");
-    opt2.value = loc.code;
-    opt2.textContent = `${loc.code} - ${loc.name}`;
-    editLocation.appendChild(opt2);
+    const opt = document.createElement("option");
+    opt.value = loc.code; // store code in users.location_id
+    opt.textContent = `${loc.code} - ${loc.name}`;
+    userLocationSelect.appendChild(opt);
   });
-}
 
-function populateRoleDropdowns() {
-  roleSelect.innerHTML = `<option value="">Select Role</option>`;
-  editRole.innerHTML = "";
-
-  ROLES.forEach(r => {
-    // Only Super Admin can assign Super Admin
-    if (loggedInRole !== "Super Admin" && r === "Super Admin") return;
-
-    const opt1 = document.createElement("option");
-    opt1.value = r;
-    opt1.textContent = r;
-    roleSelect.appendChild(opt1);
-
-    const opt2 = document.createElement("option");
-    opt2.value = r;
-    opt2.textContent = r;
-    editRole.appendChild(opt2);
-  });
-}
-
-function populateDepartmentDropdowns() {
-  departmentSelect.innerHTML = `<option value="">Select Department</option>`;
-  editDepartment.innerHTML = "";
-
-  DEPARTMENTS.forEach(d => {
-    const opt1 = document.createElement("option");
-    opt1.value = d;
-    opt1.textContent = d;
-    departmentSelect.appendChild(opt1);
-
-    const opt2 = document.createElement("option");
-    opt2.value = d;
-    opt2.textContent = d;
-    editDepartment.appendChild(opt2);
-  });
+  // If non-SuperAdmin, lock to their location
+  if (loggedInRole !== "SuperAdmin" && loggedInLocation) {
+    userLocationSelect.value = loggedInLocation;
+    userLocationSelect.disabled = true;
+  }
 }
 
 // ---------------------------------------------------------
-// 4️⃣ ROLE-BASED UI CONTROL
+// 5️⃣ Role-based UI control
 // ---------------------------------------------------------
 function setupRoleBasedUI() {
   // Location control
-  if (loggedInRole !== "Super Admin") {
+  if (loggedInRole !== "SuperAdmin") {
     if (loggedInLocation) {
-      locationSelect.value = loggedInLocation;
+      userLocationSelect.value = loggedInLocation;
     }
-    locationSelect.disabled = true;
-    editLocation.disabled = true;
+    userLocationSelect.disabled = true;
   } else {
-    locationSelect.disabled = false;
-    editLocation.disabled = false;
+    userLocationSelect.disabled = false;
+  }
+
+  // Delete button visibility: only SuperAdmin & LocationAdmin
+  if (loggedInRole === "SuperAdmin" || loggedInRole === "LocationAdmin") {
+    deleteUserBtn.style.display = "inline-block";
+  } else {
+    deleteUserBtn.style.display = "none";
   }
 }
-// ---------------------------------------------------------
-// 5️⃣ CREATE USER (Auth + DB)
-// ---------------------------------------------------------
-createUserBtn.addEventListener("click", async () => {
-  createMsg.textContent = "";
 
-  const name = nameInput.value.trim();
-  const email = emailInput.value.trim();
-  const password = passwordInput.value.trim();
-  const role = roleSelect.value;
-  const department = departmentSelect.value;
-  let locationId = locationSelect.value;
+// ---------------------------------------------------------
+// 6️⃣ Load users (with search, filter, location-based)
+// ---------------------------------------------------------
+async function loadUsers() {
+  userTableBody.innerHTML = `<tr><td colspan="5">Loading...</td></tr>`;
 
-  if (!name || !email || !password || !role || !department) {
-    createMsg.textContent = "Please fill all fields (name, email, password, role, department, location).";
+  let query = supabase.from("users").select("*");
+
+  // Location restriction
+  if (loggedInRole !== "SuperAdmin" && loggedInLocation) {
+    query = query.eq("location_id", loggedInLocation);
+  }
+
+  // Role filter
+  const filterRole = filterRoleSelect.value;
+  if (filterRole) {
+    query = query.eq("role", filterRole);
+  }
+
+  // Search filter (name or email)
+  const searchTerm = searchInput.value.trim();
+  if (searchTerm) {
+    query = query.or(
+      `name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`
+    );
+  }
+
+  const { data, error } = await query.order("name", { ascending: true });
+
+  if (error) {
+    console.error("Failed to load users:", error);
+    userTableBody.innerHTML = `<tr><td colspan="5">Failed to load users.</td></tr>`;
     return;
   }
 
-  if (loggedInRole !== "Super Admin") {
-    // Non Super Admin is locked to their own location
+  if (!data || !data.length) {
+    userTableBody.innerHTML = `<tr><td colspan="5">No users found.</td></tr>`;
+    return;
+  }
+
+  userTableBody.innerHTML = "";
+
+  data.forEach(user => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${user.name || ""}</td>
+      <td>${user.email || ""}</td>
+      <td>${user.role || ""}</td>
+      <td>${user.location_id || ""}</td>
+      <td>${user.status || ""}</td>
+    `;
+
+    // Click row to edit
+    tr.addEventListener("click", () => {
+      fillFormForEdit(user);
+    });
+
+    userTableBody.appendChild(tr);
+  });
+}
+
+// ---------------------------------------------------------
+// 7️⃣ Fill form for editing an existing user
+// ---------------------------------------------------------
+function fillFormForEdit(user) {
+  currentEditingUserId = user.id;
+
+  userNameInput.value = user.name || "";
+  userEmailInput.value = user.email || "";
+  userEmailInput.disabled = true; // email read-only on edit
+
+  userRoleSelect.value = user.role || "";
+  userDepartmentInput.value = user.department || "";
+  userLocationSelect.value = user.location_id || "";
+  userStatusSelect.value = user.status || "Active";
+
+  userPasswordInput.value = ""; // blank means "no change"
+}
+
+// ---------------------------------------------------------
+// 8️⃣ Clear form for creating a new user
+// ---------------------------------------------------------
+function clearForm() {
+  currentEditingUserId = null;
+
+  userNameInput.value = "";
+  userEmailInput.value = "";
+  userEmailInput.disabled = false;
+
+  userPasswordInput.value = "";
+  userRoleSelect.value = "";
+  userDepartmentInput.value = "";
+  userStatusSelect.value = "Active";
+
+  if (loggedInRole === "SuperAdmin") {
+    userLocationSelect.value = "";
+    userLocationSelect.disabled = false;
+  } else if (loggedInLocation) {
+    userLocationSelect.value = loggedInLocation;
+    userLocationSelect.disabled = true;
+  }
+}
+
+// ---------------------------------------------------------
+// 9️⃣ Save user (create or update)
+// ---------------------------------------------------------
+saveUserBtn.addEventListener("click", async () => {
+  const name = userNameInput.value.trim();
+  const email = userEmailInput.value.trim();
+  const password = userPasswordInput.value.trim();
+  const role = userRoleSelect.value;
+  const department = userDepartmentInput.value.trim();
+  const status = userStatusSelect.value;
+  let locationId = userLocationSelect.value;
+
+  if (!name || !email || !role || !status) {
+    alert("Please fill all required fields (name, email, role, status).");
+    return;
+  }
+
+  if (loggedInRole !== "SuperAdmin") {
     locationId = loggedInLocation;
   }
 
   if (!locationId) {
-    createMsg.textContent = "Location is required.";
+    alert("Location is required.");
     return;
   }
 
-  // Create user in Auth
+  // UPDATE existing user
+  if (currentEditingUserId) {
+    const { error } = await supabase
+      .from("users")
+      .update({
+        name,
+        role,
+        department,
+        status,
+        location_id: locationId
+      })
+      .eq("id", currentEditingUserId);
+
+    if (error) {
+      console.error("Failed to update user:", error);
+      alert("Failed to update user.");
+      return;
+    }
+
+    alert("User updated successfully.");
+    await loadUsers();
+    return;
+  }
+
+  // CREATE new user
+  if (!password) {
+    alert("Password is required for new users.");
+    return;
+  }
+
+  // 1) Create in Auth
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
@@ -189,19 +298,19 @@ createUserBtn.addEventListener("click", async () => {
 
   if (authError) {
     console.error("Auth signUp error:", authError);
-    createMsg.textContent = "Failed to create user (Auth).";
+    alert("Failed to create user (Auth).");
     return;
   }
 
   const authUser = authData.user;
   if (!authUser) {
-    createMsg.textContent = "User not returned from Auth.";
+    alert("User not returned from Auth.");
     return;
   }
 
   const userId = authUser.id;
 
-  // Insert into users table
+  // 2) Insert into users table
   const { error: dbError } = await supabase.from("users").insert({
     id: userId,
     name,
@@ -214,316 +323,70 @@ createUserBtn.addEventListener("click", async () => {
 
   if (dbError) {
     console.error("DB insert error:", dbError);
-    createMsg.textContent = "User created in Auth but failed in DB.";
+    alert("User created in Auth but failed in DB.");
     return;
   }
 
-  createMsg.textContent = "User created successfully.";
-  nameInput.value = "";
-  emailInput.value = "";
-  passwordInput.value = "";
-  roleSelect.value = "";
-  departmentSelect.value = "";
-  if (loggedInRole === "Super Admin") locationSelect.value = "";
-
-  loadUsers();
+  alert("User created successfully.");
+  clearForm();
+  await loadUsers();
 });
 
 // ---------------------------------------------------------
-// 6️⃣ LOAD USERS (with location-based filtering)
+// 🔟 Delete user (SuperAdmin / LocationAdmin only)
 // ---------------------------------------------------------
-async function loadUsers() {
-  usersBody.innerHTML = "<tr><td colspan='7'>Loading...</td></tr>";
-
-  let query = supabase.from("users").select("*");
-
-  if (loggedInRole !== "Super Admin") {
-    query = query.eq("location_id", loggedInLocation);
-  }
-
-  const { data, error } = await query.order("name", { ascending: true });
-
-  if (error) {
-    console.error("Failed to load users:", error);
-    usersBody.innerHTML = "<tr><td colspan='7'>Failed to load users.</td></tr>";
+deleteUserBtn.addEventListener("click", async () => {
+  if (!currentEditingUserId) {
+    alert("Select a user first.");
     return;
   }
 
-  if (!data || !data.length) {
-    usersBody.innerHTML = "<tr><td colspan='7'>No users found.</td></tr>";
-    return;
-  }
+  const confirmDelete = confirm("Are you sure you want to delete this user?");
+  if (!confirmDelete) return;
 
-  usersBody.innerHTML = "";
+  try {
+    // Call your Edge Function to delete from Auth + DB
+    const res = await fetch("/functions/v1/delete-user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: currentEditingUserId
+      })
+    });
 
-  data.forEach(user => {
-    const row = document.createElement("tr");
-
-    let actionButtons = `
-      <button class="editBtn" data-id="${user.id}">Edit</button>
-      <button class="resetBtn" data-id="${user.id}" data-email="${user.email}">Reset Password</button>
-    `;
-
-    // Delete / Request Delete logic
-    if (loggedInRole === "Super Admin" || loggedInRole === "Location Admin") {
-      actionButtons += `
-        <button class="deleteBtn" data-id="${user.id}" data-email="${user.email}">Delete</button>
-      `;
-    } else if (loggedInRole === "Manager") {
-      actionButtons += `
-        <button class="requestDeleteBtn" data-id="${user.id}" data-email="${user.email}">Request Delete</button>
-      `;
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error("Delete user error:", errText);
+      alert("Failed to delete user.");
+      return;
     }
 
-    row.innerHTML = `
-      <td>${user.name}</td>
-      <td>${user.email}</td>
-      <td>${user.role}</td>
-      <td>${user.department || ""}</td>
-      <td>${user.location_id}</td>
-      <td>${user.status}</td>
-      <td>${actionButtons}</td>
-    `;
-
-    usersBody.appendChild(row);
-  });
-
-  attachEditHandlers();
-  attachResetHandlers();
-  attachDeleteHandlers();
-  attachRequestDeleteHandlers();
-}
-// ---------------------------------------------------------
-// 7️⃣ RESET PASSWORD (via Edge Function)
-// ---------------------------------------------------------
-function attachResetHandlers() {
-  const resetButtons = document.querySelectorAll(".resetBtn");
-
-  resetButtons.forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const userId = btn.dataset.id;
-      const email = btn.dataset.email;
-
-      const newPassword = prompt("Enter new password for " + email);
-      if (!newPassword) return;
-
-      try {
-        const res = await fetch("/functions/v1/reset-password", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: userId,
-            new_password: newPassword
-          })
-        });
-
-        if (!res.ok) {
-          const errText = await res.text();
-          console.error("Reset password error:", errText);
-          alert("Failed to reset password.");
-          return;
-        }
-
-        alert("Password reset successfully.");
-      } catch (err) {
-        console.error("Reset password fetch error:", err);
-        alert("Failed to reset password (network error).");
-      }
-    });
-  });
-}
-
-// ---------------------------------------------------------
-// 8️⃣ DELETE USER (Super Admin / Location Admin only)
-// ---------------------------------------------------------
-function attachDeleteHandlers() {
-  const deleteButtons = document.querySelectorAll(".deleteBtn");
-
-  deleteButtons.forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const userId = btn.dataset.id;
-      const email = btn.dataset.email;
-
-      const confirmDelete = confirm(`Are you sure you want to delete user: ${email}?`);
-      if (!confirmDelete) return;
-
-      try {
-        const res = await fetch("/functions/v1/delete-user", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: userId
-          })
-        });
-
-        if (!res.ok) {
-          const errText = await res.text();
-          console.error("Delete user error:", errText);
-          alert("Failed to delete user.");
-          return;
-        }
-
-        alert("User deleted successfully.");
-        loadUsers();
-      } catch (err) {
-        console.error("Delete user fetch error:", err);
-        alert("Failed to delete user (network error).");
-      }
-    });
-  });
-}
-
-// ---------------------------------------------------------
-// 9️⃣ REQUEST DELETE (Manager → approval by Location Admin)
-// ---------------------------------------------------------
-function attachRequestDeleteHandlers() {
-  const requestButtons = document.querySelectorAll(".requestDeleteBtn");
-
-  requestButtons.forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const userId = btn.dataset.id;
-      const email = btn.dataset.email;
-
-      const confirmReq = confirm(`Request delete for user: ${email}?`);
-      if (!confirmReq) return;
-
-      const requestedBy = loggedInUserId || null;
-
-      const { error } = await supabase.from("delete_requests").insert({
-        user_id: userId,
-        requested_by: requestedBy,
-        requested_by_role: loggedInRole,
-        status: "pending",
-        requested_at: new Date().toISOString()
-      });
-
-      if (error) {
-        console.error("Failed to create delete request:", error);
-        alert("Failed to create delete request.");
-        return;
-      }
-
-      alert("Delete request submitted for approval.");
-    });
-  });
-}
-
-// ---------------------------------------------------------
-// 🔟 EDIT USER (open modal)
-// ---------------------------------------------------------
-function attachEditHandlers() {
-  const editButtons = document.querySelectorAll(".editBtn");
-
-  editButtons.forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const userId = btn.dataset.id;
-
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", userId)
-        .single();
-
-      if (error) {
-        console.error("Failed to load user:", error);
-        alert("Failed to load user.");
-        return;
-      }
-
-      editUserId.value = data.id;
-      editName.value = data.name;
-      editEmail.value = data.email;
-      editEmail.disabled = true; // email read-only
-
-      // Role
-      [...editRole.options].forEach(opt => {
-        opt.selected = opt.value === data.role;
-      });
-
-      // Department
-      [...editDepartment.options].forEach(opt => {
-        opt.selected = opt.value === data.department;
-      });
-
-      // Location
-      if (data.location_id) {
-        editLocation.value = data.location_id;
-      }
-
-      // Status
-      editStatus.value = data.status || "Active";
-
-      // Location control
-      if (loggedInRole !== "Super Admin") {
-        editLocation.disabled = true;
-      } else {
-        editLocation.disabled = false;
-      }
-
-      updateMsg.textContent = "";
-      updateModal.style.display = "flex";
-    });
-  });
-}
-// ---------------------------------------------------------
-// 1️⃣1️⃣ SAVE USER CHANGES
-// ---------------------------------------------------------
-saveUserChanges.addEventListener("click", async () => {
-  const id = editUserId.value;
-  const name = editName.value.trim();
-  const role = editRole.value;
-  const department = editDepartment.value;
-  const status = editStatus.value;
-  let locationId = editLocation.value;
-
-  if (!name || !role || !department || !status) {
-    updateMsg.textContent = "Please fill all fields (name, role, department, status).";
-    return;
+    alert("User deleted successfully.");
+    clearForm();
+    await loadUsers();
+  } catch (err) {
+    console.error("Delete user fetch error:", err);
+    alert("Failed to delete user (network error).");
   }
-
-  if (loggedInRole !== "Super Admin") {
-    locationId = loggedInLocation;
-  }
-
-  const { error } = await supabase
-    .from("users")
-    .update({
-      name,
-      role,
-      department,
-      status,
-      location_id: locationId
-    })
-    .eq("id", id);
-
-  if (error) {
-    console.error("Failed to update user:", error);
-    updateMsg.textContent = "Failed to update user.";
-    return;
-  }
-
-  updateMsg.textContent = "Updated successfully.";
-
-  setTimeout(() => {
-    updateModal.style.display = "none";
-    loadUsers();
-  }, 800);
 });
 
 // ---------------------------------------------------------
-// 1️⃣2️⃣ CLOSE MODAL
+// 1️⃣1️⃣ Search & filter listeners
 // ---------------------------------------------------------
-closeUpdateModal.addEventListener("click", () => {
-  updateModal.style.display = "none";
+searchInput.addEventListener("input", () => {
+  loadUsers();
+});
+
+filterRoleSelect.addEventListener("change", () => {
+  loadUsers();
 });
 
 // ---------------------------------------------------------
-// 1️⃣3️⃣ INIT
+// 1️⃣2️⃣ Init
 // ---------------------------------------------------------
 (async function init() {
-  populateRoleDropdowns();
-  populateDepartmentDropdowns();
+  populateRoleDropdown();
   await loadLocations();
   setupRoleBasedUI();
-  loadUsers();
+  await loadUsers();
 })();
