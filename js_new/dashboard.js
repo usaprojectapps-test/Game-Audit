@@ -50,6 +50,10 @@ document.addEventListener("DOMContentLoaded", () => {
       meta.role ||
       sessionStorage.getItem("role") ||
       "Unknown";
+      console.log("🔥 ROLE FROM SUPABASE =", meta.role);
+      console.log("🔥 ROLE FROM SESSION =", sessionStorage.getItem("role"));
+      console.log("🔥 FINAL ROLE USED =", role);
+
     const locationId =
       meta.location_id ||
       sessionStorage.getItem("location_id") ||
