@@ -77,23 +77,23 @@ document.addEventListener("DOMContentLoaded", () => {
   // PERMISSIONS
   // -------------------------------------------------------------
   function applyPermissions(deptOrRole) {
-    tiles.forEach((tile) => {
-      const allowed = tile.dataset.dept.split(",");
-      if (!allowed.includes(deptOrRole) && !allowed.includes("Admin")) {
-        tile.classList.add("hidden");
-      }
-    });
+  tiles.forEach((tile) => {
+    const allowed = tile.dataset.dept.split(",");
+    if (!allowed.includes(deptOrRole)) {
+      tile.classList.add("hidden");
+    }
+  });
 
-    subTileContainers.forEach((sub) => {
-      const parent = sub.dataset.parent;
-      const parentTile = document.querySelector(
-        `.dashboard-tile[data-module="${parent}"]`
-      );
-      if (parentTile && parentTile.classList.contains("hidden")) {
-        sub.classList.add("hidden");
-      }
-    });
-  }
+  subTileContainers.forEach((sub) => {
+    const parent = sub.dataset.parent;
+    const parentTile = document.querySelector(
+      `.dashboard-tile[data-module="${parent}"]`
+    );
+    if (parentTile && parentTile.classList.contains("hidden")) {
+      sub.classList.add("hidden");
+    }
+  });
+}
 
   // -------------------------------------------------------------
   // TILE CLICK HANDLERS
