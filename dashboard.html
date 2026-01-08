@@ -1,62 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
 
-  <link rel="stylesheet" href="CSS/dashboard.css" />
+  <!-- DASHBOARD CSS -->
+  <link rel="stylesheet" href="/CSS/styles.css">
+
+  <!-- GOOGLE FONTS -->
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&family=Sora:wght@500;600&family=Inter:wght@400;500&family=Poppins:wght@500&display=swap" rel="stylesheet">
 </head>
 
 <body>
+  <div id="toastContainer" class="toast-container"></div>
 
   <!-- HEADER -->
-  <header class="header">
-    <div class="header-left">
-      <h2>Dashboard</h2>
+  <header class="glass-card dashboard-header">
+    <div>
+      <div class="card-header">Dashboard</div>
+      <div class="card-subtitle">
+        Welcome, <span id="headerUserName"></span> — <span id="headerUserDept"></span>
+      </div>
     </div>
 
-    <div class="header-right">
-      <span><strong>Name:</strong> <span id="userName"></span></span>
-      <span><strong>Role:</strong> <span id="userRole"></span></span>
-      <span><strong>Location:</strong> <span id="userLocation"></span></span>
-
-      <button id="logoutBtn" class="logout-btn">Logout</button>
+    <div class="header-actions">
+      <button id="btnChangePassword" class="btn btn-secondary">Change Password</button>
+      <button id="btnLogout" class="btn btn-danger">Logout</button>
     </div>
   </header>
 
-  <!-- MAIN DASHBOARD GRID -->
-  <div class="dashboard-container">
-    <div class="grid">
+  <!-- MODULE CONTAINER -->
+  <div id="moduleContainer"></div>
 
-      <!-- USERS MODULE -->
-      <div class="card" id="cardUsers" onclick="window.location.href='users.html'">
-        <h3>Users</h3>
-      </div>
+  <!-- DASHBOARD GRID -->
+  <div class="dashboard-grid">
 
-      <!-- VENDORS MODULE -->
-      <div class="card" id="cardVendors" onclick="window.location.href='vendors.html'">
-        <h3>Vendors</h3>
-      </div>
-
-      <!-- MACHINES MODULE -->
-      <div class="card" id="cardMachines" onclick="window.location.href='machines.html'">
-        <h3>Machines</h3>
-      </div>
-
-      <!-- REPORTS MODULE -->
-      <div class="card" id="cardReports" onclick="window.location.href='reports.html'">
-        <h3>Reports</h3>
-      </div>
-
+    <!-- ROW 1 -->
+    <div class="dashboard-tile" data-module="vendors" data-dept="Admin,Owner,Audit,Manager">
+      <div class="tile-icon">🏪</div>
+      <div class="tile-title">Vendors</div>
     </div>
+
+    <div class="dashboard-tile" data-module="machines" data-dept="Admin,Owner,Audit,Manager">
+      <div class="tile-icon">🖥️</div>
+      <div class="tile-title">Machines</div>
+    </div>
+
+    <div class="dashboard-tile" data-module="users" data-dept="Admin,Owner,Manager">
+      <div class="tile-icon">👥</div>
+      <div class="tile-title">Users</div>
+    </div>
+
+    <div class="dashboard-tile expandable" data-module="audit" data-dept="Admin,Owner,Audit,Manager">
+      <div class="tile-icon">📊</div>
+      <div class="tile-title">Audit <span class="tile-arrow">▶</span></div>
+    </div>
+
+    <div class="dashboard-tile expandable" data-module="msp" data-dept="Admin,Owner,Cash,Manager">
+      <div class="tile-icon">💰</div>
+      <div class="tile-title">MSP <span class="tile-arrow">▶</span></div>
+    </div>
+
+    <!-- ROW 2 -->
+    <div class="dashboard-tile expandable" data-module="silver" data-dept="Admin,Owner,Silver,Manager">
+      <div class="tile-icon">🥈</div>
+      <div class="tile-title">Silver <span class="tile-arrow">▶</span></div>
+    </div>
+
+    <div class="dashboard-tile" data-module="agentSilver" data-dept="Admin,Owner,Agents">
+      <div class="tile-icon">🧾</div>
+      <div class="tile-title">Agent Silver</div>
+    </div>
+
+    <div class="dashboard-tile" data-module="silverPurchase" data-dept="Admin,Owner,Silver,Manager">
+      <div class="tile-icon">💳</div>
+      <div class="tile-title">Silver Purchase</div>
+    </div>
+
+    <div class="dashboard-tile" data-module="reports" data-dept="Admin,Owner">
+      <div class="tile-icon">📑</div>
+      <div class="tile-title">Reports</div>
+    </div>
+
+    <div class="dashboard-tile" data-module="general" data-dept="Admin,Owner,Manager">
+      <div class="tile-icon">⚙️</div>
+      <div class="tile-title">General</div>
+    </div>
+
+    <!-- SUB‑TILES -->
+    <div class="sub-tile-container" data-parent="audit">
+      <div class="sub-tile" data-module="auditEntry">Audit Entry</div>
+      <div class="sub-tile" data-module="auditDaily">Daily Report</div>
+    </div>
+
+    <div class="sub-tile-container" data-parent="msp">
+      <div class="sub-tile" data-module="mspEntry">MSP Entry</div>
+      <div class="sub-tile" data-module="mspDaily">Daily Report</div>
+    </div>
+
+    <div class="sub-tile-container" data-parent="silver">
+      <div class="sub-tile" data-module="silverEntry">Silver Entry</div>
+      <div class="sub-tile" data-module="silverDaily">Daily Report</div>
+    </div>
+
   </div>
 
-  <!-- AUTH CHECK -->
-  <script type="module" src="js_new/auth.js"></script>
-
-  <!-- DASHBOARD LOGIC -->
-  <script type="module" src="js_new/dashboard.js"></script>
-
+  <!-- JS -->
+  <script type="module" src="/js_new/dashboard.js?v=10"></script>
 </body>
 </html>
