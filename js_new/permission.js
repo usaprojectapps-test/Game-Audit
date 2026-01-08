@@ -16,39 +16,43 @@ function getYesterday() {
 }
 
 // -------------------------------------------------------------
-// PERMISSION CHECKS
+// ROLE GROUPS
 // -------------------------------------------------------------
-export function canEdit(department) {
-  // Admin & Owner → full access
-  if (department === "Admin" || department === "Owner") {
+const FULL_ACCESS_ROLES = ["SuperAdmin", "LocationAdmin"];
+
+const DATE_RESTRICTED_ROLES = ["Audit", "MSP", "Silver", "SilverAgent"];
+
+const MANAGER_EDIT_MODULES = ["Vendors", "Machines", "Users", "SilverPurchase"];
+
+// -------------------------------------------------------------
+// CORE PERMISSION CHECKS
+// -------------------------------------------------------------
+export function canEdit(role, moduleName, selectedDate = null) {
+  // SuperAdmin & LocationAdmin → full access
+  if (FULL_ACCESS_ROLES.includes(role)) {
     return true;
   }
 
-  // Manager → view only
-  if (department === "Manager") {
-    return false;
+  // Manager → special rules
+  if (role === "Manager") {
+    return MANAGER_EDIT_MODULES.includes(moduleName);
   }
 
-  // All others → edit only today + yesterday
-  return true;
+  // Date‑restricted roles → only today + yesterday
+  if (DATE_RESTRICTED_ROLES.includes(role)) {
+    if (!selectedDate) return false;
+    const today = getToday();
+    const yesterday = getYesterday();
+    return selectedDate === today || selectedDate === yesterday;
+  }
+
+  // Default fallback → no edit
+  return false;
 }
 
-export function isDateAllowed(department, selectedDate) {
-  // Admin & Owner → full access
-  if (department === "Admin" || department === "Owner") {
-    return true;
-  }
-
-  // Manager → view only (no editing)
-  if (department === "Manager") {
-    return false;
-  }
-
-  // Others → only today + yesterday
-  const today = getToday();
-  const yesterday = getYesterday();
-
-  return selectedDate === today || selectedDate === yesterday;
+export function canView(role, moduleName) {
+  // Everyone can view everything unless restricted later
+  return true;
 }
 
 // -------------------------------------------------------------
@@ -57,35 +61,24 @@ export function isDateAllowed(department, selectedDate) {
 export function disableForm(formElement) {
   if (!formElement) return;
   const inputs = formElement.querySelectorAll("input, select, textarea, button");
-  inputs.forEach(el => el.disabled = true);
+  inputs.forEach(el => (el.disabled = true));
 }
 
 export function enableForm(formElement) {
   if (!formElement) return;
   const inputs = formElement.querySelectorAll("input, select, textarea, button");
-  inputs.forEach(el => el.disabled = false);
+  inputs.forEach(el => (el.disabled = false));
 }
 
 // -------------------------------------------------------------
 // APPLY PERMISSIONS TO ANY MODULE
 // -------------------------------------------------------------
-export function applyModulePermissions(department, formElement, selectedDate = null) {
-  // Admin & Owner → full access
-  if (department === "Admin" || department === "Owner") {
+export function applyModulePermissions(role, moduleName, formElement, selectedDate = null) {
+  const allowed = canEdit(role, moduleName, selectedDate);
+
+  if (allowed) {
     enableForm(formElement);
-    return;
-  }
-
-  // Manager → view only
-  if (department === "Manager") {
-    disableForm(formElement);
-    return;
-  }
-
-  // Others → date‑restricted editing
-  if (selectedDate && !isDateAllowed(department, selectedDate)) {
-    disableForm(formElement);
   } else {
-    enableForm(formElement);
+    disableForm(formElement);
   }
 }

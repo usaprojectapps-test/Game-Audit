@@ -1,21 +1,26 @@
-// users.js
-
-// ---------------------------------------------------------
-// 0️⃣ Imports & logged-in user context
-// ---------------------------------------------------------
+// users.js — Final Production Version
+// -------------------------------------------------------------
+// IMPORTS
+// -------------------------------------------------------------
 import { supabase } from "./supabaseClient.js";
+import { ROLES } from "./roles.js";
+import { applyModuleAccess } from "./moduleAccess.js";
 
-const loggedInRole = sessionStorage.getItem("role");          // e.g. "SuperAdmin"
-const loggedInLocation = sessionStorage.getItem("locationId"); // e.g. "LOC001"
-const loggedInUserId = sessionStorage.getItem("userId");
+// -------------------------------------------------------------
+// SESSION CONTEXT
+// -------------------------------------------------------------
+const loggedInRole = sessionStorage.getItem("role");
+const loggedInLocation = sessionStorage.getItem("location_id");
+const loggedInUserId = sessionStorage.getItem("user_id");
 
-// ---------------------------------------------------------
-// 1️⃣ DOM references (matching your NEW HTML)
-// ---------------------------------------------------------
+// -------------------------------------------------------------
+// DOM ELEMENTS
+// -------------------------------------------------------------
 const searchInput = document.getElementById("searchUser");
 const filterRoleSelect = document.getElementById("filterRole");
 const userTableBody = document.getElementById("userTableBody");
 
+const userForm = document.getElementById("userForm");
 const userNameInput = document.getElementById("userName");
 const userEmailInput = document.getElementById("userEmail");
 const userPasswordInput = document.getElementById("userPassword");
@@ -24,53 +29,40 @@ const userDepartmentInput = document.getElementById("userDepartment");
 const userLocationSelect = document.getElementById("userLocation");
 const userStatusSelect = document.getElementById("userStatus");
 
-const deleteUserBtn = document.getElementById("deleteUser");
 const saveUserBtn = document.getElementById("saveUser");
+const deleteUserBtn = document.getElementById("deleteUser");
 
-// ---------------------------------------------------------
-// 2️⃣ State
-// ---------------------------------------------------------
-let currentEditingUserId = null; // null = creating new, not editing
+// -------------------------------------------------------------
+// STATE
+// -------------------------------------------------------------
+let currentEditingUserId = null;
 
-// ---------------------------------------------------------
-// 3️⃣ Constants: roles
-// ---------------------------------------------------------
-const ROLES = [
-  "SuperAdmin",
-  "LocationAdmin",
-  "Manager",
-  "Audit",
-  "MSP",
-  "Silver",
-  "SilverAgent"
-];
-
-// ---------------------------------------------------------
-// 4️⃣ Populate dropdowns (roles, locations)
-// ---------------------------------------------------------
+// -------------------------------------------------------------
+// POPULATE ROLE DROPDOWN
+// -------------------------------------------------------------
 function populateRoleDropdown() {
   userRoleSelect.innerHTML = `<option value="">Select Role</option>`;
-
-  ROLES.forEach(role => {
-    // Only SuperAdmin can assign SuperAdmin
-    if (loggedInRole !== "SuperAdmin" && role === "SuperAdmin") return;
-
-    const opt = document.createElement("option");
-    opt.value = role;
-    opt.textContent = role;
-    userRoleSelect.appendChild(opt);
-  });
-
-  // Also sync filterRole dropdown to same list (except "All Roles")
   filterRoleSelect.innerHTML = `<option value="">All Roles</option>`;
-  ROLES.forEach(role => {
-    const opt = document.createElement("option");
-    opt.value = role;
-    opt.textContent = role;
-    filterRoleSelect.appendChild(opt);
+
+  Object.values(ROLES).forEach(role => {
+    // Only SuperAdmin can assign SuperAdmin
+    if (loggedInRole !== ROLES.SUPER_ADMIN && role === ROLES.SUPER_ADMIN) return;
+
+    const opt1 = document.createElement("option");
+    opt1.value = role;
+    opt1.textContent = role;
+    userRoleSelect.appendChild(opt1);
+
+    const opt2 = document.createElement("option");
+    opt2.value = role;
+    opt2.textContent = role;
+    filterRoleSelect.appendChild(opt2);
   });
 }
 
+// -------------------------------------------------------------
+// LOAD LOCATIONS
+// -------------------------------------------------------------
 async function loadLocations() {
   const { data, error } = await supabase
     .from("locations")
@@ -79,7 +71,6 @@ async function loadLocations() {
 
   if (error) {
     console.error("Failed to load locations:", error);
-    userLocationSelect.innerHTML = `<option value="">Select Location</option>`;
     return;
   }
 
@@ -87,65 +78,51 @@ async function loadLocations() {
 
   data.forEach(loc => {
     const opt = document.createElement("option");
-    opt.value = loc.code; // store code in users.location_id
+    opt.value = loc.code;
     opt.textContent = `${loc.code} - ${loc.name}`;
     userLocationSelect.appendChild(opt);
   });
 
-  // If non-SuperAdmin, lock to their location
-  if (loggedInRole !== "SuperAdmin" && loggedInLocation) {
+  // Non-SuperAdmin → lock to their location
+  if (loggedInRole !== ROLES.SUPER_ADMIN) {
     userLocationSelect.value = loggedInLocation;
     userLocationSelect.disabled = true;
   }
 }
 
-// ---------------------------------------------------------
-// 5️⃣ Role-based UI control
-// ---------------------------------------------------------
+// -------------------------------------------------------------
+// ROLE-BASED UI
+// -------------------------------------------------------------
 function setupRoleBasedUI() {
-  // Location control
-  if (loggedInRole !== "SuperAdmin") {
-    if (loggedInLocation) {
-      userLocationSelect.value = loggedInLocation;
-    }
-    userLocationSelect.disabled = true;
-  } else {
-    userLocationSelect.disabled = false;
-  }
-
-  // Delete button visibility: only SuperAdmin & LocationAdmin
-  if (loggedInRole === "SuperAdmin" || loggedInRole === "LocationAdmin") {
+  // Delete button visibility
+  if (loggedInRole === ROLES.SUPER_ADMIN || loggedInRole === ROLES.LOCATION_ADMIN) {
     deleteUserBtn.style.display = "inline-block";
   } else {
     deleteUserBtn.style.display = "none";
   }
 }
 
-// ---------------------------------------------------------
-// 6️⃣ Load users (with search, filter, location-based)
-// ---------------------------------------------------------
+// -------------------------------------------------------------
+// LOAD USERS
+// -------------------------------------------------------------
 async function loadUsers() {
   userTableBody.innerHTML = `<tr><td colspan="5">Loading...</td></tr>`;
 
   let query = supabase.from("users").select("*");
 
   // Location restriction
-  if (loggedInRole !== "SuperAdmin" && loggedInLocation) {
+  if (loggedInRole !== ROLES.SUPER_ADMIN) {
     query = query.eq("location_id", loggedInLocation);
   }
 
   // Role filter
   const filterRole = filterRoleSelect.value;
-  if (filterRole) {
-    query = query.eq("role", filterRole);
-  }
+  if (filterRole) query = query.eq("role", filterRole);
 
-  // Search filter (name or email)
+  // Search filter
   const searchTerm = searchInput.value.trim();
   if (searchTerm) {
-    query = query.or(
-      `name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`
-    );
+    query = query.or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
   }
 
   const { data, error } = await query.order("name", { ascending: true });
@@ -156,7 +133,7 @@ async function loadUsers() {
     return;
   }
 
-  if (!data || !data.length) {
+  if (!data.length) {
     userTableBody.innerHTML = `<tr><td colspan="5">No users found.</td></tr>`;
     return;
   }
@@ -167,43 +144,39 @@ async function loadUsers() {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${user.name || ""}</td>
-      <td>${user.email || ""}</td>
-      <td>${user.role || ""}</td>
-      <td>${user.location_id || ""}</td>
-      <td>${user.status || ""}</td>
+      <td>${user.name}</td>
+      <td>${user.email}</td>
+      <td>${user.role}</td>
+      <td>${user.location_id}</td>
+      <td>${user.status}</td>
     `;
 
-    // Click row to edit
-    tr.addEventListener("click", () => {
-      fillFormForEdit(user);
-    });
-
+    tr.addEventListener("click", () => fillFormForEdit(user));
     userTableBody.appendChild(tr);
   });
 }
 
-// ---------------------------------------------------------
-// 7️⃣ Fill form for editing an existing user
-// ---------------------------------------------------------
+// -------------------------------------------------------------
+// FILL FORM FOR EDIT
+// -------------------------------------------------------------
 function fillFormForEdit(user) {
   currentEditingUserId = user.id;
 
-  userNameInput.value = user.name || "";
-  userEmailInput.value = user.email || "";
-  userEmailInput.disabled = true; // email read-only on edit
+  userNameInput.value = user.name;
+  userEmailInput.value = user.email;
+  userEmailInput.disabled = true;
 
-  userRoleSelect.value = user.role || "";
+  userRoleSelect.value = user.role;
   userDepartmentInput.value = user.department || "";
-  userLocationSelect.value = user.location_id || "";
-  userStatusSelect.value = user.status || "Active";
+  userLocationSelect.value = user.location_id;
+  userStatusSelect.value = user.status;
 
-  userPasswordInput.value = ""; // blank means "no change"
+  userPasswordInput.value = "";
 }
 
-// ---------------------------------------------------------
-// 8️⃣ Clear form for creating a new user
-// ---------------------------------------------------------
+// -------------------------------------------------------------
+// CLEAR FORM
+// -------------------------------------------------------------
 function clearForm() {
   currentEditingUserId = null;
 
@@ -216,18 +189,18 @@ function clearForm() {
   userDepartmentInput.value = "";
   userStatusSelect.value = "Active";
 
-  if (loggedInRole === "SuperAdmin") {
-    userLocationSelect.value = "";
+  if (loggedInRole === ROLES.SUPER_ADMIN) {
     userLocationSelect.disabled = false;
-  } else if (loggedInLocation) {
-    userLocationSelect.value = loggedInLocation;
+    userLocationSelect.value = "";
+  } else {
     userLocationSelect.disabled = true;
+    userLocationSelect.value = loggedInLocation;
   }
 }
 
-// ---------------------------------------------------------
-// 9️⃣ Save user (create or update)
-// ---------------------------------------------------------
+// -------------------------------------------------------------
+// SAVE USER (CREATE OR UPDATE)
+// -------------------------------------------------------------
 saveUserBtn.addEventListener("click", async () => {
   const name = userNameInput.value.trim();
   const email = userEmailInput.value.trim();
@@ -238,79 +211,56 @@ saveUserBtn.addEventListener("click", async () => {
   let locationId = userLocationSelect.value;
 
   if (!name || !email || !role || !status) {
-    alert("Please fill all required fields (name, email, role, status).");
+    alert("Please fill all required fields.");
     return;
   }
 
-  if (loggedInRole !== "SuperAdmin") {
+  if (loggedInRole !== ROLES.SUPER_ADMIN) {
     locationId = loggedInLocation;
   }
 
-  if (!locationId) {
-    alert("Location is required.");
-    return;
-  }
-
-  // UPDATE existing user
+  // UPDATE
   if (currentEditingUserId) {
     const { error } = await supabase
       .from("users")
-      .update({
-        name,
-        role,
-        department,
-        status,
-        location_id: locationId
-      })
+      .update({ name, role, department, status, location_id: locationId })
       .eq("id", currentEditingUserId);
 
     if (error) {
-      console.error("Failed to update user:", error);
+      console.error(error);
       alert("Failed to update user.");
       return;
     }
 
-    alert("User updated successfully.");
+    alert("User updated.");
     await loadUsers();
     return;
   }
 
-  // CREATE new user
+  // CREATE
   if (!password) {
     alert("Password is required for new users.");
     return;
   }
 
-  // 1) Create in Auth
+  // Create in Auth
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: {
-        name,
-        role,
-        department,
-        location_id: locationId,
-        status: "Active"
-      }
+      data: { name, role, department, location_id: locationId, status }
     }
   });
 
   if (authError) {
-    console.error("Auth signUp error:", authError);
-    alert("Failed to create user (Auth).");
+    console.error(authError);
+    alert("Failed to create user.");
     return;
   }
 
-  const authUser = authData.user;
-  if (!authUser) {
-    alert("User not returned from Auth.");
-    return;
-  }
+  const userId = authData.user.id;
 
-  const userId = authUser.id;
-
-  // 2) Insert into users table
+  // Insert into users table
   const { error: dbError } = await supabase.from("users").insert({
     id: userId,
     name,
@@ -318,73 +268,84 @@ saveUserBtn.addEventListener("click", async () => {
     role,
     department,
     location_id: locationId,
-    status: "Active"
+    status
   });
 
   if (dbError) {
-    console.error("DB insert error:", dbError);
+    console.error(dbError);
     alert("User created in Auth but failed in DB.");
     return;
   }
 
-  alert("User created successfully.");
+  alert("User created.");
   clearForm();
   await loadUsers();
 });
 
-// ---------------------------------------------------------
-// 🔟 Delete user (SuperAdmin / LocationAdmin only)
-// ---------------------------------------------------------
+// -------------------------------------------------------------
+// DELETE USER (WITH APPROVAL WORKFLOW)
+// -------------------------------------------------------------
 deleteUserBtn.addEventListener("click", async () => {
   if (!currentEditingUserId) {
     alert("Select a user first.");
     return;
   }
 
-  const confirmDelete = confirm("Are you sure you want to delete this user?");
-  if (!confirmDelete) return;
-
-  try {
-    // Call your Edge Function to delete from Auth + DB
-    const res = await fetch("/functions/v1/delete-user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id: currentEditingUserId
-      })
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error("Delete user error:", errText);
-      alert("Failed to delete user.");
-      return;
-    }
-
-    alert("User deleted successfully.");
-    clearForm();
-    await loadUsers();
-  } catch (err) {
-    console.error("Delete user fetch error:", err);
-    alert("Failed to delete user (network error).");
+  // SuperAdmin & LocationAdmin → direct delete
+  if (loggedInRole === ROLES.SUPER_ADMIN || loggedInRole === ROLES.LOCATION_ADMIN) {
+    await deleteUser(currentEditingUserId);
+    return;
   }
+
+  // Manager → create delete request
+  if (loggedInRole === ROLES.MANAGER) {
+    await createDeleteRequest(currentEditingUserId);
+    alert("Delete request sent to Location Admin.");
+    return;
+  }
+
+  alert("You do not have permission to delete users.");
 });
 
-// ---------------------------------------------------------
-// 1️⃣1️⃣ Search & filter listeners
-// ---------------------------------------------------------
-searchInput.addEventListener("input", () => {
-  loadUsers();
-});
+// -------------------------------------------------------------
+// CREATE DELETE REQUEST (MANAGER)
+// -------------------------------------------------------------
+async function createDeleteRequest(userId) {
+  await supabase.from("user_delete_requests").insert({
+    user_id: userId,
+    requested_by: loggedInUserId,
+    location_id: loggedInLocation,
+    status: "Pending"
+  });
+}
 
-filterRoleSelect.addEventListener("change", () => {
-  loadUsers();
-});
+// -------------------------------------------------------------
+// DELETE USER (ADMIN)
+// -------------------------------------------------------------
+async function deleteUser(userId) {
+  await supabase.from("users").delete().eq("id", userId);
 
-// ---------------------------------------------------------
-// 1️⃣2️⃣ Init
-// ---------------------------------------------------------
+  await supabase
+    .from("user_delete_requests")
+    .update({ status: "Approved" })
+    .eq("user_id", userId);
+
+  alert("User deleted.");
+  clearForm();
+  await loadUsers();
+}
+
+// -------------------------------------------------------------
+// SEARCH & FILTER
+// -------------------------------------------------------------
+searchInput.addEventListener("input", loadUsers);
+filterRoleSelect.addEventListener("change", loadUsers);
+
+// -------------------------------------------------------------
+// INIT
+// -------------------------------------------------------------
 (async function init() {
+  applyModuleAccess(loggedInRole, "Users", userForm, null);
   populateRoleDropdown();
   await loadLocations();
   setupRoleBasedUI();

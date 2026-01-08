@@ -1,197 +1,118 @@
 // -------------------------------------------------------------
-// SUPABASE IMPORT
+// IMPORTS
 // -------------------------------------------------------------
-import { supabase } from "/js_new/supabaseClient.js";
+import { ROLES } from "./roles.js";
+import { applyDashboardVisibility } from "./dashboardVisibility.js"; 
+import { supabase } from "./supabaseClient.js";
 
 // -------------------------------------------------------------
-// EVERYTHING INSIDE DOMContentLoaded
+// GLOBAL USER SESSION
 // -------------------------------------------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  const storedName = sessionStorage.getItem("name");
-  const storedRole = sessionStorage.getItem("role");
+let currentUser = null;
+let currentRole = null;
+let currentLocation = null;
 
-  if (storedName) document.getElementById("headerUserName").textContent = storedName;
-  if (storedRole) document.getElementById("headerUserDept").textContent = storedRole;
+// -------------------------------------------------------------
+// INITIALIZE DASHBOARD
+// -------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", async () => {
+  await validateSession();
+  await loadUserProfile();
+  applyDashboardVisibility(currentRole);
+  setupNavigation();
+  setupLogout();
+});
 
-  const moduleContainer = document.getElementById("moduleContainer");
-  const tiles = document.querySelectorAll(".dashboard-tile");
-  const subTileContainers = document.querySelectorAll(".sub-tile-container");
+// -------------------------------------------------------------
+// SESSION VALIDATION
+// -------------------------------------------------------------
+async function validateSession() {
+  const {
+    data: { session }
+  } = await supabase.auth.getSession();
 
-  initAuthAndUser();
-
-  // -------------------------------------------------------------
-  // AUTH + USER METADATA
-  // -------------------------------------------------------------
-  async function initAuthAndUser() {
-    const { data: { session }, error } = await supabase.auth.getSession();
-
-    if (error || !session) {
-      window.location.href = "/login.html";
-      return;
-    }
-
-    const user = session.user;
-    const meta = user.user_metadata || {};
-
-    const name = meta.name || sessionStorage.getItem("name") || user.email;
-    const role = meta.role || sessionStorage.getItem("role") || "Unknown";
-    const locationId = meta.location_id || sessionStorage.getItem("location_id") || "";
-
-    document.getElementById("headerUserName").textContent = name;
-    document.getElementById("headerUserDept").textContent = role;
-
-    sessionStorage.setItem("name", name);
-    sessionStorage.setItem("role", role);
-    if (locationId) sessionStorage.setItem("location_id", locationId);
-
-    applyPermissions(role);
-    loadPendingRequestsCount();
+  if (!session) {
+    window.location.href = "login.html";
+    return;
   }
 
-  // -------------------------------------------------------------
-  // PERMISSIONS
-  // -------------------------------------------------------------
-  function applyPermissions(role) {
-    tiles.forEach((tile) => {
-      const allowed = tile.dataset.dept.split(",");
-      if (!allowed.includes(role)) tile.classList.add("hidden");
-    });
+  currentUser = session.user;
+}
 
-    // Hide Locations tile for all except SuperAdmin
-    if (role !== "SuperAdmin") {
-      const locTile = document.getElementById("tile-locations");
-      if (locTile) locTile.classList.add("hidden");
-    }
+// -------------------------------------------------------------
+// LOAD USER PROFILE (ROLE + LOCATION)
+// -------------------------------------------------------------
+async function loadUserProfile() {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("role, location_id")
+    .eq("user_id", currentUser.id)
+    .single();
 
-    subTileContainers.forEach((sub) => {
-      const parent = sub.dataset.parent;
-      const parentTile = document.querySelector(`.dashboard-tile[data-module="${parent}"]`);
-      if (parentTile && parentTile.classList.contains("hidden")) {
-        sub.classList.add("hidden");
-      }
-    });
+  if (error || !data) {
+    console.error("Profile load error:", error);
+    alert("Unable to load user profile.");
+    return;
   }
 
-  // -------------------------------------------------------------
-  // TILE CLICK HANDLERS
-  // -------------------------------------------------------------
-  tiles.forEach((tile) => {
-    const moduleName = tile.dataset.module;
-    const subContainer = document.querySelector(`.sub-tile-container[data-parent="${moduleName}"]`);
-    const arrow = tile.querySelector(".tile-arrow");
+  currentRole = data.role;
+  currentLocation = data.location_id;
 
-    if (tile.classList.contains("expandable")) {
+  sessionStorage.setItem("role", currentRole);
+  sessionStorage.setItem("location_id", currentLocation);
+}
+
+// -------------------------------------------------------------
+// NAVIGATION HANDLERS
+// -------------------------------------------------------------
+function setupNavigation() {
+  const navMap = {
+    "tile-locations": "locations.html",
+    "tile-vendors": "vendors.html",
+    "tile-machines": "machines.html",
+    "tile-users": "users.html",
+    "tile-audit": "audit.html",
+    "tile-msp": "msp.html",
+    "tile-silver": "silver.html",
+    "tile-silverAgent": "silverAgent.html",
+    "tile-silverPurchase": "silverPurchase.html"
+  };
+
+  Object.keys(navMap).forEach(tileId => {
+    const tile = document.getElementById(tileId);
+    if (tile) {
       tile.addEventListener("click", () => {
-        const isOpen = subContainer.classList.contains("open");
-        closeAllSubTiles();
-        if (!isOpen) {
-          subContainer.classList.add("open");
-          if (arrow) arrow.classList.add("rotate");
-        }
-      });
-    } else {
-      tile.addEventListener("click", () => {
-        closeAllSubTiles();
-        loadModule(moduleName);
+        window.location.href = navMap[tileId];
       });
     }
   });
+}
 
-  function closeAllSubTiles() {
-    document.querySelectorAll(".sub-tile-container").forEach((sub) => sub.classList.remove("open"));
-    document.querySelectorAll(".tile-arrow").forEach((arrow) => arrow.classList.remove("rotate"));
-  }
+// -------------------------------------------------------------
+// LOGOUT HANDLER
+// -------------------------------------------------------------
+function setupLogout() {
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (!logoutBtn) return;
 
-  document.querySelectorAll(".sub-tile").forEach((sub) => {
-    sub.addEventListener("click", () => {
-      closeAllSubTiles();
-      loadModule(sub.dataset.module);
-    });
-  });
-
-  // -------------------------------------------------------------
-  // MODULE LOADING
-  // -------------------------------------------------------------
-  async function loadModule(moduleName) {
-    moduleContainer.innerHTML = `
-      <div class="glass-card" style="padding: 20px; margin-top: 20px;">
-        <div style="font-size: 20px; margin-bottom: 10px;">Loading ${moduleName}...</div>
-      </div>
-    `;
-
-    try {
-      const response = await fetch(`/modals/${moduleName}.html`);
-      const html = await response.text();
-      moduleContainer.innerHTML = html;
-
-      import(`/js_new/${moduleName}.js?v=${Date.now()}`).catch(() => {});
-    } catch (error) {
-      moduleContainer.innerHTML = `
-        <div class="glass-card" style="padding: 20px; margin-top: 20px;">
-          <div style="color: #ef4444;">Failed to load module: ${moduleName}</div>
-        </div>
-      `;
-    }
-  }
-
-  // -------------------------------------------------------------
-  // LOGOUT + CHANGE PASSWORD
-  // -------------------------------------------------------------
-  document.getElementById("btnLogout").addEventListener("click", async () => {
+  logoutBtn.addEventListener("click", async () => {
     await supabase.auth.signOut();
     sessionStorage.clear();
-    window.location.href = "/login.html";
+    window.location.href = "login.html";
   });
+}
 
-  document.getElementById("btnChangePassword").addEventListener("click", () => {
-    window.location.href = "/modals/changePassword.html";
-  });
-
-  // -------------------------------------------------------------
-  // PENDING DELETE REQUESTS WIDGET
-  // -------------------------------------------------------------
-  const pendingRequestsCard = document.getElementById("pendingRequestsCard");
-  const pendingRequestsCount = document.getElementById("pendingRequestsCount");
-  const pendingBadge = document.getElementById("pendingBadge");
-
-  pendingRequestsCard.style.cursor = "pointer";
-  pendingRequestsCard.addEventListener("click", () => {
-    window.location.href = "/approval.html";
-  });
-
-  async function loadPendingRequestsCount() {
-    const role = sessionStorage.getItem("role");
-    const locationId = sessionStorage.getItem("location_id");
-
-    if (role !== "SuperAdmin" && role !== "LocationAdmin") {
-      pendingRequestsCard.style.display = "none";
-      return;
-    }
-
-    let query = supabase
-      .from("delete_requests")
-      .select(`id, user_id, users:user_id (location_id)`)
-      .eq("status", "pending");
-
-    if (role === "LocationAdmin") {
-      query = query.eq("users.location_id", locationId);
-    }
-
-    const { data, error } = await query;
-    if (error) return;
-
-    const count = data.length;
-    pendingRequestsCount.textContent = count;
-
-    if (count > 0) {
-      pendingBadge.textContent = count;
-      pendingBadge.classList.remove("hidden");
-      pendingRequestsCard.classList.add("pulse");
-    } else {
-      pendingBadge.classList.add("hidden");
-      pendingRequestsCard.classList.remove("pulse");
-    }
+// -------------------------------------------------------------
+// LOCATION FILTERING (USED BY MODULES)
+// -------------------------------------------------------------
+export function getLocationFilter() {
+  if (currentRole === ROLES.SUPER_ADMIN) {
+    return null; // no restriction
   }
 
-  setInterval(loadPendingRequestsCount, 10000);
-});
+  if (currentRole === ROLES.LOCATION_ADMIN) {
+    return currentLocation; // restrict to assigned location
+  }
+
+  return null; // other roles see all data unless module restricts
+}
