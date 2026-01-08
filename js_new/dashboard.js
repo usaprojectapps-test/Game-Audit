@@ -4,34 +4,26 @@
 import { supabase } from "/js_new/supabaseClient.js";
 
 // -------------------------------------------------------------
-// EVERYTHING ELSE INSIDE DOMContentLoaded
+// EVERYTHING INSIDE DOMContentLoaded
 // -------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
-  // HEADER UPDATE FROM sessionStorage (fallback to Supabase session later)
   const storedName = sessionStorage.getItem("name");
   const storedRole = sessionStorage.getItem("role");
 
-  if (storedName) {
-    document.getElementById("headerUserName").textContent = storedName;
-  }
-  if (storedRole) {
-    document.getElementById("headerUserDept").textContent = storedRole;
-  }
+  if (storedName) document.getElementById("headerUserName").textContent = storedName;
+  if (storedRole) document.getElementById("headerUserDept").textContent = storedRole;
 
   const moduleContainer = document.getElementById("moduleContainer");
   const tiles = document.querySelectorAll(".dashboard-tile");
   const subTileContainers = document.querySelectorAll(".sub-tile-container");
 
-  // -------------------------------------------------------------
-  // AUTH STATE VIA SUPABASE
-  // -------------------------------------------------------------
   initAuthAndUser();
 
+  // -------------------------------------------------------------
+  // AUTH + USER METADATA
+  // -------------------------------------------------------------
   async function initAuthAndUser() {
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
+    const { data: { session }, error } = await supabase.auth.getSession();
 
     if (error || !session) {
       window.location.href = "/login.html";
@@ -41,80 +33,57 @@ document.addEventListener("DOMContentLoaded", () => {
     const user = session.user;
     const meta = user.user_metadata || {};
 
-    const name =
-      meta.name ||
-      sessionStorage.getItem("name") ||
-      user.email ||
-      "Unknown User";
-    const role =
-      meta.role ||
-      sessionStorage.getItem("role") ||
-      "Unknown";
-      console.log("🔥 ROLE FROM SUPABASE =", meta.role);
-      console.log("🔥 ROLE FROM SESSION =", sessionStorage.getItem("role"));
-      console.log("🔥 FINAL ROLE USED =", role);
+    const name = meta.name || sessionStorage.getItem("name") || user.email;
+    const role = meta.role || sessionStorage.getItem("role") || "Unknown";
+    const locationId = meta.location_id || sessionStorage.getItem("location_id") || "";
 
-    const locationId =
-      meta.location_id ||
-      sessionStorage.getItem("location_id") ||
-      "";
-
-    // Update header
     document.getElementById("headerUserName").textContent = name;
     document.getElementById("headerUserDept").textContent = role;
 
-    // Persist to sessionStorage
     sessionStorage.setItem("name", name);
     sessionStorage.setItem("role", role);
-    if (locationId) {
-      sessionStorage.setItem("location_id", locationId);
-    }
+    if (locationId) sessionStorage.setItem("location_id", locationId);
 
-    // Apply permissions
     applyPermissions(role);
-
-    // Load widget
     loadPendingRequestsCount();
   }
 
   // -------------------------------------------------------------
   // PERMISSIONS
   // -------------------------------------------------------------
-  function applyPermissions(deptOrRole) {
-  tiles.forEach((tile) => {
-    const allowed = tile.dataset.dept.split(",");
-    if (!allowed.includes(deptOrRole)) {
-      tile.classList.add("hidden");
-    }
-  });
+  function applyPermissions(role) {
+    tiles.forEach((tile) => {
+      const allowed = tile.dataset.dept.split(",");
+      if (!allowed.includes(role)) tile.classList.add("hidden");
+    });
 
-  subTileContainers.forEach((sub) => {
-    const parent = sub.dataset.parent;
-    const parentTile = document.querySelector(
-      `.dashboard-tile[data-module="${parent}"]`
-    );
-    if (parentTile && parentTile.classList.contains("hidden")) {
-      sub.classList.add("hidden");
+    // Hide Locations tile for all except SuperAdmin
+    if (role !== "SuperAdmin") {
+      const locTile = document.getElementById("tile-locations");
+      if (locTile) locTile.classList.add("hidden");
     }
-  });
-}
+
+    subTileContainers.forEach((sub) => {
+      const parent = sub.dataset.parent;
+      const parentTile = document.querySelector(`.dashboard-tile[data-module="${parent}"]`);
+      if (parentTile && parentTile.classList.contains("hidden")) {
+        sub.classList.add("hidden");
+      }
+    });
+  }
 
   // -------------------------------------------------------------
   // TILE CLICK HANDLERS
   // -------------------------------------------------------------
   tiles.forEach((tile) => {
     const moduleName = tile.dataset.module;
-    const subContainer = document.querySelector(
-      `.sub-tile-container[data-parent="${moduleName}"]`
-    );
+    const subContainer = document.querySelector(`.sub-tile-container[data-parent="${moduleName}"]`);
     const arrow = tile.querySelector(".tile-arrow");
 
     if (tile.classList.contains("expandable")) {
       tile.addEventListener("click", () => {
         const isOpen = subContainer.classList.contains("open");
-
         closeAllSubTiles();
-
         if (!isOpen) {
           subContainer.classList.add("open");
           if (arrow) arrow.classList.add("rotate");
@@ -129,15 +98,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function closeAllSubTiles() {
-    document
-      .querySelectorAll(".sub-tile-container")
-      .forEach((sub) => sub.classList.remove("open"));
-    document
-      .querySelectorAll(".tile-arrow")
-      .forEach((arrow) => arrow.classList.remove("rotate"));
+    document.querySelectorAll(".sub-tile-container").forEach((sub) => sub.classList.remove("open"));
+    document.querySelectorAll(".tile-arrow").forEach((arrow) => arrow.classList.remove("rotate"));
   }
 
-  // SUB-TILE CLICK
   document.querySelectorAll(".sub-tile").forEach((sub) => {
     sub.addEventListener("click", () => {
       closeAllSubTiles();
@@ -160,7 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const html = await response.text();
       moduleContainer.innerHTML = html;
 
-      // Load JS AFTER HTML is inserted
       import(`/js_new/${moduleName}.js?v=${Date.now()}`).catch(() => {});
     } catch (error) {
       moduleContainer.innerHTML = `
@@ -172,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // -------------------------------------------------------------
-  // LOGOUT
+  // LOGOUT + CHANGE PASSWORD
   // -------------------------------------------------------------
   document.getElementById("btnLogout").addEventListener("click", async () => {
     await supabase.auth.signOut();
@@ -180,19 +143,17 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "/login.html";
   });
 
-  // CHANGE PASSWORD
   document.getElementById("btnChangePassword").addEventListener("click", () => {
     window.location.href = "/modals/changePassword.html";
   });
 
   // -------------------------------------------------------------
-  // ⭐ PENDING DELETE REQUESTS WIDGET
+  // PENDING DELETE REQUESTS WIDGET
   // -------------------------------------------------------------
   const pendingRequestsCard = document.getElementById("pendingRequestsCard");
   const pendingRequestsCount = document.getElementById("pendingRequestsCount");
   const pendingBadge = document.getElementById("pendingBadge");
 
-  // Make widget clickable → open approval screen
   pendingRequestsCard.style.cursor = "pointer";
   pendingRequestsCard.addEventListener("click", () => {
     window.location.href = "/approval.html";
@@ -202,35 +163,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const role = sessionStorage.getItem("role");
     const locationId = sessionStorage.getItem("location_id");
 
-    if (!pendingRequestsCard) return;
-
-    // Hide for non-admin roles
-    if (role !== "Super Admin" && role !== "Location Admin") {
+    if (role !== "SuperAdmin" && role !== "LocationAdmin") {
       pendingRequestsCard.style.display = "none";
       return;
     }
 
     let query = supabase
       .from("delete_requests")
-      .select(`
-        id,
-        user_id,
-        users:user_id (location_id)
-      `)
+      .select(`id, user_id, users:user_id (location_id)`)
       .eq("status", "pending");
 
-    if (role === "Location Admin") {
+    if (role === "LocationAdmin") {
       query = query.eq("users.location_id", locationId);
     }
 
     const { data, error } = await query;
-
     if (error) return;
 
     const count = data.length;
     pendingRequestsCount.textContent = count;
 
-    // Badge + pulse logic
     if (count > 0) {
       pendingBadge.textContent = count;
       pendingBadge.classList.remove("hidden");
@@ -241,6 +193,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Auto-refresh every 10 seconds
   setInterval(loadPendingRequestsCount, 10000);
 });

@@ -5,10 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
 
-  <!-- DASHBOARD CSS -->
   <link rel="stylesheet" href="/CSS/styles.css">
-
-  <!-- GOOGLE FONTS -->
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&family=Sora:wght@500;600&family=Inter:wght@400;500&family=Poppins:wght@500&display=swap" rel="stylesheet">
 </head>
 
@@ -30,62 +27,67 @@
     </div>
   </header>
 
-  <!-- MODULE CONTAINER -->
   <div id="moduleContainer"></div>
 
   <!-- DASHBOARD GRID -->
   <div class="dashboard-grid">
 
     <!-- ROW 1 -->
-    <div class="dashboard-tile" data-module="vendors" data-dept="Super Admin,Location Admin,Manager,Audit">
+    <div class="dashboard-tile" data-module="vendors" data-dept="SuperAdmin,LocationAdmin,Manager,Audit">
       <div class="tile-icon">🏪</div>
       <div class="tile-title">Vendors</div>
     </div>
 
-    <div class="dashboard-tile" data-module="machines" data-dept="Super Admin,Location Admin,Manager,Audit">
+    <div class="dashboard-tile" data-module="machines" data-dept="SuperAdmin,LocationAdmin,Manager,Audit">
       <div class="tile-icon">🖥️</div>
       <div class="tile-title">Machines</div>
     </div>
 
-    <div class="dashboard-tile" data-module="users" data-dept="Super Admin,Location Admin,Manager">
+    <div class="dashboard-tile" data-module="users" data-dept="SuperAdmin,LocationAdmin,Manager">
       <div class="tile-icon">👥</div>
       <div class="tile-title">Users</div>
     </div>
 
-    <div class="dashboard-tile expandable" data-module="audit" data-dept="Audit,Super Admin,Location Admin,Manager">
+    <div class="dashboard-tile expandable" data-module="audit" data-dept="Audit,SuperAdmin,LocationAdmin,Manager">
       <div class="tile-icon">📊</div>
       <div class="tile-title">Audit <span class="tile-arrow">▶</span></div>
     </div>
 
-    <div class="dashboard-tile expandable" data-module="msp" data-dept="MSP,Super Admin,Location Admin,Manager">
+    <div class="dashboard-tile expandable" data-module="msp" data-dept="MSP,SuperAdmin,LocationAdmin,Manager">
       <div class="tile-icon">💰</div>
       <div class="tile-title">MSP <span class="tile-arrow">▶</span></div>
     </div>
 
     <!-- ROW 2 -->
-    <div class="dashboard-tile expandable" data-module="silver" data-dept="Silver,Super Admin,Location Admin,Manager">
+    <div class="dashboard-tile expandable" data-module="silver" data-dept="Silver,SuperAdmin,LocationAdmin,Manager">
       <div class="tile-icon">🥈</div>
       <div class="tile-title">Silver <span class="tile-arrow">▶</span></div>
     </div>
 
-    <div class="dashboard-tile" data-module="agentSilver" data-dept="SilverAgents,Super Admin,Location Admin,Manager">
+    <div class="dashboard-tile" data-module="agentSilver" data-dept="SilverAgent,SuperAdmin,LocationAdmin,Manager">
       <div class="tile-icon">🧾</div>
       <div class="tile-title">Silver Agents</div>
     </div>
 
-    <div class="dashboard-tile" data-module="silverPurchase" data-dept="Silver,Super Admin,Location Admin,Manager">
+    <div class="dashboard-tile" data-module="silverPurchase" data-dept="Silver,SuperAdmin,LocationAdmin,Manager">
       <div class="tile-icon">💳</div>
       <div class="tile-title">Silver Purchase</div>
     </div>
 
-    <div class="dashboard-tile" data-module="reports" data-dept="Super Admin,Location Admin,Manager">
+    <div class="dashboard-tile" data-module="reports" data-dept="SuperAdmin,LocationAdmin,Manager">
       <div class="tile-icon">📑</div>
       <div class="tile-title">Reports</div>
     </div>
 
-    <div class="dashboard-tile" data-module="general" data-dept="Super Admin,Location Admin,Manager,Audit,MSP,Silver,SilverAgents">
+    <div class="dashboard-tile" data-module="general" data-dept="SuperAdmin,LocationAdmin,Manager,Audit,MSP,Silver,SilverAgent">
       <div class="tile-icon">⚙️</div>
       <div class="tile-title">General</div>
+    </div>
+
+    <!-- ⭐ NEW: LOCATIONS TILE (SuperAdmin only) -->
+    <div class="dashboard-tile" id="tile-locations" data-module="locations" data-dept="SuperAdmin">
+      <div class="tile-icon">📍</div>
+      <div class="tile-title">Locations</div>
     </div>
 
     <!-- PENDING REQUESTS WIDGET -->
@@ -115,7 +117,6 @@
 
   </div>
 
-  <!-- JS -->
-  <script type="module" src="/js_new/dashboard.js?v=10"></script>
+  <script type="module" src="/js_new/dashboard.js?v=11"></script>
 </body>
 </html>
