@@ -45,7 +45,7 @@ async function validateSession() {
 async function loadUserProfile() {
   const { data, error } = await supabase
     .from("profiles")
-    .select("role, location_id")
+    .select("full_name, role, location_id")
     .eq("user_id", currentUser.id)
     .single();
 
