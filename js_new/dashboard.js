@@ -57,7 +57,11 @@ async function loadUserProfile() {
 
   currentRole = data.role;
   currentLocation = data.location_id;
-
+    
+  // ⭐ ADD THESE TWO LINES ⭐ 
+  document.getElementById("headerUserName").textContent = data.full_name; 
+  document.getElementById("headerUserDept").textContent = data.role;
+  
   sessionStorage.setItem("role", currentRole);
   sessionStorage.setItem("location_id", currentLocation);
 }
