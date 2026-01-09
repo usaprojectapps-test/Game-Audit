@@ -61,6 +61,7 @@ function renderTable(rows) {
       <td>${row.city}</td>
       <td>${row.state}</td>
       <td>${row.country}</td>
+      <td>${row.role || currentRole}</td>
     `;
 
     tr.addEventListener("click", () => loadForm(row));
