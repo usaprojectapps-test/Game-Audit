@@ -45,12 +45,29 @@ async function loadUserProfile() {
   currentRole = data.role;
   currentLocation = data.location_id;
 
-  // Update header
+  // Update header: name
   const nameEl = document.getElementById("headerUserName");
   if (nameEl) nameEl.textContent = data.name;
 
+  // Update header: role
+  const roleEl = document.getElementById("headerUserDept");
+  if (roleEl) roleEl.textContent = data.role;
+
+  // Update header: location name (not code)
   const locationEl = document.getElementById("headerLocationName");
-  if (locationEl) locationEl.textContent = data.role === "SuperAdmin" ? "All Locations" : data.location_id;
+  if (locationEl) {
+    if (data.role === "SuperAdmin") {
+      locationEl.textContent = "All Locations";
+    } else {
+      const { data: locData, error: locError } = await supabase
+        .from("locations")
+        .select("name")
+        .eq("id", data.location_id)
+        .single();
+
+      locationEl.textContent = locData?.name || "Unknown Location";
+    }
+  }
 
   // Store in session
   sessionStorage.setItem("name", data.name);
@@ -58,6 +75,7 @@ async function loadUserProfile() {
   sessionStorage.setItem("location_id", data.location_id);
   sessionStorage.setItem("user_id", currentUser.id);
 }
+
 
 // -------------------------------------------------------------
 // MODULE LOADER

@@ -18,9 +18,7 @@ export function applyModuleAccess(role, moduleName, formElement, selectedDate = 
 
   const inputs = formElement.querySelectorAll("input, select, textarea, button");
 
-  if (allowed) {
-    inputs.forEach(el => el.disabled = false);
-  } else {
-    inputs.forEach(el => el.disabled = true);
-  }
+  inputs.forEach(el => {
+    el.disabled = !allowed;
+  });
 }
