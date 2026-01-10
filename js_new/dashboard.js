@@ -1,46 +1,33 @@
 // -------------------------------------------------------------
 // IMPORTS
 // -------------------------------------------------------------
-import { ROLES } from "./roles.js";
-import { applyDashboardVisibility } from "./dashboardVisibility.js"; 
 import { supabase } from "./supabaseClient.js";
+import { showToast } from "./toast.js";
 
 // -------------------------------------------------------------
-// GLOBAL USER SESSION
+// STATE
 // -------------------------------------------------------------
 let currentUser = null;
 let currentRole = null;
 let currentLocation = null;
 
 // -------------------------------------------------------------
-// INITIALIZE DASHBOARD
-// -------------------------------------------------------------
-document.addEventListener("DOMContentLoaded", async () => {
-  await validateSession();
-  await loadUserProfile();
-  applyDashboardVisibility(currentRole);
-  setupNavigation();
-  setupLogout();
-});
-
-// -------------------------------------------------------------
-// SESSION VALIDATION
+// VALIDATE SESSION
 // -------------------------------------------------------------
 async function validateSession() {
-  const {
-    data: { session }
-  } = await supabase.auth.getSession();
+  const { data } = await supabase.auth.getSession();
 
-  if (!session) {
+  if (!data.session) {
+    sessionStorage.clear();
     window.location.href = "login.html";
     return;
   }
 
-  currentUser = session.user;
+  currentUser = data.session.user;
 }
 
 // -------------------------------------------------------------
-// LOAD USER PROFILE (ROLE + LOCATION)
+// LOAD USER PROFILE (FROM users TABLE)
 // -------------------------------------------------------------
 async function loadUserProfile() {
   const { data, error } = await supabase
@@ -51,120 +38,32 @@ async function loadUserProfile() {
 
   if (error || !data) {
     console.error("Profile load error:", error);
-    alert("Unable to load user profile.");
+    showToast("Unable to load user profile.", "error");
     return;
   }
 
   currentRole = data.role;
   currentLocation = data.location_id;
 
-  // Update header
-  document.getElementById("welcomeName").textContent = `Welcome, ${data.name}`;
+  // Update welcome message
+  const welcomeEl = document.getElementById("welcomeName");
+  if (welcomeEl) {
+    welcomeEl.textContent = `Welcome, ${data.name}`;
+  }
 
   // Store in session
+  sessionStorage.setItem("name", data.name);
   sessionStorage.setItem("role", data.role);
   sessionStorage.setItem("location_id", data.location_id);
-  sessionStorage.setItem("name", data.name);
-}
-  // Set header info
-  document.getElementById("headerUserName").textContent = data.full_name;
-  document.getElementById("headerUserDept").textContent = data.role;
-
-  // Set location display
-  const locationBanner = document.getElementById("headerLocationName");
-  if (locationBanner) {
-    if (currentRole === ROLES.SUPER_ADMIN) {
-      locationBanner.textContent = "Master User";
-    } else {
-      const { data: locData, error: locError } = await supabase
-        .from("locations")
-        .select("name")
-        .eq("id", currentLocation)
-        .single();
-
-      locationBanner.textContent = locError || !locData
-        ? "Location: Unknown"
-        : `Location: ${locData.name}`;
-    }
-  }
-
-  sessionStorage.setItem("role", currentRole);
-  sessionStorage.setItem("location_id", currentLocation);
+  sessionStorage.setItem("user_id", currentUser.id);
 }
 
 // -------------------------------------------------------------
-// MODULE LOADER (HTML + JS)
+// INITIALIZE DASHBOARD
 // -------------------------------------------------------------
-async function loadModule(moduleName) {
-  try {
-    const htmlResponse = await fetch(`/modals/${moduleName}.html`);
-    if (!htmlResponse.ok) {
-      console.error(`Failed to load HTML for module: ${moduleName}`);
-      alert(`Module HTML not found: ${moduleName}.html`);
-      return;
-    }
-
-    const html = await htmlResponse.text();
-    document.getElementById("moduleContainer").innerHTML = html;
-
-    await import(`/js_new/${moduleName}.js`);
-  } catch (err) {
-    console.error("Module load error:", err);
-    alert("Failed to load module.");
-  }
+async function initDashboard() {
+  await validateSession();
+  await loadUserProfile();
 }
 
-// -------------------------------------------------------------
-// NAVIGATION HANDLERS
-// -------------------------------------------------------------
-function setupNavigation() {
-  const navMap = {
-    "tile-locations": "locations",
-    "tile-vendors": "vendors",
-    "tile-machines": "machines",
-    "tile-users": "users",
-    "tile-audit": "audit",
-    "tile-msp": "msp",
-    "tile-silver": "silver",
-    "tile-silverAgent": "silverAgent",
-    "tile-silverPurchase": "silverPurchase"
-  };
-
-  Object.keys(navMap).forEach(tileId => {
-    const tile = document.getElementById(tileId);
-    if (tile) {
-      tile.addEventListener("click", () => {
-        loadModule(navMap[tileId]);
-      });
-    }
-  });
-}
-
-// -------------------------------------------------------------
-// LOGOUT HANDLER
-// -------------------------------------------------------------
-function setupLogout() {
-  const logoutBtn = document.getElementById("btnLogout");
-  if (!logoutBtn) return;
-
-  logoutBtn.addEventListener("click", async () => {
-    await supabase.auth.signOut();
-    sessionStorage.clear();
-    window.location.href = "login.html";
-  });
-}
-
-// -------------------------------------------------------------
-// LOCATION FILTERING (USED BY MODULES)
-// -------------------------------------------------------------
-export function getLocationFilter() {
-  if (currentRole === ROLES.SUPER_ADMIN) {
-    return null;
-  }
-
-  if (currentRole === ROLES.LOCATION_ADMIN) {
-    return currentLocation;
-  }
-
-  return null;
-}
+initDashboard();
