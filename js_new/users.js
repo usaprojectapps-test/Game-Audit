@@ -66,7 +66,6 @@ function populateRoleDropdown() {
   filterRoleSelect.innerHTML = `<option value="">All Roles</option>`;
 
   Object.values(ROLES).forEach(role => {
-    // Non-SuperAdmin cannot assign SuperAdmin
     if (loggedInRole !== ROLES.SUPER_ADMIN && role === ROLES.SUPER_ADMIN) return;
 
     const opt1 = document.createElement("option");
@@ -100,12 +99,11 @@ async function loadLocations() {
 
   data.forEach(loc => {
     const opt = document.createElement("option");
-    opt.value = loc.id; // UUID
+    opt.value = loc.id;
     opt.textContent = `${loc.code} - ${loc.name}`;
     userLocationSelect.appendChild(opt);
   });
 
-  // LocationAdmin / others → lock to their UUID
   if (loggedInRole !== ROLES.SUPER_ADMIN) {
     userLocationSelect.value = loggedInLocation;
     userLocationSelect.disabled = true;
@@ -133,7 +131,6 @@ async function loadUsers() {
 
   let query = supabase.from("users").select("*");
 
-  // Non-SuperAdmin → restricted to their location
   if (loggedInRole !== ROLES.SUPER_ADMIN) {
     query = query.eq("location_id", loggedInLocation);
   }
@@ -150,8 +147,8 @@ async function loadUsers() {
 
   if (error) {
     console.error("Failed to load users:", error);
-    userTableBody.innerHTML = `<tr><td colspan="5">Failed to load users.</td></tr>`;
     showToast("Failed to load users.", "error");
+    userTableBody.innerHTML = `<tr><td colspan="5">Failed to load users.</td></tr>`;
     return;
   }
 
@@ -165,9 +162,10 @@ async function loadUsers() {
   data.forEach(user => {
     const tr = document.createElement("tr");
 
-    const locationName = user.role === ROLES.SUPER_ADMIN
-      ? "All Locations"
-      : locationMap[user.location_id] || "—";
+    const locationName =
+      user.role === ROLES.SUPER_ADMIN
+        ? "All Locations"
+        : locationMap[user.location_id] || "—";
 
     tr.innerHTML = `
       <td>${user.name}</td>
@@ -196,7 +194,6 @@ function fillFormForEdit(user) {
   userDepartmentInput.value = user.department || "";
   userStatusSelect.value = user.status || "Active";
 
-  // Ensure locations are loaded before setting
   setTimeout(() => {
     userLocationSelect.value = user.location_id;
   }, 150);
@@ -246,12 +243,10 @@ saveUserBtn.addEventListener("click", async () => {
     return;
   }
 
-  // SuperAdmin role → no specific location assignment
   if (role === ROLES.SUPER_ADMIN) {
     locationId = null;
   }
 
-  // Logged-in non-SuperAdmin cannot move users outside their location
   if (loggedInRole !== ROLES.SUPER_ADMIN && role !== ROLES.SUPER_ADMIN) {
     locationId = loggedInLocation;
   }
@@ -293,13 +288,20 @@ saveUserBtn.addEventListener("click", async () => {
     email,
     password,
     options: {
-      data: { name, role, department, location_id: locationId, status }
+      data: {
+        name: name || "",
+        role: role || "",
+        department: department || "",
+        location_id: locationId || "",
+        status: status || "Active"
+      },
+      redirectTo: "https://yourdomain.com/confirm"
     }
   });
 
   if (authError) {
-    console.error(authError);
-    showToast("Failed to create user in Auth.", "error");
+    console.error("AUTH ERROR:", authError);
+    showToast("Auth failed: " + authError.message, "error");
     return;
   }
 
