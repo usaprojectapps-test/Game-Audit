@@ -1,380 +1,243 @@
-// users.js — Final Production Version (UUID + Location Name Display)
-// -------------------------------------------------------------
-// IMPORTS
-// -------------------------------------------------------------
 import { supabase } from "./supabaseClient.js";
-import { ROLES } from "./roles.js";
-import { applyModuleAccess } from "./moduleAccess.js";
 import { showToast } from "./toast.js";
-
-// -------------------------------------------------------------
-// SESSION CONTEXT
-// -------------------------------------------------------------
-const loggedInRole = sessionStorage.getItem("role");
-const loggedInLocation = sessionStorage.getItem("location_id");
-const loggedInUserId = sessionStorage.getItem("user_id");
+import { applyModuleAccess } from "./moduleAccess.js";
 
 // -------------------------------------------------------------
 // DOM ELEMENTS
 // -------------------------------------------------------------
+const tableBody = document.getElementById("usersTableBody");
 const searchInput = document.getElementById("searchUser");
-const filterRoleSelect = document.getElementById("filterRole");
-const userTableBody = document.getElementById("userTableBody");
 
-const userNameInput = document.getElementById("userName");
-const userEmailInput = document.getElementById("userEmail");
-const userPasswordInput = document.getElementById("userPassword");
-const userRoleSelect = document.getElementById("userRole");
-const userDepartmentInput = document.getElementById("userDepartment");
-const userLocationSelect = document.getElementById("userLocation");
-const userStatusSelect = document.getElementById("userStatus");
+const form = document.getElementById("userForm");
+const nameInput = document.getElementById("userName");
+const emailInput = document.getElementById("userEmail");
+const roleSelect = document.getElementById("userRole");
+const locationSelect = document.getElementById("userLocation");
+const statusSelect = document.getElementById("userStatus");
 
-const saveUserBtn = document.getElementById("saveUser");
-const deleteUserBtn = document.getElementById("deleteUser");
+const btnSave = document.getElementById("saveUser");
+const btnDelete = document.getElementById("deleteUser");
+const btnClear = document.getElementById("clearUser");
 
-// -------------------------------------------------------------
-// STATE
-// -------------------------------------------------------------
-let currentEditingUserId = null;
-let locationMap = {}; // UUID → Location Name
+let selectedId = null;
+const currentRole = sessionStorage.getItem("role");
+const currentLocation = sessionStorage.getItem("location_id");
 
 // -------------------------------------------------------------
-// PRELOAD LOCATION NAMES (UUID → Name)
+// INITIAL LOAD
 // -------------------------------------------------------------
-async function preloadLocationNames() {
-  const { data, error } = await supabase
-    .from("locations")
-    .select("id, name");
-
-  if (error) {
-    console.error("Failed to load location names:", error);
-    showToast("Failed to load location names.", "error");
-    return;
-  }
-
-  locationMap = {};
-  data.forEach(loc => {
-    locationMap[loc.id] = loc.name;
-  });
-}
-
-// -------------------------------------------------------------
-// POPULATE ROLE DROPDOWN
-// -------------------------------------------------------------
-function populateRoleDropdown() {
-  userRoleSelect.innerHTML = `<option value="">Select Role</option>`;
-  filterRoleSelect.innerHTML = `<option value="">All Roles</option>`;
-
-  Object.values(ROLES).forEach(role => {
-    if (loggedInRole !== ROLES.SUPER_ADMIN && role === ROLES.SUPER_ADMIN) return;
-
-    const opt1 = document.createElement("option");
-    opt1.value = role;
-    opt1.textContent = role;
-    userRoleSelect.appendChild(opt1);
-
-    const opt2 = document.createElement("option");
-    opt2.value = role;
-    opt2.textContent = role;
-    filterRoleSelect.appendChild(opt2);
-  });
-}
-
-// -------------------------------------------------------------
-// LOAD LOCATIONS (UUID)
-// -------------------------------------------------------------
-async function loadLocations() {
-  const { data, error } = await supabase
-    .from("locations")
-    .select("id, code, name")
-    .order("code", { ascending: true });
-
-  if (error) {
-    console.error("Failed to load locations:", error);
-    showToast("Failed to load locations.", "error");
-    return;
-  }
-
-  userLocationSelect.innerHTML = `<option value="">Select Location</option>`;
-
-  data.forEach(loc => {
-    const opt = document.createElement("option");
-    opt.value = loc.id;
-    opt.textContent = `${loc.code} - ${loc.name}`;
-    userLocationSelect.appendChild(opt);
-  });
-
-  if (loggedInRole !== ROLES.SUPER_ADMIN) {
-    userLocationSelect.value = loggedInLocation;
-    userLocationSelect.disabled = true;
-  }
-}
-
-// -------------------------------------------------------------
-// ROLE-BASED UI
-// -------------------------------------------------------------
-function setupRoleBasedUI() {
-  if (loggedInRole === ROLES.SUPER_ADMIN || loggedInRole === ROLES.LOCATION_ADMIN) {
-    deleteUserBtn.style.display = "inline-block";
-  } else {
-    deleteUserBtn.style.display = "none";
-  }
-}
+loadUsers();
+loadLocations();
+setupFormAccess();
 
 // -------------------------------------------------------------
 // LOAD USERS
 // -------------------------------------------------------------
 async function loadUsers() {
-  userTableBody.innerHTML = `<tr><td colspan="5">Loading...</td></tr>`;
+  let query = supabase.from("users").select("id, name, email, role, location_id, status");
 
-  await preloadLocationNames();
-
-  let query = supabase.from("users").select("*");
-
-  if (loggedInRole !== ROLES.SUPER_ADMIN) {
-    query = query.eq("location_id", loggedInLocation);
+  if (currentRole !== "SuperAdmin") {
+    query = query.eq("location_id", currentLocation);
   }
 
-  const filterRole = filterRoleSelect.value;
-  if (filterRole) query = query.eq("role", filterRole);
-
-  const searchTerm = searchInput.value.trim();
-  if (searchTerm) {
-    query = query.or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
-  }
-
-  const { data, error } = await query.order("name", { ascending: true });
+  const { data, error } = await query;
 
   if (error) {
-    console.error("Failed to load users:", error);
+    console.error("User load error:", error);
     showToast("Failed to load users.", "error");
-    userTableBody.innerHTML = `<tr><td colspan="5">Failed to load users.</td></tr>`;
     return;
   }
 
-  if (!data.length) {
-    userTableBody.innerHTML = `<tr><td colspan="5">No users found.</td></tr>`;
-    return;
-  }
-
-  userTableBody.innerHTML = "";
-
-  data.forEach(user => {
-    const tr = document.createElement("tr");
-
-    const locationName =
-      user.role === ROLES.SUPER_ADMIN
-        ? "All Locations"
-        : locationMap[user.location_id] || "—";
-
-    tr.innerHTML = `
-      <td>${user.name}</td>
-      <td>${user.email}</td>
-      <td>${user.role}</td>
-      <td>${locationName}</td>
-      <td>${user.status}</td>
-    `;
-
-    tr.addEventListener("click", () => fillFormForEdit(user));
-    userTableBody.appendChild(tr);
-  });
+  renderTable(data);
 }
 
 // -------------------------------------------------------------
-// FILL FORM FOR EDIT
+// LOAD LOCATIONS FOR DROPDOWN
 // -------------------------------------------------------------
-function fillFormForEdit(user) {
-  currentEditingUserId = user.id;
+async function loadLocations() {
+  const { data, error } = await supabase
+    .from("locations")
+    .select("id, name")
+    .order("name", { ascending: true });
 
-  userNameInput.value = user.name;
-  userEmailInput.value = user.email;
-  userEmailInput.disabled = true;
+  if (error) {
+    console.error("Location load error:", error);
+    showToast("Failed to load locations.", "error");
+    return;
+  }
 
-  userRoleSelect.value = user.role;
-  userDepartmentInput.value = user.department || "";
-  userStatusSelect.value = user.status || "Active";
+  locationSelect.innerHTML = "";
 
-  setTimeout(() => {
-    userLocationSelect.value = user.location_id;
-  }, 150);
+  data.forEach(loc => {
+    const option = document.createElement("option");
+    option.value = loc.id;
+    option.textContent = loc.name;
+    locationSelect.appendChild(option);
+  });
 
-  userPasswordInput.value = "";
+  // Lock dropdown for LocationAdmin
+  if (currentRole !== "SuperAdmin") {
+    locationSelect.value = currentLocation;
+    locationSelect.disabled = true;
+  }
+}
+
+// -------------------------------------------------------------
+// RENDER TABLE
+// -------------------------------------------------------------
+async function renderTable(rows) {
+  tableBody.innerHTML = "";
+
+  for (const row of rows) {
+    const { data: locData } = await supabase
+      .from("locations")
+      .select("name")
+      .eq("id", row.location_id)
+      .single();
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${row.name}</td>
+      <td>${row.email}</td>
+      <td>${row.role}</td>
+      <td>${locData?.name || "Unknown"}</td>
+      <td>${row.status}</td>
+    `;
+    tr.addEventListener("click", () => loadForm(row));
+    tableBody.appendChild(tr);
+  }
+}
+
+// -------------------------------------------------------------
+// LOAD FORM
+// -------------------------------------------------------------
+function loadForm(row) {
+  selectedId = row.id;
+
+  nameInput.value = row.name || "";
+  emailInput.value = row.email || "";
+  roleSelect.value = row.role || "";
+  locationSelect.value = row.location_id || "";
+  statusSelect.value = row.status || "";
+
+  // Lock location dropdown if not SuperAdmin
+  if (currentRole !== "SuperAdmin") {
+    locationSelect.disabled = true;
+  }
 }
 
 // -------------------------------------------------------------
 // CLEAR FORM
 // -------------------------------------------------------------
-function clearForm() {
-  currentEditingUserId = null;
+btnClear.addEventListener("click", () => {
+  selectedId = null;
+  form.reset();
 
-  userNameInput.value = "";
-  userEmailInput.value = "";
-  userEmailInput.disabled = false;
-
-  userPasswordInput.value = "";
-  userRoleSelect.value = "";
-  userDepartmentInput.value = "";
-  userStatusSelect.value = "Active";
-
-  if (loggedInRole === ROLES.SUPER_ADMIN) {
-    userLocationSelect.disabled = false;
-    userLocationSelect.value = "";
-  } else {
-    userLocationSelect.disabled = true;
-    userLocationSelect.value = loggedInLocation;
+  if (currentRole !== "SuperAdmin") {
+    locationSelect.value = currentLocation;
+    locationSelect.disabled = true;
   }
-}
+});
 
 // -------------------------------------------------------------
-// SAVE USER (CREATE OR UPDATE)
+// SAVE USER
 // -------------------------------------------------------------
-saveUserBtn.addEventListener("click", async () => {
-  const name = userNameInput.value.trim();
-  const email = userEmailInput.value.trim();
-  const password = userPasswordInput.value.trim();
-  const role = userRoleSelect.value;
-  const department = userDepartmentInput.value.trim();
-  const status = userStatusSelect.value;
-
-  let locationId = userLocationSelect.value;
-
-  if (!name || !email || !role || !status) {
-    showToast("Please fill all required fields.", "warning");
-    return;
-  }
-
-  if (role === ROLES.SUPER_ADMIN) {
-    locationId = null;
-  }
-
-  if (loggedInRole !== ROLES.SUPER_ADMIN && role !== ROLES.SUPER_ADMIN) {
-    locationId = loggedInLocation;
-  }
-
+btnSave.addEventListener("click", async () => {
   const payload = {
-    name,
-    role,
-    department,
-    status,
-    location_id: locationId
+    name: nameInput.value.trim(),
+    email: emailInput.value.trim(),
+    role: roleSelect.value,
+    location_id: currentRole === "SuperAdmin" ? locationSelect.value : currentLocation,
+    status: statusSelect.value
   };
 
-  // UPDATE FLOW
-  if (currentEditingUserId) {
-    const { error } = await supabase
+  let result;
+
+  if (selectedId) {
+    result = await supabase
       .from("users")
       .update(payload)
-      .eq("id", currentEditingUserId);
+      .eq("id", selectedId);
+  } else {
+    result = await supabase
+      .from("users")
+      .insert(payload);
+  }
 
-    if (error) {
-      console.error(error);
-      showToast("Failed to update user.", "error");
-      return;
-    }
-
-    showToast("User updated successfully.", "success");
-    clearForm();
-    await loadUsers();
+  if (result.error) {
+    console.error("Save error:", result.error);
+    showToast("Failed to save user.", "error");
     return;
   }
 
-  // CREATE FLOW
-  if (!password) {
-    showToast("Password is required for new users.", "warning");
-    return;
-  }
-
-  const { data: authData, error: authError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        name: name || "",
-        role: role || "",
-        department: department || "",
-        location_id: locationId || "",
-        status: status || "Active"
-      },
-      redirectTo: "https://yourdomain.com/confirm"
-    }
-  });
-
-  if (authError) {
-    console.error("AUTH ERROR:", authError);
-    showToast("Auth failed: " + authError.message, "error");
-    return;
-  }
-
-  const userId = authData.user.id;
-
-  const { error: dbError } = await supabase.from("users").insert({
-    id: userId,
-    name,
-    email,
-    role,
-    department,
-    location_id: locationId,
-    status
-  });
-
-  if (dbError) {
-    console.error(dbError);
-    showToast("User created in Auth but failed in DB.", "error");
-    return;
-  }
-
-  showToast("User created successfully.", "success");
-  clearForm();
+  showToast("User saved successfully.", "success");
+  form.reset();
+  selectedId = null;
   await loadUsers();
 });
 
 // -------------------------------------------------------------
 // DELETE USER
 // -------------------------------------------------------------
-deleteUserBtn.addEventListener("click", async () => {
-  if (!currentEditingUserId) {
+btnDelete.addEventListener("click", async () => {
+  if (!selectedId) {
     showToast("Select a user first.", "warning");
     return;
   }
 
-  if (loggedInRole === ROLES.SUPER_ADMIN || loggedInRole === ROLES.LOCATION_ADMIN) {
-    await deleteUser(currentEditingUserId);
+  const { data: user } = await supabase
+    .from("users")
+    .select("location_id")
+    .eq("id", selectedId)
+    .single();
+
+  if (currentRole !== "SuperAdmin" && user.location_id !== currentLocation) {
+    showToast("You cannot delete users from other locations.", "error");
     return;
   }
 
-  showToast("You do not have permission to delete users.", "warning");
-});
-
-// -------------------------------------------------------------
-// DELETE USER (ADMIN)
-// -------------------------------------------------------------
-async function deleteUser(userId) {
-  const { error } = await supabase.from("users").delete().eq("id", userId);
+  const { error } = await supabase
+    .from("users")
+    .delete()
+    .eq("id", selectedId);
 
   if (error) {
-    console.error(error);
+    console.error("Delete error:", error);
     showToast("Failed to delete user.", "error");
     return;
   }
 
-  showToast("User deleted successfully.", "success");
-  clearForm();
+  showToast("User deleted.", "success");
+  form.reset();
+  selectedId = null;
   await loadUsers();
+});
+
+// -------------------------------------------------------------
+// SEARCH
+// -------------------------------------------------------------
+searchInput.addEventListener("input", async () => {
+  const term = searchInput.value.toLowerCase();
+
+  let query = supabase.from("users").select("*");
+
+  if (currentRole !== "SuperAdmin") {
+    query = query.eq("location_id", currentLocation);
+  }
+
+  const { data } = await query;
+
+  const filtered = data.filter(row =>
+    (row.name || "").toLowerCase().includes(term) ||
+    (row.email || "").toLowerCase().includes(term)
+  );
+
+  renderTable(filtered);
+});
+
+// -------------------------------------------------------------
+// FORM ACCESS CONTROL
+// -------------------------------------------------------------
+function setupFormAccess() {
+  applyModuleAccess(currentRole, "Users", form);
 }
-
-// -------------------------------------------------------------
-// SEARCH & FILTER
-// -------------------------------------------------------------
-searchInput.addEventListener("input", loadUsers);
-filterRoleSelect.addEventListener("change", loadUsers);
-
-// -------------------------------------------------------------
-// INIT
-// -------------------------------------------------------------
-(async function init() {
-  applyModuleAccess(loggedInRole, "Users", null, null);
-  populateRoleDropdown();
-  await loadLocations();
-  setupRoleBasedUI();
-  await loadUsers();
-})();
