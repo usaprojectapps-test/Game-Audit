@@ -59,11 +59,41 @@ async function loadUserProfile() {
 }
 
 // -------------------------------------------------------------
+// TILE NAVIGATION
+// -------------------------------------------------------------
+function setupTileNavigation() {
+  const navMap = {
+    tileVendors: "vendors.html",
+    tileMachines: "machines.html",
+    tileUsers: "users.html",
+    tileAudit: "audit.html",
+    tileMSP: "msp.html",
+    tileSilver: "silver.html",
+    tileSilverAgents: "silver_agents.html",
+    tileSilverPurchase: "silver_purchase.html",
+    tileReports: "reports.html",
+    tileGeneral: "general.html",
+    tileLocations: "locations.html"
+  };
+
+  Object.entries(navMap).forEach(([id, page]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.cursor = "pointer";
+      el.addEventListener("click", () => {
+        window.location.href = page;
+      });
+    }
+  });
+}
+
+// -------------------------------------------------------------
 // INITIALIZE DASHBOARD
 // -------------------------------------------------------------
 async function initDashboard() {
   await validateSession();
   await loadUserProfile();
+  setupTileNavigation();
 }
 
 initDashboard();
