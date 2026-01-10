@@ -44,9 +44,9 @@ async function validateSession() {
 // -------------------------------------------------------------
 async function loadUserProfile() {
   const { data, error } = await supabase
-    .from("profiles")
-    .select("full_name, role, location_id")
-    .eq("user_id", currentUser.id)
+    .from("users")
+    .select("name, role, location_id")
+    .eq("id", currentUser.id)
     .single();
 
   if (error || !data) {
@@ -58,6 +58,14 @@ async function loadUserProfile() {
   currentRole = data.role;
   currentLocation = data.location_id;
 
+  // Update header
+  document.getElementById("welcomeName").textContent = `Welcome, ${data.name}`;
+
+  // Store in session
+  sessionStorage.setItem("role", data.role);
+  sessionStorage.setItem("location_id", data.location_id);
+  sessionStorage.setItem("name", data.name);
+}
   // Set header info
   document.getElementById("headerUserName").textContent = data.full_name;
   document.getElementById("headerUserDept").textContent = data.role;

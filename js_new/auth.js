@@ -14,15 +14,13 @@ async function checkSession() {
 
   const user = data.session.user;
 
-  // Load metadata
   const name = user.user_metadata.name;
   const role = user.user_metadata.role;
   const locationId = user.user_metadata.location_id;
 
-  // Store in session
   sessionStorage.setItem("name", name);
   sessionStorage.setItem("role", role);
-  sessionStorage.setItem("locationId", locationId);
+  sessionStorage.setItem("location_id", locationId);
 }
 
 checkSession();
