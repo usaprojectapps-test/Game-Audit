@@ -1,7 +1,5 @@
 import { supabase } from "./supabaseClient.js";
-import { getLocationFilter } from "./dashboard.js";
-import { ROLES } from "./roles.js";
-import { showToast } from "/js_new/toast.js"; // ⭐ REQUIRED
+import { showToast } from "/js_new/toast.js";
 
 // -------------------------------------------------------------
 // DOM ELEMENTS
@@ -161,7 +159,7 @@ btnSave.addEventListener("click", async () => {
   showToast("Location saved successfully.", "success");
   form.reset();
   selectedId = null;
-  await loadLocations(); // refresh table immediately
+  await loadLocations();
 });
 
 // -------------------------------------------------------------
@@ -187,7 +185,7 @@ btnDelete.addEventListener("click", async () => {
   showToast("Location deleted.", "success");
   form.reset();
   selectedId = null;
-  await loadLocations(); // refresh table
+  await loadLocations();
 });
 
 // -------------------------------------------------------------
