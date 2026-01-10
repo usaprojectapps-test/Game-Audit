@@ -63,17 +63,17 @@ async function loadUserProfile() {
 // -------------------------------------------------------------
 function setupTileNavigation() {
   const navMap = {
-    tileVendors: "vendors.html",
-    tileMachines: "machines.html",
-    tileUsers: "users.html",
-    tileAudit: "audit.html",
-    tileMSP: "msp.html",
-    tileSilver: "silver.html",
-    tileSilverAgents: "silver_agents.html",
-    tileSilverPurchase: "silver_purchase.html",
-    tileReports: "reports.html",
-    tileGeneral: "general.html",
-    tileLocations: "locations.html"
+    "tile-vendors": "vendors.html",
+    "tile-machines": "machines.html",
+    "tile-users": "users.html",
+    "tile-audit": "audit.html",
+    "tile-msp": "msp.html",
+    "tile-silver": "silver.html",
+    "tile-silverAgent": "silver_agents.html",
+    "tile-silverPurchase": "silver_purchase.html",
+    "tile-reports": "reports.html",
+    "tile-general": "general.html",
+    "tile-locations": "locations.html"
   };
 
   Object.entries(navMap).forEach(([id, page]) => {
