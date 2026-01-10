@@ -42,7 +42,7 @@ async function loadUserProfile() {
     return;
   }
 
-  currentRole = data.role;
+  currentRole = data.role.trim();
   currentLocation = data.location_id;
 
   // Update header: name
@@ -51,18 +51,18 @@ async function loadUserProfile() {
 
   // Update header: role
   const roleEl = document.getElementById("headerUserDept");
-  if (roleEl) roleEl.textContent = data.role;
+  if (roleEl) roleEl.textContent = currentRole;
 
-  // Update header: location name (not code)
+  // Update header: location name (not UUID)
   const locationEl = document.getElementById("headerLocationName");
   if (locationEl) {
-    if (data.role === "SuperAdmin") {
+    if (currentRole === "SuperAdmin") {
       locationEl.textContent = "All Locations";
     } else {
-      const { data: locData, error: locError } = await supabase
+      const { data: locData } = await supabase
         .from("locations")
         .select("name")
-        .eq("id", data.location_id)
+        .eq("id", currentLocation)
         .single();
 
       locationEl.textContent = locData?.name || "Unknown Location";
@@ -71,11 +71,25 @@ async function loadUserProfile() {
 
   // Store in session
   sessionStorage.setItem("name", data.name);
-  sessionStorage.setItem("role", data.role);
-  sessionStorage.setItem("location_id", data.location_id);
+  sessionStorage.setItem("role", currentRole);
+  sessionStorage.setItem("location_id", currentLocation);
   sessionStorage.setItem("user_id", currentUser.id);
 }
 
+// -------------------------------------------------------------
+// HIDE TILES BASED ON ROLE
+// -------------------------------------------------------------
+function applyDashboardTileAccess() {
+  const role = sessionStorage.getItem("role");
+
+  document.querySelectorAll(".dashboard-tile").forEach(tile => {
+    const allowed = tile.getAttribute("data-dept")?.split(",");
+
+    if (!allowed.includes(role)) {
+      tile.style.display = "none";
+    }
+  });
+}
 
 // -------------------------------------------------------------
 // MODULE LOADER
@@ -169,6 +183,7 @@ document.getElementById("btnLogout")?.addEventListener("click", async () => {
 async function initDashboard() {
   await validateSession();
   await loadUserProfile();
+  applyDashboardTileAccess();   // ⭐ Hides tiles based on role
   setupTileNavigation();
 }
 
