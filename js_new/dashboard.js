@@ -57,11 +57,29 @@ async function loadUserProfile() {
 
   currentRole = data.role;
   currentLocation = data.location_id;
-    
-  // ⭐ ADD THESE TWO LINES ⭐ 
-  document.getElementById("headerUserName").textContent = data.full_name; 
+
+  // Set header info
+  document.getElementById("headerUserName").textContent = data.full_name;
   document.getElementById("headerUserDept").textContent = data.role;
-  
+
+  // Set location display
+  const locationBanner = document.getElementById("headerLocationName");
+  if (locationBanner) {
+    if (currentRole === ROLES.SUPER_ADMIN) {
+      locationBanner.textContent = "Master User";
+    } else {
+      const { data: locData, error: locError } = await supabase
+        .from("locations")
+        .select("name")
+        .eq("id", currentLocation)
+        .single();
+
+      locationBanner.textContent = locError || !locData
+        ? "Location: Unknown"
+        : `Location: ${locData.name}`;
+    }
+  }
+
   sessionStorage.setItem("role", currentRole);
   sessionStorage.setItem("location_id", currentLocation);
 }
@@ -71,7 +89,6 @@ async function loadUserProfile() {
 // -------------------------------------------------------------
 async function loadModule(moduleName) {
   try {
-    // Load HTML
     const htmlResponse = await fetch(`/modals/${moduleName}.html`);
     if (!htmlResponse.ok) {
       console.error(`Failed to load HTML for module: ${moduleName}`);
@@ -82,7 +99,6 @@ async function loadModule(moduleName) {
     const html = await htmlResponse.text();
     document.getElementById("moduleContainer").innerHTML = html;
 
-    // Load JS
     await import(`/js_new/${moduleName}.js`);
   } catch (err) {
     console.error("Module load error:", err);
@@ -135,12 +151,12 @@ function setupLogout() {
 // -------------------------------------------------------------
 export function getLocationFilter() {
   if (currentRole === ROLES.SUPER_ADMIN) {
-    return null; // no restriction
+    return null;
   }
 
   if (currentRole === ROLES.LOCATION_ADMIN) {
-    return currentLocation; // restrict to assigned location
+    return currentLocation;
   }
 
-  return null; // other roles see all data unless module restricts
+  return null;
 }
