@@ -40,6 +40,7 @@ async function loadLocations() {
 
   if (error) {
     console.error("Load error:", error);
+    showToast("Failed to load locations.", "error");
     return;
   }
 
@@ -56,12 +57,11 @@ function renderTable(rows) {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${row.code}</td>
-      <td>${row.name}</td>
-      <td>${row.city}</td>
-      <td>${row.state}</td>
-      <td>${row.country}</td>
-     
+      <td>${row.code || ""}</td>
+      <td>${row.name || ""}</td>
+      <td>${row.city || ""}</td>
+      <td>${row.state || ""}</td>
+      <td>${row.country || ""}</td>
     `;
 
     tr.addEventListener("click", () => loadForm(row));
@@ -75,14 +75,14 @@ function renderTable(rows) {
 function loadForm(row) {
   selectedId = row.id;
 
-  codeInput.value = row.code;
-  nameInput.value = row.name;
-  addressInput.value = row.address;
-  cityInput.value = row.city;
-  stateInput.value = row.state;
-  countryInput.value = row.country;
-  contactPersonInput.value = row.contact_person;
-  contactPhoneInput.value = row.contact_phone;
+  codeInput.value = row.code || "";
+  nameInput.value = row.name || "";
+  addressInput.value = row.address || "";
+  cityInput.value = row.city || "";
+  stateInput.value = row.state || "";
+  countryInput.value = row.country || "";
+  contactPersonInput.value = row.contact_person || "";
+  contactPhoneInput.value = row.contact_phone || "";
 }
 
 // -------------------------------------------------------------
@@ -101,7 +101,6 @@ async function generateLocationCode(city, country) {
 
   const cityCode = city.substring(0, 3).toUpperCase();
   const countryCode = country.substring(0, 3).toUpperCase();
-
   const prefix = `${countryCode}-${cityCode}`;
 
   const { data } = await supabase
@@ -124,19 +123,19 @@ btnSave.addEventListener("click", async () => {
 
   let code = codeInput.value.trim();
 
-  if (!selectedId && (!code || code === "")) {
+  if (!selectedId && !code) {
     code = await generateLocationCode(city, country);
   }
 
   const payload = {
-    code,
-    name: nameInput.value.trim(),
-    address: addressInput.value.trim(),
-    city,
-    state: stateInput.value.trim(),
-    country,
-    contact_person: contactPersonInput.value.trim(),
-    contact_phone: contactPhoneInput.value.trim()
+    code: code || null,
+    name: nameInput.value.trim() || null,
+    address: addressInput.value.trim() || null,
+    city: city || null,
+    state: stateInput.value.trim() || null,
+    country: country || null,
+    contact_person: contactPersonInput.value.trim() || null,
+    contact_phone: contactPhoneInput.value.trim() || null
   };
 
   let result;
@@ -154,14 +153,14 @@ btnSave.addEventListener("click", async () => {
 
   if (result.error) {
     console.error("Save error:", result.error);
-    alert("Failed to save location.");
+    showToast("Failed to save location.", "error");
     return;
   }
 
-  alert("Location saved successfully.");
+  showToast("Location saved successfully.", "success");
   form.reset();
   selectedId = null;
-  loadLocations();
+  await loadLocations(); // refresh table immediately
 });
 
 // -------------------------------------------------------------
@@ -169,7 +168,7 @@ btnSave.addEventListener("click", async () => {
 // -------------------------------------------------------------
 btnDelete.addEventListener("click", async () => {
   if (!selectedId) {
-    alert("Select a location first.");
+    showToast("Select a location first.", "warning");
     return;
   }
 
@@ -180,14 +179,14 @@ btnDelete.addEventListener("click", async () => {
 
   if (error) {
     console.error("Delete error:", error);
-    alert("Failed to delete.");
+    showToast("Failed to delete location.", "error");
     return;
   }
 
-  alert("Location deleted.");
+  showToast("Location deleted.", "success");
   form.reset();
   selectedId = null;
-  loadLocations();
+  await loadLocations(); // refresh table
 });
 
 // -------------------------------------------------------------
@@ -201,9 +200,9 @@ searchInput.addEventListener("input", async () => {
     .select("*");
 
   const filtered = data.filter(row =>
-    row.code.toLowerCase().includes(term) ||
-    row.name.toLowerCase().includes(term) ||
-    row.city.toLowerCase().includes(term)
+    (row.code || "").toLowerCase().includes(term) ||
+    (row.name || "").toLowerCase().includes(term) ||
+    (row.city || "").toLowerCase().includes(term)
   );
 
   renderTable(filtered);
