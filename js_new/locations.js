@@ -1,6 +1,7 @@
 import { supabase } from "./supabaseClient.js";
 import { getLocationFilter } from "./dashboard.js";
 import { ROLES } from "./roles.js";
+import { showToast } from "./toast.js"; // ⭐ REQUIRED
 
 // -------------------------------------------------------------
 // DOM ELEMENTS
