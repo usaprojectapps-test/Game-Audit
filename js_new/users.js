@@ -5,6 +5,7 @@
 import { supabase } from "./supabaseClient.js";
 import { ROLES } from "./roles.js";
 import { applyModuleAccess } from "./moduleAccess.js";
+import { showToast } from "./toast.js";
 
 // -------------------------------------------------------------
 // SESSION CONTEXT
@@ -47,6 +48,7 @@ async function preloadLocationNames() {
 
   if (error) {
     console.error("Failed to load location names:", error);
+    showToast("Failed to load location names.", "error");
     return;
   }
 
@@ -64,6 +66,7 @@ function populateRoleDropdown() {
   filterRoleSelect.innerHTML = `<option value="">All Roles</option>`;
 
   Object.values(ROLES).forEach(role => {
+    // Non-SuperAdmin cannot assign SuperAdmin
     if (loggedInRole !== ROLES.SUPER_ADMIN && role === ROLES.SUPER_ADMIN) return;
 
     const opt1 = document.createElement("option");
@@ -89,6 +92,7 @@ async function loadLocations() {
 
   if (error) {
     console.error("Failed to load locations:", error);
+    showToast("Failed to load locations.", "error");
     return;
   }
 
@@ -101,7 +105,7 @@ async function loadLocations() {
     userLocationSelect.appendChild(opt);
   });
 
-  // LocationAdmin → lock to their UUID
+  // LocationAdmin / others → lock to their UUID
   if (loggedInRole !== ROLES.SUPER_ADMIN) {
     userLocationSelect.value = loggedInLocation;
     userLocationSelect.disabled = true;
@@ -129,6 +133,7 @@ async function loadUsers() {
 
   let query = supabase.from("users").select("*");
 
+  // Non-SuperAdmin → restricted to their location
   if (loggedInRole !== ROLES.SUPER_ADMIN) {
     query = query.eq("location_id", loggedInLocation);
   }
@@ -146,6 +151,7 @@ async function loadUsers() {
   if (error) {
     console.error("Failed to load users:", error);
     userTableBody.innerHTML = `<tr><td colspan="5">Failed to load users.</td></tr>`;
+    showToast("Failed to load users.", "error");
     return;
   }
 
@@ -188,8 +194,9 @@ function fillFormForEdit(user) {
 
   userRoleSelect.value = user.role;
   userDepartmentInput.value = user.department || "";
-  userStatusSelect.value = user.status;
+  userStatusSelect.value = user.status || "Active";
 
+  // Ensure locations are loaded before setting
   setTimeout(() => {
     userLocationSelect.value = user.location_id;
   }, 150);
@@ -235,16 +242,16 @@ saveUserBtn.addEventListener("click", async () => {
   let locationId = userLocationSelect.value;
 
   if (!name || !email || !role || !status) {
-    alert("Please fill all required fields.");
+    showToast("Please fill all required fields.", "warning");
     return;
   }
 
-  // SuperAdmin → no location assignment
+  // SuperAdmin role → no specific location assignment
   if (role === ROLES.SUPER_ADMIN) {
     locationId = null;
   }
 
-  // LocationAdmin → force their location
+  // Logged-in non-SuperAdmin cannot move users outside their location
   if (loggedInRole !== ROLES.SUPER_ADMIN && role !== ROLES.SUPER_ADMIN) {
     locationId = loggedInLocation;
   }
@@ -257,7 +264,7 @@ saveUserBtn.addEventListener("click", async () => {
     location_id: locationId
   };
 
-  // UPDATE
+  // UPDATE FLOW
   if (currentEditingUserId) {
     const { error } = await supabase
       .from("users")
@@ -266,18 +273,19 @@ saveUserBtn.addEventListener("click", async () => {
 
     if (error) {
       console.error(error);
-      alert("Failed to update user.");
+      showToast("Failed to update user.", "error");
       return;
     }
 
-    alert("User updated.");
+    showToast("User updated successfully.", "success");
+    clearForm();
     await loadUsers();
     return;
   }
 
-  // CREATE
+  // CREATE FLOW
   if (!password) {
-    alert("Password is required for new users.");
+    showToast("Password is required for new users.", "warning");
     return;
   }
 
@@ -291,7 +299,7 @@ saveUserBtn.addEventListener("click", async () => {
 
   if (authError) {
     console.error(authError);
-    alert("Failed to create user.");
+    showToast("Failed to create user in Auth.", "error");
     return;
   }
 
@@ -309,11 +317,11 @@ saveUserBtn.addEventListener("click", async () => {
 
   if (dbError) {
     console.error(dbError);
-    alert("User created in Auth but failed in DB.");
+    showToast("User created in Auth but failed in DB.", "error");
     return;
   }
 
-  alert("User created.");
+  showToast("User created successfully.", "success");
   clearForm();
   await loadUsers();
 });
@@ -323,7 +331,7 @@ saveUserBtn.addEventListener("click", async () => {
 // -------------------------------------------------------------
 deleteUserBtn.addEventListener("click", async () => {
   if (!currentEditingUserId) {
-    alert("Select a user first.");
+    showToast("Select a user first.", "warning");
     return;
   }
 
@@ -332,16 +340,22 @@ deleteUserBtn.addEventListener("click", async () => {
     return;
   }
 
-  alert("You do not have permission to delete users.");
+  showToast("You do not have permission to delete users.", "warning");
 });
 
 // -------------------------------------------------------------
 // DELETE USER (ADMIN)
 // -------------------------------------------------------------
 async function deleteUser(userId) {
-  await supabase.from("users").delete().eq("id", userId);
+  const { error } = await supabase.from("users").delete().eq("id", userId);
 
-  alert("User deleted.");
+  if (error) {
+    console.error(error);
+    showToast("Failed to delete user.", "error");
+    return;
+  }
+
+  showToast("User deleted successfully.", "success");
   clearForm();
   await loadUsers();
 }
