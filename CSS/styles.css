@@ -197,7 +197,7 @@ body {
 ------------------------------------------------------------- */
 .module-wrapper {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: 1fr 350px;
   gap: 24px;
   margin-top: 20px;
 }
