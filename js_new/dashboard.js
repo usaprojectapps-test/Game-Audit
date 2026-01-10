@@ -45,11 +45,12 @@ async function loadUserProfile() {
   currentRole = data.role;
   currentLocation = data.location_id;
 
-  // Update welcome message
-  const welcomeEl = document.getElementById("welcomeName");
-  if (welcomeEl) {
-    welcomeEl.textContent = `Welcome, ${data.name}`;
-  }
+  // Update header
+  const nameEl = document.getElementById("headerUserName");
+  if (nameEl) nameEl.textContent = data.name;
+
+  const locationEl = document.getElementById("headerLocationName");
+  if (locationEl) locationEl.textContent = data.role === "SuperAdmin" ? "All Locations" : data.location_id;
 
   // Store in session
   sessionStorage.setItem("name", data.name);
@@ -59,36 +60,93 @@ async function loadUserProfile() {
 }
 
 // -------------------------------------------------------------
-// TILE NAVIGATION
+// MODULE LOADER
+// -------------------------------------------------------------
+async function loadModule(moduleName) {
+  const container = document.getElementById("moduleContainer");
+  if (!container) return;
+
+  container.innerHTML = `<div class="loading">Loading...</div>`;
+
+  try {
+    // Load HTML
+    const response = await fetch(`/modals/${moduleName}.html`);
+    if (!response.ok) {
+      container.innerHTML = `<div class="error">Module not found: ${moduleName}</div>`;
+      return;
+    }
+
+    const html = await response.text();
+    container.innerHTML = html;
+
+    // Load JS
+    const script = document.createElement("script");
+    script.type = "module";
+    script.src = `/js_new/${moduleName}.js?v=${Date.now()}`;
+    document.body.appendChild(script);
+
+  } catch (err) {
+    console.error("Module load error:", err);
+    container.innerHTML = `<div class="error">Failed to load module.</div>`;
+  }
+}
+
+// -------------------------------------------------------------
+// TILE NAVIGATION (LOAD MODULES)
 // -------------------------------------------------------------
 function setupTileNavigation() {
-  const navMap = {
-    "tile-vendors": "vendors.html",
-    "tile-machines": "machines.html",
-    "tile-users": "/modals/users.html",
-    "tile-audit": "audit.html",
-    "tile-msp": "msp.html",
-    "tile-silver": "silver.html",
-    "tile-silverAgent": "silver_agents.html",
-    "tile-silverPurchase": "silver_purchase.html",
-    "tile-reports": "reports.html",
-    "tile-general": "general.html",
-    "tile-locations": "/modals/locations.html"
-  };
+  const tiles = document.querySelectorAll(".dashboard-tile");
 
-  Object.entries(navMap).forEach(([id, page]) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.style.cursor = "pointer";
-      el.addEventListener("click", () => {
-        window.location.href = page;
-      });
-    }
+  tiles.forEach(tile => {
+    tile.style.cursor = "pointer";
+
+    tile.addEventListener("click", () => {
+      const moduleName = tile.getAttribute("data-module");
+
+      // Expandable tiles (Audit, MSP, Silver)
+      if (tile.classList.contains("expandable")) {
+        toggleSubTiles(tile.id.replace("tile-", ""));
+        return;
+      }
+
+      if (moduleName) {
+        loadModule(moduleName);
+      }
+    });
+  });
+
+  // Sub‑tile clicks
+  const subTiles = document.querySelectorAll(".sub-tile");
+  subTiles.forEach(sub => {
+    sub.style.cursor = "pointer";
+    sub.addEventListener("click", () => {
+      const moduleName = sub.getAttribute("data-module");
+      if (moduleName) loadModule(moduleName);
+    });
   });
 }
 
 // -------------------------------------------------------------
-// INITIALIZE DASHBOARD
+// EXPAND / COLLAPSE SUB‑TILES
+// -------------------------------------------------------------
+function toggleSubTiles(parent) {
+  const container = document.querySelector(`.sub-tile-container[data-parent="${parent}"]`);
+  if (!container) return;
+
+  container.classList.toggle("open");
+}
+
+// -------------------------------------------------------------
+// LOGOUT
+// -------------------------------------------------------------
+document.getElementById("btnLogout")?.addEventListener("click", async () => {
+  await supabase.auth.signOut();
+  sessionStorage.clear();
+  window.location.href = "login.html";
+});
+
+// -------------------------------------------------------------
+// INIT
 // -------------------------------------------------------------
 async function initDashboard() {
   await validateSession();
