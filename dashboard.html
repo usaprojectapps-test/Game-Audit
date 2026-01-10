@@ -13,19 +13,28 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- HEADER -->
-  <header class="glass-card dashboard-header">
-    <div>
-      <div class="card-header">Dashboard</div>
-      <div class="card-subtitle">
-       <div class="location-banner" id="headerLocationName"></div>
-        Welcome, <span id="headerUserName"></span> — <span id="headerUserDept"></span>
-    </div>
+<header class="glass-card dashboard-header" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px;">
 
-    <div class="header-actions">
-      <button id="btnChangePassword" class="btn btn-secondary">Change Password</button>
-      <button id="btnLogout" class="btn btn-danger">Logout</button>
+  <!-- LEFT SIDE -->
+  <div class="header-left">
+    <div class="card-header">Dashboard</div>
+    <div class="card-subtitle">
+      Welcome, <span id="headerUserName"></span> — <span id="headerUserDept"></span>
     </div>
-  </header>
+  </div>
+
+  <!-- CENTER -->
+  <div class="header-center">
+    <div id="headerLocationName" class="location-banner">Master User</div>
+  </div>
+
+  <!-- RIGHT SIDE -->
+  <div class="header-actions">
+    <button id="btnChangePassword" class="btn btn-secondary">Change Password</button>
+    <button id="btnLogout" class="btn btn-danger">Logout</button>
+  </div>
+
+</header>
 
   <div id="moduleContainer"></div>
 
