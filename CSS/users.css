@@ -190,3 +190,10 @@ tr:hover {
   </div>
 </div>
 
+.users-module .left-panel {
+  width: 50%;
+}
+
+.users-module .right-panel {
+  width: 50%;
+}
