@@ -65,7 +65,7 @@ function setupTileNavigation() {
   const navMap = {
     "tile-vendors": "vendors.html",
     "tile-machines": "machines.html",
-    "tile-users": "users.html",
+    "tile-users": "/modals/users.html",
     "tile-audit": "audit.html",
     "tile-msp": "msp.html",
     "tile-silver": "silver.html",
@@ -73,7 +73,7 @@ function setupTileNavigation() {
     "tile-silverPurchase": "silver_purchase.html",
     "tile-reports": "reports.html",
     "tile-general": "general.html",
-    "tile-locations": "locations.html"
+    "tile-locations": "/modals/locations.html"
   };
 
   Object.entries(navMap).forEach(([id, page]) => {
