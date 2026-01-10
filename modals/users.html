@@ -2,14 +2,12 @@
 
   <!-- LEFT SIDE (65%) -->
   <div class="left-panel glass-card">
-
     <div class="card-header">User Management</div>
     <div class="card-subtitle">Search, filter & manage users</div>
 
     <!-- SEARCH + FILTER -->
     <div class="search-row">
       <input type="text" id="searchUser" class="input" placeholder="Search name / email" />
-
       <select id="filterRole" class="dropdown">
         <option value="">All Roles</option>
         <option value="SuperAdmin">SuperAdmin</option>
@@ -42,66 +40,64 @@
         <button id="nextUsers" class="btn btn-secondary">Next</button>
       </div>
     </div>
-
   </div>
 
   <!-- RIGHT SIDE (35%) -->
   <div class="right-panel glass-card">
-
     <div class="card-header">User Details</div>
 
-    <div class="form-group">
-      <label>Name</label>
-      <input type="text" id="userName" class="input" />
-    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="userName" class="input" />
+      </div>
 
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="userEmail" class="input" />
-    </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="userEmail" class="input" />
+      </div>
 
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="userPassword" class="input" placeholder="Leave blank to keep same" />
-    </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="userPassword" class="input" placeholder="Leave blank to keep same" />
+      </div>
 
-    <div class="form-group">
-      <label>Role</label>
-      <select id="userRole" class="dropdown">
-        <option value="">Select Role</option>
-        <option value="SuperAdmin">SuperAdmin</option>
-        <option value="LocationAdmin">LocationAdmin</option>
-        <option value="Manager">Manager</option>
-        <option value="Audit">Audit</option>
-        <option value="MSP">MSP</option>
-        <option value="Silver">Silver</option>
-        <option value="SilverAgent">SilverAgent</option>
-      </select>
-    </div>
+      <div class="form-group">
+        <label>Role</label>
+        <select id="userRole" class="dropdown">
+          <option value="">Select Role</option>
+          <option value="SuperAdmin">SuperAdmin</option>
+          <option value="LocationAdmin">LocationAdmin</option>
+          <option value="Manager">Manager</option>
+          <option value="Audit">Audit</option>
+          <option value="MSP">MSP</option>
+          <option value="Silver">Silver</option>
+          <option value="SilverAgent">SilverAgent</option>
+        </select>
+      </div>
 
-    <div class="form-group">
-      <label>Department</label>
-      <input type="text" id="userDepartment" class="input" placeholder="Optional" />
-    </div>
+      <div class="form-group">
+        <label>Department</label>
+        <input type="text" id="userDepartment" class="input" placeholder="Optional" />
+      </div>
 
-    <div class="form-group">
-      <label>Location</label>
-      <select id="userLocation" class="dropdown"></select>
-    </div>
+      <div class="form-group">
+        <label>Location</label>
+        <select id="userLocation" class="dropdown"></select>
+      </div>
 
-    <div class="form-group">
-      <label>Status</label>
-      <select id="userStatus" class="dropdown">
-        <option value="Active">Active</option>
-        <option value="Inactive">Inactive</option>
-      </select>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="userStatus" class="dropdown">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
     </div>
 
     <div class="form-actions">
       <button id="deleteUser" class="btn btn-danger">Delete</button>
       <button id="saveUser" class="btn btn-primary">Save</button>
     </div>
-
   </div>
-
 </div>
