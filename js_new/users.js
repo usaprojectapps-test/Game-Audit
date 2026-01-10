@@ -1,4 +1,4 @@
-// users.js — Final Production Version (UUID + applyModuleAccess)
+// users.js — Final Production Version (UUID + Location Name Display)
 // -------------------------------------------------------------
 // IMPORTS
 // -------------------------------------------------------------
@@ -35,6 +35,26 @@ const deleteUserBtn = document.getElementById("deleteUser");
 // STATE
 // -------------------------------------------------------------
 let currentEditingUserId = null;
+let locationMap = {}; // UUID → Location Name
+
+// -------------------------------------------------------------
+// PRELOAD LOCATION NAMES (UUID → Name)
+// -------------------------------------------------------------
+async function preloadLocationNames() {
+  const { data, error } = await supabase
+    .from("locations")
+    .select("id, name");
+
+  if (error) {
+    console.error("Failed to load location names:", error);
+    return;
+  }
+
+  locationMap = {};
+  data.forEach(loc => {
+    locationMap[loc.id] = loc.name;
+  });
+}
 
 // -------------------------------------------------------------
 // POPULATE ROLE DROPDOWN
@@ -105,6 +125,8 @@ function setupRoleBasedUI() {
 async function loadUsers() {
   userTableBody.innerHTML = `<tr><td colspan="5">Loading...</td></tr>`;
 
+  await preloadLocationNames();
+
   let query = supabase.from("users").select("*");
 
   if (loggedInRole !== ROLES.SUPER_ADMIN) {
@@ -137,11 +159,15 @@ async function loadUsers() {
   data.forEach(user => {
     const tr = document.createElement("tr");
 
+    const locationName = user.role === ROLES.SUPER_ADMIN
+      ? "All Locations"
+      : locationMap[user.location_id] || "—";
+
     tr.innerHTML = `
       <td>${user.name}</td>
       <td>${user.email}</td>
       <td>${user.role}</td>
-      <td>${user.location_id}</td>
+      <td>${locationName}</td>
       <td>${user.status}</td>
     `;
 
@@ -165,7 +191,7 @@ function fillFormForEdit(user) {
   userStatusSelect.value = user.status;
 
   setTimeout(() => {
-    userLocationSelect.value = user.location_id; // UUID
+    userLocationSelect.value = user.location_id;
   }, 150);
 
   userPasswordInput.value = "";
@@ -205,6 +231,7 @@ saveUserBtn.addEventListener("click", async () => {
   const role = userRoleSelect.value;
   const department = userDepartmentInput.value.trim();
   const status = userStatusSelect.value;
+
   let locationId = userLocationSelect.value;
 
   if (!name || !email || !role || !status) {
@@ -212,7 +239,13 @@ saveUserBtn.addEventListener("click", async () => {
     return;
   }
 
-  if (loggedInRole !== ROLES.SUPER_ADMIN) {
+  // SuperAdmin → no location assignment
+  if (role === ROLES.SUPER_ADMIN) {
+    locationId = null;
+  }
+
+  // LocationAdmin → force their location
+  if (loggedInRole !== ROLES.SUPER_ADMIN && role !== ROLES.SUPER_ADMIN) {
     locationId = loggedInLocation;
   }
 
