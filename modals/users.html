@@ -28,6 +28,7 @@
             <th>ROLE</th>
             <th>LOCATION</th>
             <th>STATUS</th>
+            <th>PHONE</th>
           </tr>
         </thead>
         <tbody id="usersTableBody"></tbody>
@@ -44,61 +45,69 @@
   <div class="right-panel glass-card" style="flex: 1;">
     <div class="card-header">User Details</div>
 
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Name</label>
-        <input type="text" id="userName" class="input" />
+    <form id="userForm">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="userName" class="input" />
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="userEmail" class="input" />
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="userPassword" class="input" placeholder="Leave blank to keep same" />
+        </div>
+
+        <div class="form-group">
+          <label>Role</label>
+          <select id="userRole" class="dropdown">
+            <option value="">Select Role</option>
+            <option value="SuperAdmin">SuperAdmin</option>
+            <option value="LocationAdmin">LocationAdmin</option>
+            <option value="Manager">Manager</option>
+            <option value="Audit">Audit</option>
+            <option value="MSP">MSP</option>
+            <option value="Silver">Silver</option>
+            <option value="SilverAgent">SilverAgent</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Department</label>
+          <input type="text" id="userDepartment" class="input" placeholder="Optional" />
+        </div>
+
+        <div class="form-group">
+          <label>Location</label>
+          <select id="userLocation" class="dropdown"></select>
+        </div>
+
+        <div class="form-group">
+          <label>Status</label>
+          <select id="userStatus" class="dropdown">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" id="userPhone" class="input" maxlength="12" placeholder="000-000-0000" />
+        </div>
+
       </div>
 
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="userEmail" class="input" />
+      <div class="form-actions">
+        <button id="clearUser" class="btn btn-secondary" type="button">Clear</button>
+        <button id="deleteUser" class="btn btn-danger" type="button">Delete</button>
+        <button id="saveUser" class="btn btn-primary" type="button">Save</button>
       </div>
-
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="userPassword" class="input" placeholder="Leave blank to keep same" />
-      </div>
-
-      <div class="form-group">
-        <label>Role</label>
-        <select id="userRole" class="dropdown">
-          <option value="">Select Role</option>
-          <option value="SuperAdmin">SuperAdmin</option>
-          <option value="LocationAdmin">LocationAdmin</option>
-          <option value="Manager">Manager</option>
-          <option value="Audit">Audit</option>
-          <option value="MSP">MSP</option>
-          <option value="Silver">Silver</option>
-          <option value="SilverAgent">SilverAgent</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Department</label>
-        <input type="text" id="userDepartment" class="input" placeholder="Optional" />
-      </div>
-
-      <div class="form-group">
-        <label>Location</label>
-        <select id="userLocation" class="dropdown"></select>
-      </div>
-
-      <div class="form-group">
-        <label>Status</label>
-        <select id="userStatus" class="dropdown">
-          <option value="Active">Active</option>
-          <option value="Inactive">Inactive</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="form-actions">
-      <button id="clearUser" class="btn btn-secondary">Clear</button>
-      <button id="deleteUser" class="btn btn-danger">Delete</button>
-      <button id="saveUser" class="btn btn-primary">Save</button>
-    </div>
-
+    </form>
   </div>
 
 </div>

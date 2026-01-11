@@ -2,7 +2,7 @@ import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 import { applyModuleAccess } from "./moduleAccess.js";
 
-let tableBody, searchInput, form, nameInput, emailInput, roleSelect, locationSelect, statusSelect;
+let tableBody, searchInput, form, nameInput, emailInput, roleSelect, locationSelect, statusSelect, phoneInput;
 let btnSave, btnDelete, btnClear;
 
 let selectedId = null;
@@ -19,7 +19,6 @@ setTimeout(() => {
 function initUsersModule() {
   console.log("Users module initialized");
 
-  // Re‑query DOM after HTML is injected
   tableBody = document.getElementById("usersTableBody");
   searchInput = document.getElementById("searchUser");
 
@@ -29,18 +28,28 @@ function initUsersModule() {
   roleSelect = document.getElementById("userRole");
   locationSelect = document.getElementById("userLocation");
   statusSelect = document.getElementById("userStatus");
+  phoneInput = document.getElementById("userPhone");
 
   btnSave = document.getElementById("saveUser");
   btnDelete = document.getElementById("deleteUser");
   btnClear = document.getElementById("clearUser");
 
-  // Attach events
+  // Phone auto-format
+  phoneInput?.addEventListener("input", () => {
+    let value = phoneInput.value.replace(/\D/g, "");
+    if (value.length > 3 && value.length <= 6) {
+      value = value.replace(/(\d{3})(\d+)/, "$1-$2");
+    } else if (value.length > 6) {
+      value = value.replace(/(\d{3})(\d{3})(\d+)/, "$1-$2-$3");
+    }
+    phoneInput.value = value;
+  });
+
   btnClear?.addEventListener("click", clearForm);
   btnSave?.addEventListener("click", saveUser);
   btnDelete?.addEventListener("click", deleteUser);
   searchInput?.addEventListener("input", searchUsers);
 
-  // Load data
   loadUsers();
   loadLocations();
   setupFormAccess();
@@ -50,9 +59,7 @@ function initUsersModule() {
 // LOAD USERS
 // -------------------------------------------------------------
 async function loadUsers() {
-  console.log("Loading users…");
-
-  let query = supabase.from("users").select("id, name, email, role, location_id, status");
+  let query = supabase.from("users").select("*");
 
   if (currentRole !== "SuperAdmin") {
     query = query.eq("location_id", currentLocation);
@@ -61,12 +68,11 @@ async function loadUsers() {
   const { data, error } = await query;
 
   if (error) {
-    console.error("User load error:", error);
+    console.error(error);
     showToast("Failed to load users.", "error");
     return;
   }
 
-  console.log("Filtered users:", data);
   renderTable(data);
 }
 
@@ -79,11 +85,7 @@ async function loadLocations() {
     .select("id, name")
     .order("name", { ascending: true });
 
-  if (error) {
-    console.error("Location load error:", error);
-    showToast("Failed to load locations.", "error");
-    return;
-  }
+  if (error) return;
 
   locationSelect.innerHTML = "";
 
@@ -118,8 +120,9 @@ async function renderTable(rows) {
       <td>${row.name}</td>
       <td>${row.email}</td>
       <td>${row.role}</td>
-      <td>${locData?.name || "Unknown"}</td>
+      <td>${locData?.name || "—"}</td>
       <td>${row.status}</td>
+      <td>${row.phone || ""}</td>
     `;
     tr.addEventListener("click", () => loadForm(row));
     tableBody.appendChild(tr);
@@ -137,6 +140,7 @@ function loadForm(row) {
   roleSelect.value = row.role;
   locationSelect.value = row.location_id;
   statusSelect.value = row.status;
+  phoneInput.value = row.phone || "";
 
   if (currentRole !== "SuperAdmin") {
     locationSelect.disabled = true;
@@ -149,6 +153,8 @@ function loadForm(row) {
 function clearForm() {
   selectedId = null;
   form.reset();
+
+  phoneInput.value = "";
 
   if (currentRole !== "SuperAdmin") {
     locationSelect.value = currentLocation;
@@ -164,7 +170,8 @@ async function saveUser() {
     name: nameInput.value.trim(),
     email: emailInput.value.trim(),
     role: roleSelect.value,
-    location_id: currentRole === "SuperAdmin" ? locationSelect.value : currentLocation,
+    phone: phoneInput.value.trim(),
+    location_id: currentRole === "SuperAdmin" ? null : currentLocation,
     status: statusSelect.value
   };
 
@@ -177,7 +184,6 @@ async function saveUser() {
   }
 
   if (result.error) {
-    console.error("Save error:", result.error);
     showToast("Failed to save user.", "error");
     return;
   }
@@ -196,21 +202,9 @@ async function deleteUser() {
     return;
   }
 
-  const { data: user } = await supabase
-    .from("users")
-    .select("location_id")
-    .eq("id", selectedId)
-    .single();
-
-  if (currentRole !== "SuperAdmin" && user.location_id !== currentLocation) {
-    showToast("You cannot delete users from other locations.", "error");
-    return;
-  }
-
   const { error } = await supabase.from("users").delete().eq("id", selectedId);
 
   if (error) {
-    console.error("Delete error:", error);
     showToast("Failed to delete user.", "error");
     return;
   }
