@@ -122,7 +122,7 @@ async function renderTable(rows) {
       <td>${row.role}</td>
       <td>${locData?.name || "—"}</td>
       <td>${row.status}</td>
-      <td>${row.phone || ""}</td>
+      
     `;
     tr.addEventListener("click", () => loadForm(row));
     tableBody.appendChild(tr);
