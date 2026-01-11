@@ -2,38 +2,51 @@ import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 import { applyModuleAccess } from "./moduleAccess.js";
 
-// -------------------------------------------------------------
-// DOM ELEMENTS
-// -------------------------------------------------------------
-const tableBody = document.getElementById("usersTableBody");
-const searchInput = document.getElementById("searchUser");
-
-const form = document.getElementById("userForm");
-const nameInput = document.getElementById("userName");
-const emailInput = document.getElementById("userEmail");
-const roleSelect = document.getElementById("userRole");
-const locationSelect = document.getElementById("userLocation");
-const statusSelect = document.getElementById("userStatus");
-
-const btnSave = document.getElementById("saveUser");
-const btnDelete = document.getElementById("deleteUser");
-const btnClear = document.getElementById("clearUser");
-
 let selectedId = null;
-const currentRole = sessionStorage.getItem("role");
-const currentLocation = sessionStorage.getItem("location_id");
+let currentRole = sessionStorage.getItem("role");
+let currentLocation = sessionStorage.getItem("location_id");
 
 // -------------------------------------------------------------
-// INITIAL LOAD
+// INIT MODULE (WAIT FOR HTML TO LOAD)
 // -------------------------------------------------------------
-loadUsers();
-loadLocations();
-setupFormAccess();
+document.addEventListener("DOMContentLoaded", initUsersModule);
+
+function initUsersModule() {
+  console.log("Users module initialized");
+
+  // Re‑query DOM after HTML is injected
+  tableBody = document.getElementById("usersTableBody");
+  searchInput = document.getElementById("searchUser");
+
+  form = document.getElementById("userForm");
+  nameInput = document.getElementById("userName");
+  emailInput = document.getElementById("userEmail");
+  roleSelect = document.getElementById("userRole");
+  locationSelect = document.getElementById("userLocation");
+  statusSelect = document.getElementById("userStatus");
+
+  btnSave = document.getElementById("saveUser");
+  btnDelete = document.getElementById("deleteUser");
+  btnClear = document.getElementById("clearUser");
+
+  // Attach events
+  btnClear?.addEventListener("click", clearForm);
+  btnSave?.addEventListener("click", saveUser);
+  btnDelete?.addEventListener("click", deleteUser);
+  searchInput?.addEventListener("input", searchUsers);
+
+  // Load data
+  loadUsers();
+  loadLocations();
+  setupFormAccess();
+}
 
 // -------------------------------------------------------------
 // LOAD USERS
 // -------------------------------------------------------------
 async function loadUsers() {
+  console.log("Loading users…");
+
   let query = supabase.from("users").select("id, name, email, role, location_id, status");
 
   if (currentRole !== "SuperAdmin") {
@@ -48,11 +61,12 @@ async function loadUsers() {
     return;
   }
 
+  console.log("Filtered users:", data);
   renderTable(data);
 }
 
 // -------------------------------------------------------------
-// LOAD LOCATIONS FOR DROPDOWN
+// LOAD LOCATIONS
 // -------------------------------------------------------------
 async function loadLocations() {
   const { data, error } = await supabase
@@ -75,7 +89,6 @@ async function loadLocations() {
     locationSelect.appendChild(option);
   });
 
-  // Lock dropdown for LocationAdmin
   if (currentRole !== "SuperAdmin") {
     locationSelect.value = currentLocation;
     locationSelect.disabled = true;
@@ -114,13 +127,12 @@ async function renderTable(rows) {
 function loadForm(row) {
   selectedId = row.id;
 
-  nameInput.value = row.name || "";
-  emailInput.value = row.email || "";
-  roleSelect.value = row.role || "";
-  locationSelect.value = row.location_id || "";
-  statusSelect.value = row.status || "";
+  nameInput.value = row.name;
+  emailInput.value = row.email;
+  roleSelect.value = row.role;
+  locationSelect.value = row.location_id;
+  statusSelect.value = row.status;
 
-  // Lock location dropdown if not SuperAdmin
   if (currentRole !== "SuperAdmin") {
     locationSelect.disabled = true;
   }
@@ -129,7 +141,7 @@ function loadForm(row) {
 // -------------------------------------------------------------
 // CLEAR FORM
 // -------------------------------------------------------------
-btnClear.addEventListener("click", () => {
+function clearForm() {
   selectedId = null;
   form.reset();
 
@@ -137,12 +149,12 @@ btnClear.addEventListener("click", () => {
     locationSelect.value = currentLocation;
     locationSelect.disabled = true;
   }
-});
+}
 
 // -------------------------------------------------------------
 // SAVE USER
 // -------------------------------------------------------------
-btnSave.addEventListener("click", async () => {
+async function saveUser() {
   const payload = {
     name: nameInput.value.trim(),
     email: emailInput.value.trim(),
@@ -154,14 +166,9 @@ btnSave.addEventListener("click", async () => {
   let result;
 
   if (selectedId) {
-    result = await supabase
-      .from("users")
-      .update(payload)
-      .eq("id", selectedId);
+    result = await supabase.from("users").update(payload).eq("id", selectedId);
   } else {
-    result = await supabase
-      .from("users")
-      .insert(payload);
+    result = await supabase.from("users").insert(payload);
   }
 
   if (result.error) {
@@ -171,15 +178,14 @@ btnSave.addEventListener("click", async () => {
   }
 
   showToast("User saved successfully.", "success");
-  form.reset();
-  selectedId = null;
-  await loadUsers();
-});
+  clearForm();
+  loadUsers();
+}
 
 // -------------------------------------------------------------
 // DELETE USER
 // -------------------------------------------------------------
-btnDelete.addEventListener("click", async () => {
+async function deleteUser() {
   if (!selectedId) {
     showToast("Select a user first.", "warning");
     return;
@@ -196,10 +202,7 @@ btnDelete.addEventListener("click", async () => {
     return;
   }
 
-  const { error } = await supabase
-    .from("users")
-    .delete()
-    .eq("id", selectedId);
+  const { error } = await supabase.from("users").delete().eq("id", selectedId);
 
   if (error) {
     console.error("Delete error:", error);
@@ -208,15 +211,14 @@ btnDelete.addEventListener("click", async () => {
   }
 
   showToast("User deleted.", "success");
-  form.reset();
-  selectedId = null;
-  await loadUsers();
-});
+  clearForm();
+  loadUsers();
+}
 
 // -------------------------------------------------------------
 // SEARCH
 // -------------------------------------------------------------
-searchInput.addEventListener("input", async () => {
+async function searchUsers() {
   const term = searchInput.value.toLowerCase();
 
   let query = supabase.from("users").select("*");
@@ -228,12 +230,12 @@ searchInput.addEventListener("input", async () => {
   const { data } = await query;
 
   const filtered = data.filter(row =>
-    (row.name || "").toLowerCase().includes(term) ||
-    (row.email || "").toLowerCase().includes(term)
+    row.name.toLowerCase().includes(term) ||
+    row.email.toLowerCase().includes(term)
   );
 
   renderTable(filtered);
-});
+}
 
 // -------------------------------------------------------------
 // FORM ACCESS CONTROL
