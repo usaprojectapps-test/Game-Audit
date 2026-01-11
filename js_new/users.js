@@ -2,14 +2,19 @@ import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 import { applyModuleAccess } from "./moduleAccess.js";
 
+let tableBody, searchInput, form, nameInput, emailInput, roleSelect, locationSelect, statusSelect;
+let btnSave, btnDelete, btnClear;
+
 let selectedId = null;
-let currentRole = sessionStorage.getItem("role");
-let currentLocation = sessionStorage.getItem("location_id");
+const currentRole = sessionStorage.getItem("role");
+const currentLocation = sessionStorage.getItem("location_id");
 
 // -------------------------------------------------------------
-// INIT MODULE (WAIT FOR HTML TO LOAD)
+// INIT MODULE (DELAY FIX FOR DYNAMIC HTML LOAD)
 // -------------------------------------------------------------
-document.addEventListener("DOMContentLoaded", initUsersModule);
+setTimeout(() => {
+  initUsersModule();
+}, 50);
 
 function initUsersModule() {
   console.log("Users module initialized");
