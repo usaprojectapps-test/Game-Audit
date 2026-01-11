@@ -184,9 +184,11 @@ async function saveUser() {
   }
 
   if (result.error) {
+    console.error("SAVE ERROR DETAILS:", result.error);
+    alert("ERROR: " + JSON.stringify(result.error, null, 2));
     showToast("Failed to save user.", "error");
     return;
-  }
+}
 
   showToast("User saved successfully.", "success");
   clearForm();
