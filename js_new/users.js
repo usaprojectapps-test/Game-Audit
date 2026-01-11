@@ -2,7 +2,9 @@ import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 import { applyModuleAccess } from "./moduleAccess.js";
 
-let tableBody, searchInput, form, nameInput, emailInput, roleSelect, locationSelect, statusSelect, phoneInput;
+let tableBody, searchInput, form;
+let nameInput, emailInput, passwordInput, roleSelect, departmentInput;
+let locationSelect, statusSelect, phoneInput;
 let btnSave, btnDelete, btnClear;
 
 let selectedId = null;
@@ -12,20 +14,21 @@ const currentLocation = sessionStorage.getItem("location_id");
 // -------------------------------------------------------------
 // INIT MODULE (DELAY FIX FOR DYNAMIC HTML LOAD)
 // -------------------------------------------------------------
-setTimeout(() => {
-  initUsersModule();
-}, 50);
+setTimeout(() => initUsersModule(), 50);
 
 function initUsersModule() {
   console.log("Users module initialized");
 
+  // DOM references
   tableBody = document.getElementById("usersTableBody");
   searchInput = document.getElementById("searchUser");
 
   form = document.getElementById("userForm");
   nameInput = document.getElementById("userName");
   emailInput = document.getElementById("userEmail");
+  passwordInput = document.getElementById("userPassword");
   roleSelect = document.getElementById("userRole");
+  departmentInput = document.getElementById("userDepartment");
   locationSelect = document.getElementById("userLocation");
   statusSelect = document.getElementById("userStatus");
   phoneInput = document.getElementById("userPhone");
@@ -45,6 +48,7 @@ function initUsersModule() {
     phoneInput.value = value;
   });
 
+  // Events
   btnClear?.addEventListener("click", clearForm);
   btnSave?.addEventListener("click", saveUser);
   btnDelete?.addEventListener("click", deleteUser);
@@ -53,6 +57,49 @@ function initUsersModule() {
   loadUsers();
   loadLocations();
   setupFormAccess();
+}
+
+// -------------------------------------------------------------
+// CREATE USER IN AUTH + DB
+// -------------------------------------------------------------
+async function createUserSync(payload) {
+  try {
+    // 1. Create Auth user
+    const { data: authUser, error: authError } =
+      await supabase.auth.admin.createUser({
+        email: payload.email,
+        password: payload.password,
+        email_confirm: true,
+        user_metadata: {
+          name: payload.name,
+          role: payload.role,
+          location_id: payload.location_id
+        }
+      });
+
+    if (authError) return { error: authError };
+
+    const uid = authUser.user.id;
+
+    // 2. Insert into public.users
+    const { error: dbError } = await supabase.from("users").insert({
+      id: uid,
+      name: payload.name,
+      email: payload.email,
+      role: payload.role,
+      location_id: payload.location_id,
+      status: payload.status,
+      phone: payload.phone || null,
+      department: payload.department || null
+    });
+
+    if (dbError) return { error: dbError };
+
+    return { success: true };
+
+  } catch (err) {
+    return { error: err };
+  }
 }
 
 // -------------------------------------------------------------
@@ -68,7 +115,6 @@ async function loadUsers() {
   const { data, error } = await query;
 
   if (error) {
-    console.error(error);
     showToast("Failed to load users.", "error");
     return;
   }
@@ -122,7 +168,6 @@ async function renderTable(rows) {
       <td>${row.role}</td>
       <td>${locData?.name || "—"}</td>
       <td>${row.status}</td>
-      
     `;
     tr.addEventListener("click", () => loadForm(row));
     tableBody.appendChild(tr);
@@ -138,9 +183,11 @@ function loadForm(row) {
   nameInput.value = row.name;
   emailInput.value = row.email;
   roleSelect.value = row.role;
+  departmentInput.value = row.department || "";
   locationSelect.value = row.location_id;
   statusSelect.value = row.status;
   phoneInput.value = row.phone || "";
+  passwordInput.value = ""; // never load password
 
   if (currentRole !== "SuperAdmin") {
     locationSelect.disabled = true;
@@ -153,7 +200,6 @@ function loadForm(row) {
 function clearForm() {
   selectedId = null;
   form.reset();
-
   phoneInput.value = "";
 
   if (currentRole !== "SuperAdmin") {
@@ -166,31 +212,61 @@ function clearForm() {
 // SAVE USER
 // -------------------------------------------------------------
 async function saveUser() {
+  const isNew = !selectedId;
+
   const payload = {
     name: nameInput.value.trim(),
     email: emailInput.value.trim(),
+    password: passwordInput.value.trim(),
     role: roleSelect.value,
+    department: departmentInput.value.trim(),
     phone: phoneInput.value.trim(),
-    location_id: currentRole === "SuperAdmin" ? null : currentLocation,
+    location_id: roleSelect.value === "SuperAdmin" ? null : currentLocation,
     status: statusSelect.value
   };
 
-  let result;
+  // NEW USER → Auth + DB
+  if (isNew) {
+    if (!payload.password) {
+      showToast("Password is required for new users.", "warning");
+      return;
+    }
 
-  if (selectedId) {
-    result = await supabase.from("users").update(payload).eq("id", selectedId);
-  } else {
-    result = await supabase.from("users").insert(payload);
+    const result = await createUserSync(payload);
+
+    if (result.error) {
+      alert("ERROR: " + JSON.stringify(result.error, null, 2));
+      showToast("Failed to create user.", "error");
+      return;
+    }
+
+    showToast("User created successfully.", "success");
   }
 
-  if (result.error) {
-    console.error("SAVE ERROR DETAILS:", result.error);
-    alert("ERROR: " + JSON.stringify(result.error, null, 2));
-    showToast("Failed to save user.", "error");
-    return;
-}
+  // EXISTING USER → update DB only
+  else {
+    const { error } = await supabase
+      .from("users")
+      .update({
+        name: payload.name,
+        email: payload.email,
+        role: payload.role,
+        department: payload.department,
+        phone: payload.phone,
+        location_id: payload.location_id,
+        status: payload.status
+      })
+      .eq("id", selectedId);
 
-  showToast("User saved successfully.", "success");
+    if (error) {
+      alert("ERROR: " + JSON.stringify(error, null, 2));
+      showToast("Failed to update user.", "error");
+      return;
+    }
+
+    showToast("User updated successfully.", "success");
+  }
+
   clearForm();
   loadUsers();
 }
