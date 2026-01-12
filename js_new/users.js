@@ -12,14 +12,13 @@ const currentRole = sessionStorage.getItem("role");
 const currentLocation = sessionStorage.getItem("location_id");
 
 // -------------------------------------------------------------
-// INIT MODULE (DELAY FIX FOR DYNAMIC HTML LOAD)
+// INIT MODULE
 // -------------------------------------------------------------
 setTimeout(() => initUsersModule(), 50);
 
 function initUsersModule() {
   console.log("Users module initialized");
 
-  // DOM references
   tableBody = document.getElementById("usersTableBody");
   searchInput = document.getElementById("searchUser");
 
@@ -48,7 +47,6 @@ function initUsersModule() {
     phoneInput.value = value;
   });
 
-  // Events
   btnClear?.addEventListener("click", clearForm);
   btnSave?.addEventListener("click", saveUser);
   btnDelete?.addEventListener("click", deleteUser);
@@ -60,46 +58,15 @@ function initUsersModule() {
 }
 
 // -------------------------------------------------------------
-// CREATE USER IN AUTH + DB
+// CREATE USER VIA EDGE FUNCTION
 // -------------------------------------------------------------
 async function createUserSync(payload) {
-  try {
-    // 1. Create Auth user
-    const { data: authUser, error: authError } =
-      await supabase.auth.admin.createUser({
-        email: payload.email,
-        password: payload.password,
-        email_confirm: true,
-        user_metadata: {
-          name: payload.name,
-          role: payload.role,
-          location_id: payload.location_id
-        }
-      });
+  const { data, error } = await supabase.functions.invoke("create_user", {
+    body: payload
+  });
 
-    if (authError) return { error: authError };
-
-    const uid = authUser.user.id;
-
-    // 2. Insert into public.users
-    const { error: dbError } = await supabase.from("users").insert({
-      id: uid,
-      name: payload.name,
-      email: payload.email,
-      role: payload.role,
-      location_id: payload.location_id,
-      status: payload.status,
-      phone: payload.phone || null,
-      department: payload.department || null
-    });
-
-    if (dbError) return { error: dbError };
-
-    return { success: true };
-
-  } catch (err) {
-    return { error: err };
-  }
+  if (error) return { error };
+  return data;
 }
 
 // -------------------------------------------------------------
@@ -187,7 +154,7 @@ function loadForm(row) {
   locationSelect.value = row.location_id;
   statusSelect.value = row.status;
   phoneInput.value = row.phone || "";
-  passwordInput.value = ""; // never load password
+  passwordInput.value = "";
 
   if (currentRole !== "SuperAdmin") {
     locationSelect.disabled = true;
@@ -225,7 +192,7 @@ async function saveUser() {
     status: statusSelect.value
   };
 
-  // NEW USER → Auth + DB
+  // NEW USER → Edge Function
   if (isNew) {
     if (!payload.password) {
       showToast("Password is required for new users.", "warning");
@@ -234,7 +201,7 @@ async function saveUser() {
 
     const result = await createUserSync(payload);
 
-    if (result.error) {
+    if (result?.error) {
       alert("ERROR: " + JSON.stringify(result.error, null, 2));
       showToast("Failed to create user.", "error");
       return;
@@ -272,7 +239,7 @@ async function saveUser() {
 }
 
 // -------------------------------------------------------------
-// DELETE USER
+// DELETE USER VIA EDGE FUNCTION
 // -------------------------------------------------------------
 async function deleteUser() {
   if (!selectedId) {
@@ -280,7 +247,9 @@ async function deleteUser() {
     return;
   }
 
-  const { error } = await supabase.from("users").delete().eq("id", selectedId);
+  const { data, error } = await supabase.functions.invoke("delete_user", {
+    body: { id: selectedId }
+  });
 
   if (error) {
     showToast("Failed to delete user.", "error");
