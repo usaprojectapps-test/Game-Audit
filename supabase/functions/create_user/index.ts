@@ -1,6 +1,23 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// ✅ CORS headers block — paste this right after imports
+const headers = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*", // or your domain
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization"
+};
+
+// ✅ Handle preflight OPTIONS request
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers });
+  }
+
+  // ... your function logic starts here
+});
+
 serve(async (req) => {
   try {
     const body = await req.json();
@@ -38,7 +55,7 @@ serve(async (req) => {
 
     const uid = authUser.user.id;
 
-    // 2. Insert into public.users
+    // 2. Insert into DB
     const { error: dbError } = await supabase.from("users").insert({
       id: uid,
       name,
@@ -57,8 +74,10 @@ serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ success: true }), {
-      status: 200
+      status: 200,
+      headers
     });
+
 
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), {

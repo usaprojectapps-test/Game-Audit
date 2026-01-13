@@ -5,11 +5,15 @@ import { applyModuleAccess } from "./moduleAccess.js";
 let tableBody, searchInput, form;
 let nameInput, emailInput, passwordInput, roleSelect, departmentInput;
 let locationSelect, statusSelect, phoneInput;
-let btnSave, btnDelete, btnClear;
+let btnSave, btnDelete, btnClear, btnResetPassword;
 
 let selectedId = null;
 const currentRole = sessionStorage.getItem("role");
 const currentLocation = sessionStorage.getItem("location_id");
+
+let currentPage = 1;
+const pageSize = 10;
+let fullUserList = [];
 
 // -------------------------------------------------------------
 // INIT MODULE
@@ -35,6 +39,7 @@ function initUsersModule() {
   btnSave = document.getElementById("saveUser");
   btnDelete = document.getElementById("deleteUser");
   btnClear = document.getElementById("clearUser");
+  btnResetPassword = document.getElementById("resetPassword");
 
   // Phone auto-format
   phoneInput?.addEventListener("input", () => {
@@ -47,14 +52,58 @@ function initUsersModule() {
     phoneInput.value = value;
   });
 
+  // Events
   btnClear?.addEventListener("click", clearForm);
   btnSave?.addEventListener("click", saveUser);
   btnDelete?.addEventListener("click", deleteUser);
+  btnResetPassword?.addEventListener("click", openResetModal);
+
   searchInput?.addEventListener("input", searchUsers);
+  document.getElementById("filterRole")?.addEventListener("change", searchUsers);
+
+  document.getElementById("prevUsers")?.addEventListener("click", () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderPaginatedTable();
+    }
+  });
+
+  document.getElementById("nextUsers")?.addEventListener("click", () => {
+    if ((currentPage * pageSize) < fullUserList.length) {
+      currentPage++;
+      renderPaginatedTable();
+    }
+  });
+
+  document.getElementById("confirmReset")?.addEventListener("click", confirmResetPassword);
+  document.getElementById("cancelReset")?.addEventListener("click", closeResetModal);
 
   loadUsers();
   loadLocations();
   setupFormAccess();
+}
+
+// -------------------------------------------------------------
+// VALIDATION
+// -------------------------------------------------------------
+function validateForm(payload, isNew) {
+  if (!payload.name) return "Name is required.";
+  if (!payload.email) return "Email is required.";
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(payload.email)) return "Invalid email format.";
+
+  if (!payload.role) return "Role is required.";
+  if (!payload.status) return "Status is required.";
+
+  if (isNew && !payload.password) return "Password is required for new users.";
+
+  const phoneRegex = /^\d{3}-\d{3}-\d{4}$/;
+  if (payload.phone && !phoneRegex.test(payload.phone)) {
+    return "Phone must be in 000-000-0000 format.";
+  }
+
+  return null;
 }
 
 // -------------------------------------------------------------
@@ -70,13 +119,31 @@ async function createUserSync(payload) {
 }
 
 // -------------------------------------------------------------
+// UPDATE PASSWORD VIA EDGE FUNCTION
+// -------------------------------------------------------------
+async function updatePasswordSync(id, newPassword, email) {
+  const { data, error } = await supabase.functions.invoke("update_password", {
+    body: { id, newPassword, email }
+  });
+
+  if (error) return { error };
+  return data;
+}
+
+// -------------------------------------------------------------
 // LOAD USERS
 // -------------------------------------------------------------
 async function loadUsers() {
+  const roleFilter = document.getElementById("filterRole").value;
+
   let query = supabase.from("users").select("*");
 
   if (currentRole !== "SuperAdmin") {
     query = query.eq("location_id", currentLocation);
+  }
+
+  if (roleFilter) {
+    query = query.eq("role", roleFilter);
   }
 
   const { data, error } = await query;
@@ -86,7 +153,24 @@ async function loadUsers() {
     return;
   }
 
-  renderTable(data);
+  fullUserList = data;
+  currentPage = 1;
+  renderPaginatedTable();
+}
+
+// -------------------------------------------------------------
+// PAGINATION
+// -------------------------------------------------------------
+function renderPaginatedTable() {
+  const start = (currentPage - 1) * pageSize;
+  const end = start + pageSize;
+
+  const pageRows = fullUserList.slice(start, end);
+
+  renderTable(pageRows);
+
+  document.getElementById("prevUsers").disabled = currentPage === 1;
+  document.getElementById("nextUsers").disabled = end >= fullUserList.length;
 }
 
 // -------------------------------------------------------------
@@ -192,17 +276,17 @@ async function saveUser() {
     status: statusSelect.value
   };
 
-  // NEW USER → Edge Function
-  if (isNew) {
-    if (!payload.password) {
-      showToast("Password is required for new users.", "warning");
-      return;
-    }
+  const validationError = validateForm(payload, isNew);
+  if (validationError) {
+    showToast(validationError, "warning");
+    return;
+  }
 
+  // NEW USER
+  if (isNew) {
     const result = await createUserSync(payload);
 
     if (result?.error) {
-      alert("ERROR: " + JSON.stringify(result.error, null, 2));
       showToast("Failed to create user.", "error");
       return;
     }
@@ -210,8 +294,9 @@ async function saveUser() {
     showToast("User created successfully.", "success");
   }
 
-  // EXISTING USER → update DB only
+  // EXISTING USER
   else {
+    // Update DB fields
     const { error } = await supabase
       .from("users")
       .update({
@@ -226,12 +311,22 @@ async function saveUser() {
       .eq("id", selectedId);
 
     if (error) {
-      alert("ERROR: " + JSON.stringify(error, null, 2));
       showToast("Failed to update user.", "error");
       return;
     }
 
-    showToast("User updated successfully.", "success");
+    // Update password if provided
+    if (payload.password) {
+      const result = await updatePasswordSync(selectedId, payload.password, payload.email);
+
+      if (result?.error) {
+        showToast("Password update failed.", "error");
+      } else {
+        showToast("Password updated & user notified.", "success");
+      }
+    } else {
+      showToast("User updated successfully.", "success");
+    }
   }
 
   clearForm();
@@ -239,7 +334,7 @@ async function saveUser() {
 }
 
 // -------------------------------------------------------------
-// DELETE USER VIA EDGE FUNCTION
+// DELETE USER
 // -------------------------------------------------------------
 async function deleteUser() {
   if (!selectedId) {
@@ -266,6 +361,7 @@ async function deleteUser() {
 // -------------------------------------------------------------
 async function searchUsers() {
   const term = searchInput.value.toLowerCase();
+  const roleFilter = document.getElementById("filterRole").value;
 
   let query = supabase.from("users").select("*");
 
@@ -275,12 +371,55 @@ async function searchUsers() {
 
   const { data } = await query;
 
-  const filtered = data.filter(row =>
-    row.name.toLowerCase().includes(term) ||
-    row.email.toLowerCase().includes(term)
-  );
+  let filtered = data;
 
-  renderTable(filtered);
+  if (term) {
+    filtered = filtered.filter(row =>
+      row.name.toLowerCase().includes(term) ||
+      row.email.toLowerCase().includes(term)
+    );
+  }
+
+  if (roleFilter) {
+    filtered = filtered.filter(row => row.role === roleFilter);
+  }
+
+  fullUserList = filtered;
+  currentPage = 1;
+  renderPaginatedTable();
+}
+
+// -------------------------------------------------------------
+// RESET PASSWORD MODAL
+// -------------------------------------------------------------
+function openResetModal() {
+  if (!selectedId) {
+    showToast("Select a user first.", "warning");
+    return;
+  }
+
+  document.getElementById("resetEmail").value = emailInput.value;
+  document.getElementById("resetModal").style.display = "flex";
+}
+
+function closeResetModal() {
+  document.getElementById("resetModal").style.display = "none";
+}
+
+async function confirmResetPassword() {
+  const email = document.getElementById("resetEmail").value;
+
+  const { error } = await supabase.functions.invoke("reset_password", {
+    body: { email }
+  });
+
+  if (error) {
+    showToast("Failed to send reset email.", "error");
+    return;
+  }
+
+  showToast("Password reset email sent.", "success");
+  closeResetModal();
 }
 
 // -------------------------------------------------------------
