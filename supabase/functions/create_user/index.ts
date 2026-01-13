@@ -1,24 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// ✅ CORS headers block — paste this right after imports
-const headers = {
-  "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*", // or your domain
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization"
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, x-client-info",
+  "Access-Control-Allow-Methods": "POST, OPTIONS"
 };
 
-// ✅ Handle preflight OPTIONS request
 serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers });
+    return new Response("ok", { headers: corsHeaders });
   }
 
-  // ... your function logic starts here
-});
-
-serve(async (req) => {
   try {
     const body = await req.json();
 
@@ -49,7 +42,8 @@ serve(async (req) => {
 
     if (authError) {
       return new Response(JSON.stringify({ error: authError }), {
-        status: 400
+        status: 400,
+        headers: corsHeaders
       });
     }
 
@@ -69,19 +63,20 @@ serve(async (req) => {
 
     if (dbError) {
       return new Response(JSON.stringify({ error: dbError }), {
-        status: 400
+        status: 400,
+        headers: corsHeaders
       });
     }
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
-      headers
+      headers: corsHeaders
     });
-
 
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), {
-      status: 500
+      status: 500,
+      headers: corsHeaders
     });
   }
 });
