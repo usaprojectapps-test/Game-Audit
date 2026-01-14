@@ -1,20 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, x-client-info",
-  "Access-Control-Allow-Methods": "POST, OPTIONS"
-};
+import { corsHeaders, handleCors } from "../_shared/cors.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  const cors = handleCors(req);
+  if (cors) return cors;
 
   try {
-    const body = await req.json();
-
     const {
       name,
       email,
@@ -24,7 +16,7 @@ serve(async (req) => {
       status,
       phone,
       department
-    } = body;
+    } = await req.json();
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,

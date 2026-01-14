@@ -1,16 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, x-client-info",
-  "Access-Control-Allow-Methods": "POST, OPTIONS"
-};
+import { corsHeaders, handleCors } from "../_shared/cors.ts";
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  const cors = handleCors(req);
+  if (cors) return cors;
 
   try {
     const { id, newPassword, email } = await req.json();
@@ -32,7 +26,7 @@ serve(async (req) => {
       });
     }
 
-    // 2. Send simple notification email
+    // 2. Send notification email
     await supabase.auth.admin.generateLink({
       type: "email_change_current",
       email
