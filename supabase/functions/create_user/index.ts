@@ -7,6 +7,8 @@ serve(async (req) => {
   if (cors) return cors;
 
   try {
+    const body = await req.json();
+
     const {
       name,
       email,
@@ -16,9 +18,9 @@ serve(async (req) => {
       status,
       phone,
       department
-    } = await req.json();
-    console.log("Incoming payload:", await req.json());
+    } = body;
 
+    console.log("Incoming payload:", body);
 
     const supabase = createClient(
       Deno.env.get("PROJECT_URL")!,
