@@ -7,7 +7,10 @@ serve(async (req) => {
   if (cors) return cors;
 
   try {
+    // Read the body ONCE
     const body = await req.json();
+
+    console.log("Incoming payload:", body);
 
     const {
       name,
@@ -19,8 +22,6 @@ serve(async (req) => {
       phone,
       department
     } = body;
-
-    console.log("Incoming payload:", body);
 
     const supabase = createClient(
       Deno.env.get("PROJECT_URL")!,
