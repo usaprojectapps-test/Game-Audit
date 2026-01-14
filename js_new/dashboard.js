@@ -189,16 +189,20 @@ async function loadChangePasswordModal() {
   const html = await response.text();
   container.innerHTML = html;
 
+  // ⭐ Now the modal exists in the DOM
   const modal = container.querySelector(".modal");
   const closeBtn = modal.querySelector(".close");
   const cancelBtn = modal.querySelector("#cancelChangePassword");
   const saveBtn = modal.querySelector("#saveChangePassword");
   const status = modal.querySelector("#changePasswordStatus");
 
+  // ⭐ Attach events AFTER modal loads
   closeBtn.onclick = () => modal.remove();
   cancelBtn.onclick = () => modal.remove();
 
   saveBtn.onclick = async () => {
+    console.log("Save clicked"); // test
+
     const oldPass = modal.querySelector("#oldPassword").value.trim();
     const newPass = modal.querySelector("#newPassword").value.trim();
     const confirmPass = modal.querySelector("#confirmPassword").value.trim();
