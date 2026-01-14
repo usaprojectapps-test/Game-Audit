@@ -45,15 +45,12 @@ async function loadUserProfile() {
   currentRole = data.role.trim();
   currentLocation = data.location_id;
 
-  // Update header: name
   const nameEl = document.getElementById("headerUserName");
   if (nameEl) nameEl.textContent = data.name;
 
-  // Update header: role
   const roleEl = document.getElementById("headerUserDept");
   if (roleEl) roleEl.textContent = currentRole;
 
-  // Update header: location name
   const locationEl = document.getElementById("headerLocationName");
   if (locationEl) {
     if (currentRole === "SuperAdmin") {
@@ -69,7 +66,6 @@ async function loadUserProfile() {
     }
   }
 
-  // Store in session (Option A)
   sessionStorage.setItem("name", data.name);
   sessionStorage.setItem("role", currentRole);
   sessionStorage.setItem("locationId", currentLocation);
@@ -84,7 +80,6 @@ function applyDashboardTileAccess() {
 
   document.querySelectorAll(".dashboard-tile").forEach(tile => {
     const allowed = tile.getAttribute("data-dept")?.split(",");
-
     if (!allowed.includes(role)) {
       tile.style.display = "none";
     }
@@ -114,7 +109,6 @@ async function loadModule(moduleName) {
     script.type = "module";
     script.src = `/js_new/${moduleName}.js?v=${Date.now()}`;
     document.body.appendChild(script);
-
   } catch (err) {
     console.error("Module load error:", err);
     container.innerHTML = `<div class="error">Failed to load module.</div>`;
@@ -158,25 +152,35 @@ function setupTileNavigation() {
 function toggleSubTiles(parent) {
   const container = document.querySelector(`.sub-tile-container[data-parent="${parent}"]`);
   if (!container) return;
-
   container.classList.toggle("open");
 }
 
 // -------------------------------------------------------------
 // LOGOUT
 // -------------------------------------------------------------
-document.getElementById("btnLogout")?.addEventListener("click", async () => {
-  await supabase.auth.signOut();
-  sessionStorage.clear();
-  window.location.href = "login.html";
-});
+function setupLogout() {
+  const btnLogout = document.getElementById("btnLogout");
+  if (!btnLogout) return;
+
+  btnLogout.addEventListener("click", async () => {
+    await supabase.auth.signOut();
+    sessionStorage.clear();
+    window.location.href = "login.html";
+  });
+}
 
 // -------------------------------------------------------------
 // CHANGE PASSWORD BUTTON
 // -------------------------------------------------------------
-document.getElementById("btnChangePassword")?.addEventListener("click", async () => {
-  await loadChangePasswordModal();
-});
+function setupChangePassword() {
+  const btn = document.getElementById("btnChangePassword");
+  if (!btn) return;
+
+  btn.addEventListener("click", async () => {
+    console.log("Change Password clicked");
+    await loadChangePasswordModal();
+  });
+}
 
 // -------------------------------------------------------------
 // LOAD CHANGE PASSWORD MODAL
@@ -186,14 +190,17 @@ async function loadChangePasswordModal() {
   if (!container) return;
 
   const response = await fetch("/modals/changePassword.html");
+  if (!response.ok) {
+    console.error("changePassword.html not found");
+    return;
+  }
+
   const html = await response.text();
   container.innerHTML = html;
 
-  // ⭐ Find modal safely
-  const modal = container.querySelector(".modal") || container.querySelector(".change-password-modal");
-
+  const modal = container.querySelector(".modal");
   if (!modal) {
-    console.error("Modal not found in loaded HTML");
+    console.error("Modal element not found in loaded HTML");
     return;
   }
 
@@ -202,7 +209,6 @@ async function loadChangePasswordModal() {
   const saveBtn = modal.querySelector("#saveChangePassword");
   const status = modal.querySelector("#changePasswordStatus");
 
-  // ⭐ Attach events only if elements exist
   if (closeBtn) closeBtn.onclick = () => modal.remove();
   if (cancelBtn) cancelBtn.onclick = () => modal.remove();
 
@@ -229,6 +235,7 @@ async function loadChangePasswordModal() {
       const { error } = await supabase.auth.updateUser({ password: newPass });
 
       if (error) {
+        console.error(error);
         status.textContent = "Password update failed.";
         status.className = "error-text";
       } else {
@@ -266,20 +273,11 @@ async function initDashboard() {
   await loadUserProfile();
   applyDashboardTileAccess();
   setupTileNavigation();
-  startClock(); // ⭐ Start live date/time
+  setupLogout();
+  setupChangePassword();
+  startClock();
 }
 
-initDashboard();
-
 document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("btnChangePassword");
-
-  if (btn) {
-    btn.addEventListener("click", () => {
-      console.log("Change Password clicked");
-      loadChangePasswordModal();
-    });
-  } else {
-    console.log("btnChangePassword NOT FOUND in DOM");
-  }
+  initDashboard();
 });

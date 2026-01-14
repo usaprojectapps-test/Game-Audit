@@ -13,93 +13,94 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- HEADER -->
-<header class="glass-card dashboard-header" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px;">
+  <header class="glass-card dashboard-header" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px;">
 
-  <!-- LEFT SIDE -->
-  <div class="header-left">
-    <div class="card-header">Dashboard</div>
-    <div class="card-subtitle">
-      Welcome, <span id="headerUserName"></span> — <span id="headerUserDept"></span>
+    <!-- LEFT SIDE -->
+    <div class="header-left">
+      <div class="card-header">Dashboard</div>
+      <div class="card-subtitle">
+        Welcome, <span id="headerUserName"></span> — <span id="headerUserDept"></span>
+      </div>
     </div>
-  </div>
 
-  <!-- CENTER -->
-  <div class="header-center">
-    <div id="headerLocationName" class="location-banner">Master User</div>
-  </div>
+    <!-- CENTER -->
+    <div class="header-center">
+      <div id="headerLocationName" class="location-banner">Master User</div>
+    </div>
 
-  <div id="headerDateTime" class="header-clock"></div>
+    <!-- DATE/TIME -->
+    <div id="headerDateTime" class="header-clock"></div>
 
-  <!-- RIGHT SIDE -->
-  <div class="header-actions">
-    <button id="btnChangePassword" class="btn btn-secondary">Change Password</button>
-    <button id="btnLogout" class="btn btn-danger">Logout</button>
-  </div>
+    <!-- RIGHT SIDE -->
+    <div class="header-actions">
+      <button id="btnChangePassword" class="btn btn-secondary">Change Password</button>
+      <button id="btnLogout" class="btn btn-danger">Logout</button>
+    </div>
 
-</header>
+  </header>
 
+  <!-- MODULE CONTAINER -->
   <div id="moduleContainer"></div>
 
   <!-- DASHBOARD GRID -->
   <div class="dashboard-grid">
 
     <!-- ROW 1 -->
-<div class="dashboard-tile" id="tile-vendors" data-module="vendors" data-dept="SuperAdmin,LocationAdmin,Manager,Audit">
-  <div class="tile-icon">🏪</div>
-  <div class="tile-title">Vendors</div>
-</div>
+    <div class="dashboard-tile" id="tile-vendors" data-module="vendors" data-dept="SuperAdmin,LocationAdmin,Manager,Audit">
+      <div class="tile-icon">🏪</div>
+      <div class="tile-title">Vendors</div>
+    </div>
 
-<div class="dashboard-tile" id="tile-machines" data-module="machines" data-dept="SuperAdmin,LocationAdmin,Manager,Audit">
-  <div class="tile-icon">🖥️</div>
-  <div class="tile-title">Machines</div>
-</div>
+    <div class="dashboard-tile" id="tile-machines" data-module="machines" data-dept="SuperAdmin,LocationAdmin,Manager,Audit">
+      <div class="tile-icon">🖥️</div>
+      <div class="tile-title">Machines</div>
+    </div>
 
-<div class="dashboard-tile" id="tile-users" data-module="users" data-dept="SuperAdmin,LocationAdmin,Manager">
-  <div class="tile-icon">👥</div>
-  <div class="tile-title">Users</div>
-</div>
+    <div class="dashboard-tile" id="tile-users" data-module="users" data-dept="SuperAdmin,LocationAdmin,Manager">
+      <div class="tile-icon">👥</div>
+      <div class="tile-title">Users</div>
+    </div>
 
-<div class="dashboard-tile expandable" id="tile-audit" data-module="audit" data-dept="Audit,SuperAdmin,LocationAdmin,Manager">
-  <div class="tile-icon">📊</div>
-  <div class="tile-title">Audit <span class="tile-arrow">▶</span></div>
-</div>
+    <div class="dashboard-tile expandable" id="tile-audit" data-module="audit" data-dept="Audit,SuperAdmin,LocationAdmin,Manager">
+      <div class="tile-icon">📊</div>
+      <div class="tile-title">Audit <span class="tile-arrow">▶</span></div>
+    </div>
 
-<div class="dashboard-tile expandable" id="tile-msp" data-module="msp" data-dept="MSP,SuperAdmin,LocationAdmin,Manager">
-  <div class="tile-icon">💰</div>
-  <div class="tile-title">MSP <span class="tile-arrow">▶</span></div>
-</div>
+    <div class="dashboard-tile expandable" id="tile-msp" data-module="msp" data-dept="MSP,SuperAdmin,LocationAdmin,Manager">
+      <div class="tile-icon">💰</div>
+      <div class="tile-title">MSP <span class="tile-arrow">▶</span></div>
+    </div>
 
-<!-- ROW 2 -->
-<div class="dashboard-tile expandable" id="tile-silver" data-module="silver" data-dept="Silver,SuperAdmin,LocationAdmin,Manager">
-  <div class="tile-icon">🥈</div>
-  <div class="tile-title">Silver <span class="tile-arrow">▶</span></div>
-</div>
+    <!-- ROW 2 -->
+    <div class="dashboard-tile expandable" id="tile-silver" data-module="silver" data-dept="Silver,SuperAdmin,LocationAdmin,Manager">
+      <div class="tile-icon">🥈</div>
+      <div class="tile-title">Silver <span class="tile-arrow">▶</span></div>
+    </div>
 
-<div class="dashboard-tile" id="tile-silverAgent" data-module="agentSilver" data-dept="SilverAgent,SuperAdmin,LocationAdmin,Manager">
-  <div class="tile-icon">🧾</div>
-  <div class="tile-title">Silver Agents</div>
-</div>
+    <div class="dashboard-tile" id="tile-silverAgent" data-module="agentSilver" data-dept="SilverAgent,SuperAdmin,LocationAdmin,Manager">
+      <div class="tile-icon">🧾</div>
+      <div class="tile-title">Silver Agents</div>
+    </div>
 
-<div class="dashboard-tile" id="tile-silverPurchase" data-module="silverPurchase" data-dept="Silver,SuperAdmin,LocationAdmin,Manager">
-  <div class="tile-icon">💳</div>
-  <div class="tile-title">Silver Purchase</div>
-</div>
+    <div class="dashboard-tile" id="tile-silverPurchase" data-module="silverPurchase" data-dept="Silver,SuperAdmin,LocationAdmin,Manager">
+      <div class="tile-icon">💳</div>
+      <div class="tile-title">Silver Purchase</div>
+    </div>
 
-<div class="dashboard-tile" id="tile-reports" data-module="reports" data-dept="SuperAdmin,LocationAdmin,Manager">
-  <div class="tile-icon">📑</div>
-  <div class="tile-title">Reports</div>
-</div>
+    <div class="dashboard-tile" id="tile-reports" data-module="reports" data-dept="SuperAdmin,LocationAdmin,Manager">
+      <div class="tile-icon">📑</div>
+      <div class="tile-title">Reports</div>
+    </div>
 
-<div class="dashboard-tile" id="tile-general" data-module="general" data-dept="SuperAdmin,LocationAdmin,Manager,Audit,MSP,Silver,SilverAgent">
-  <div class="tile-icon">⚙️</div>
-  <div class="tile-title">General</div>
-</div>
+    <div class="dashboard-tile" id="tile-general" data-module="general" data-dept="SuperAdmin,LocationAdmin,Manager,Audit,MSP,Silver,SilverAgent">
+      <div class="tile-icon">⚙️</div>
+      <div class="tile-title">General</div>
+    </div>
 
-<!-- LOCATIONS TILE (already correct) -->
-<div class="dashboard-tile" id="tile-locations" data-module="locations" data-dept="SuperAdmin">
-  <div class="tile-icon">📍</div>
-  <div class="tile-title">Locations</div>
-</div>
+    <div class="dashboard-tile" id="tile-locations" data-module="locations" data-dept="SuperAdmin">
+      <div class="tile-icon">📍</div>
+      <div class="tile-title">Locations</div>
+    </div>
 
     <!-- PENDING REQUESTS WIDGET -->
     <div class="dashboard-card" id="pendingRequestsCard">
@@ -128,31 +129,31 @@
 
   </div>
 
-  
-<!-- RESET PASSWORD MODAL -->
-<div id="resetModal" class="modal">
-  <div class="modal-content">
-    <h2><i class="fa fa-lock"></i> Reset Password</h2>
-    <p class="modal-description">
-      We’ll send a secure password reset link to the email below.<br>
-      Please confirm the address before proceeding.
-    </p>
+  <!-- RESET PASSWORD MODAL (for admin reset in Users module) -->
+  <div id="resetModal" class="modal">
+    <div class="modal-content">
+      <h2><i class="fa fa-lock"></i> Reset Password</h2>
+      <p class="modal-description">
+        We’ll send a secure password reset link to the email below.<br>
+        Please confirm the address before proceeding.
+      </p>
 
-    <input type="email" id="resetEmail" class="input-field" readonly />
+      <input type="email" id="resetEmail" class="input-field" readonly />
 
-    <small class="footer-note">
-      If this email is incorrect, update the user profile before sending.
-    </small>
+      <small class="footer-note">
+        If this email is incorrect, update the user profile before sending.
+      </small>
 
-    <div class="button-group">
-      <button id="cancelReset" class="btn-secondary">Cancel</button>
-      <button id="confirmReset" class="btn-primary">Send Reset Link</button>
+      <div class="button-group">
+        <button id="cancelReset" class="btn-secondary">Cancel</button>
+        <button id="confirmReset" class="btn-primary">Send Reset Link</button>
+      </div>
     </div>
   </div>
-</div>
 
+  <!-- MODAL CONTAINER FOR DYNAMIC MODALS (like Change Password) -->
+  <div id="modalContainer"></div>
 
-<script type="module" src="/js_new/dashboard.js?v=11"></script>
-  
+  <script type="module" src="/js_new/dashboard.js?v=12"></script>
 </body>
 </html>
