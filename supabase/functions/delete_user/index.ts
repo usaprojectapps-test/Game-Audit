@@ -16,6 +16,7 @@ serve(async (req) => {
 
     // 1. Delete from Auth
     const { error: authError } = await supabase.auth.admin.deleteUser(id);
+
     if (authError) {
       return new Response(JSON.stringify({ error: authError }), {
         status: 400,
@@ -23,7 +24,7 @@ serve(async (req) => {
       });
     }
 
-    // 2. Delete from DB
+    // 2. Delete from users table
     const { error: dbError } = await supabase
       .from("users")
       .delete()

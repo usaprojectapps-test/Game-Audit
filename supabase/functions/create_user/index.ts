@@ -3,12 +3,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, handleCors } from "../_shared/cors.ts";
 
 serve(async (req) => {
-  // Handle CORS preflight
   const cors = handleCors(req);
   if (cors) return cors;
 
   try {
-    // Parse request body
     const {
       name,
       email,
@@ -20,7 +18,6 @@ serve(async (req) => {
       department
     } = await req.json();
 
-    // Initialize Supabase client with service role key
     const supabase = createClient(
       Deno.env.get("PROJECT_URL")!,
       Deno.env.get("SERVICE_ROLE_KEY")!
@@ -44,7 +41,7 @@ serve(async (req) => {
 
     const uid = authUser.user.id;
 
-    // 2. Insert into public.users table
+    // 2. Insert into users table
     const { error: dbError } = await supabase.from("users").insert({
       id: uid,
       name,

@@ -14,23 +14,20 @@ serve(async (req) => {
       Deno.env.get("SERVICE_ROLE_KEY")!
     );
 
-    // 1. Update password
-    const { error: pwError } = await supabase.auth.admin.updateUser(id, {
+    // 1. Update password in Auth
+    const { error: authError } = await supabase.auth.admin.updateUserById(id, {
       password: newPassword
     });
 
-    if (pwError) {
-      return new Response(JSON.stringify({ error: pwError }), {
+    if (authError) {
+      return new Response(JSON.stringify({ error: authError }), {
         status: 400,
         headers: corsHeaders
       });
     }
 
-    // 2. Send notification email
-    await supabase.auth.admin.generateLink({
-      type: "email_change_current",
-      email
-    });
+    // 2. Send reset email (optional)
+    await supabase.auth.admin.sendPasswordResetEmail(email);
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

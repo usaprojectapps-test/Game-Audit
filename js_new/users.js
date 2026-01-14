@@ -110,24 +110,56 @@ function validateForm(payload, isNew) {
 // CREATE USER VIA EDGE FUNCTION
 // -------------------------------------------------------------
 async function createUserSync(payload) {
-  const { data, error } = await supabase.functions.invoke("create_user", {
-    body: payload
-  });
+  try {
+    const res = await fetch(
+      "https://kjfzdmmloryzbuiixceh.supabase.co/functions/v1/create_user",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+          // ❌ DO NOT send apikey or Authorization
+        },
+        body: JSON.stringify(payload)
+      }
+    );
 
-  if (error) return { error };
-  return data;
+    if (!res.ok) {
+      const err = await res.json();
+      return { error: err };
+    }
+
+    return await res.json();
+  } catch (err) {
+    return { error: err.message };
+  }
 }
+
 
 // -------------------------------------------------------------
 // UPDATE PASSWORD VIA EDGE FUNCTION
 // -------------------------------------------------------------
 async function updatePasswordSync(id, newPassword, email) {
-  const { data, error } = await supabase.functions.invoke("update_password", {
-    body: { id, newPassword, email }
-  });
+  try {
+    const res = await fetch(
+      "https://kjfzdmmloryzbuiixceh.supabase.co/functions/v1/update_password",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ id, newPassword, email })
+      }
+    );
 
-  if (error) return { error };
-  return data;
+    if (!res.ok) {
+      const err = await res.json();
+      return { error: err };
+    }
+
+    return await res.json();
+  } catch (err) {
+    return { error: err.message };
+  }
 }
 
 // -------------------------------------------------------------
@@ -342,18 +374,30 @@ async function deleteUser() {
     return;
   }
 
-  const { data, error } = await supabase.functions.invoke("delete_user", {
-    body: { id: selectedId }
-  });
+  try {
+    const res = await fetch(
+      "https://kjfzdmmloryzbuiixceh.supabase.co/functions/v1/delete_user",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ id: selectedId })
+      }
+    );
 
-  if (error) {
+    if (!res.ok) {
+      const err = await res.json();
+      showToast("Failed to delete user.", "error");
+      return;
+    }
+
+    showToast("User deleted.", "success");
+    clearForm();
+    loadUsers();
+  } catch (err) {
     showToast("Failed to delete user.", "error");
-    return;
   }
-
-  showToast("User deleted.", "success");
-  clearForm();
-  loadUsers();
 }
 
 // -------------------------------------------------------------

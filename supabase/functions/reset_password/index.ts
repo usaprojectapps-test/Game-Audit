@@ -14,10 +14,7 @@ serve(async (req) => {
       Deno.env.get("SERVICE_ROLE_KEY")!
     );
 
-    const { error } = await supabase.auth.admin.generateLink({
-      type: "recovery",
-      email
-    });
+    const { error } = await supabase.auth.admin.sendPasswordResetEmail(email);
 
     if (error) {
       return new Response(JSON.stringify({ error }), {
