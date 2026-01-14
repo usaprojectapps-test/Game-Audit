@@ -1,6 +1,8 @@
 import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 import { applyModuleAccess } from "./moduleAccess.js";
+import { callEdgeFunction } from "./edgeClient.js";
+
 
 let tableBody, searchInput, form;
 let nameInput, emailInput, passwordInput, roleSelect, departmentInput;
@@ -110,28 +112,7 @@ function validateForm(payload, isNew) {
 // CREATE USER VIA EDGE FUNCTION
 // -------------------------------------------------------------
 async function createUserSync(payload) {
-  try {
-    const res = await fetch(
-      "https://kjfzdmmloryzbuiixceh.supabase.co/functions/v1/create_user",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-          // ❌ DO NOT send apikey or Authorization
-        },
-        body: JSON.stringify(payload)
-      }
-    );
-
-    if (!res.ok) {
-      const err = await res.json();
-      return { error: err };
-    }
-
-    return await res.json();
-  } catch (err) {
-    return { error: err.message };
-  }
+  return await callEdgeFunction("create_user", payload);
 }
 
 
@@ -139,27 +120,7 @@ async function createUserSync(payload) {
 // UPDATE PASSWORD VIA EDGE FUNCTION
 // -------------------------------------------------------------
 async function updatePasswordSync(id, newPassword, email) {
-  try {
-    const res = await fetch(
-      "https://kjfzdmmloryzbuiixceh.supabase.co/functions/v1/update_password",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ id, newPassword, email })
-      }
-    );
-
-    if (!res.ok) {
-      const err = await res.json();
-      return { error: err };
-    }
-
-    return await res.json();
-  } catch (err) {
-    return { error: err.message };
-  }
+  return await callEdgeFunction("update_password", { id, newPassword, email });
 }
 
 // -------------------------------------------------------------
@@ -374,30 +335,16 @@ async function deleteUser() {
     return;
   }
 
-  try {
-    const res = await fetch(
-      "https://kjfzdmmloryzbuiixceh.supabase.co/functions/v1/delete_user",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ id: selectedId })
-      }
-    );
+  const result = await callEdgeFunction("delete_user", { id: selectedId });
 
-    if (!res.ok) {
-      const err = await res.json();
-      showToast("Failed to delete user.", "error");
-      return;
-    }
-
-    showToast("User deleted.", "success");
-    clearForm();
-    loadUsers();
-  } catch (err) {
+  if (result.error) {
     showToast("Failed to delete user.", "error");
+    return;
   }
+
+  showToast("User deleted.", "success");
+  clearForm();
+  loadUsers();
 }
 
 // -------------------------------------------------------------
