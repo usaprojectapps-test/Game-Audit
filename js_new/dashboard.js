@@ -53,7 +53,7 @@ async function loadUserProfile() {
   const roleEl = document.getElementById("headerUserDept");
   if (roleEl) roleEl.textContent = currentRole;
 
-  // Update header: location name (not UUID)
+  // Update header: location name
   const locationEl = document.getElementById("headerLocationName");
   if (locationEl) {
     if (currentRole === "SuperAdmin") {
@@ -69,11 +69,11 @@ async function loadUserProfile() {
     }
   }
 
-  // Store in session
+  // Store in session (Option A)
   sessionStorage.setItem("name", data.name);
   sessionStorage.setItem("role", currentRole);
-  sessionStorage.setItem("location_id", currentLocation);
-  sessionStorage.setItem("user_id", currentUser.id);
+  sessionStorage.setItem("locationId", currentLocation);
+  sessionStorage.setItem("userId", currentUser.id);
 }
 
 // -------------------------------------------------------------
@@ -101,7 +101,6 @@ async function loadModule(moduleName) {
   container.innerHTML = `<div class="loading">Loading...</div>`;
 
   try {
-    // Load HTML
     const response = await fetch(`/modals/${moduleName}.html`);
     if (!response.ok) {
       container.innerHTML = `<div class="error">Module not found: ${moduleName}</div>`;
@@ -111,7 +110,6 @@ async function loadModule(moduleName) {
     const html = await response.text();
     container.innerHTML = html;
 
-    // Load JS
     const script = document.createElement("script");
     script.type = "module";
     script.src = `/js_new/${moduleName}.js?v=${Date.now()}`;
@@ -124,7 +122,7 @@ async function loadModule(moduleName) {
 }
 
 // -------------------------------------------------------------
-// TILE NAVIGATION (LOAD MODULES)
+// TILE NAVIGATION
 // -------------------------------------------------------------
 function setupTileNavigation() {
   const tiles = document.querySelectorAll(".dashboard-tile");
@@ -135,19 +133,15 @@ function setupTileNavigation() {
     tile.addEventListener("click", () => {
       const moduleName = tile.getAttribute("data-module");
 
-      // Expandable tiles (Audit, MSP, Silver)
       if (tile.classList.contains("expandable")) {
         toggleSubTiles(tile.id.replace("tile-", ""));
         return;
       }
 
-      if (moduleName) {
-        loadModule(moduleName);
-      }
+      if (moduleName) loadModule(moduleName);
     });
   });
 
-  // Sub‑tile clicks
   const subTiles = document.querySelectorAll(".sub-tile");
   subTiles.forEach(sub => {
     sub.style.cursor = "pointer";
@@ -178,13 +172,87 @@ document.getElementById("btnLogout")?.addEventListener("click", async () => {
 });
 
 // -------------------------------------------------------------
+// CHANGE PASSWORD BUTTON
+// -------------------------------------------------------------
+document.getElementById("btnChangePassword")?.addEventListener("click", async () => {
+  await loadChangePasswordModal();
+});
+
+// -------------------------------------------------------------
+// LOAD CHANGE PASSWORD MODAL
+// -------------------------------------------------------------
+async function loadChangePasswordModal() {
+  const container = document.getElementById("modalContainer");
+  if (!container) return;
+
+  const response = await fetch("/modals/changePassword.html");
+  const html = await response.text();
+  container.innerHTML = html;
+
+  const modal = container.querySelector(".modal");
+  const closeBtn = modal.querySelector(".close");
+  const cancelBtn = modal.querySelector("#cancelChangePassword");
+  const saveBtn = modal.querySelector("#saveChangePassword");
+  const status = modal.querySelector("#changePasswordStatus");
+
+  closeBtn.onclick = () => modal.remove();
+  cancelBtn.onclick = () => modal.remove();
+
+  saveBtn.onclick = async () => {
+    const oldPass = modal.querySelector("#oldPassword").value.trim();
+    const newPass = modal.querySelector("#newPassword").value.trim();
+    const confirmPass = modal.querySelector("#confirmPassword").value.trim();
+
+    if (!oldPass || !newPass || !confirmPass) {
+      status.textContent = "Fill all fields.";
+      status.className = "error-text";
+      return;
+    }
+
+    if (newPass !== confirmPass) {
+      status.textContent = "Passwords do not match.";
+      status.className = "error-text";
+      return;
+    }
+
+    const { error } = await supabase.auth.updateUser({ password: newPass });
+
+    if (error) {
+      status.textContent = "Password update failed.";
+      status.className = "error-text";
+    } else {
+      status.textContent = "Password updated successfully.";
+      status.className = "success-text";
+      setTimeout(() => modal.remove(), 1200);
+    }
+  };
+}
+
+// -------------------------------------------------------------
+// LIVE DATE & TIME
+// -------------------------------------------------------------
+function startClock() {
+  const clockEl = document.getElementById("headerDateTime");
+  if (!clockEl) return;
+
+  function updateClock() {
+    const now = new Date();
+    clockEl.textContent = now.toLocaleString();
+  }
+
+  updateClock();
+  setInterval(updateClock, 1000);
+}
+
+// -------------------------------------------------------------
 // INIT
 // -------------------------------------------------------------
 async function initDashboard() {
   await validateSession();
   await loadUserProfile();
-  applyDashboardTileAccess();   // ⭐ Hides tiles based on role
+  applyDashboardTileAccess();
   setupTileNavigation();
+  startClock(); // ⭐ Start live date/time
 }
 
 initDashboard();

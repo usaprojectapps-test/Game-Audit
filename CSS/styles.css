@@ -923,3 +923,10 @@ tr:hover {
   cursor: pointer;
 }
 
+.header-clock {
+  color: white;
+  font-size: 14px;
+  margin-right: 20px;
+  opacity: 0.9;
+}
+
