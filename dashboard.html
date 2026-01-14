@@ -127,5 +127,28 @@
   </div>
 
   <script type="module" src="/js_new/dashboard.js?v=11"></script>
+  
+<!-- RESET PASSWORD MODAL -->
+<div id="resetModal" class="modal">
+  <div class="modal-content">
+    <h2><i class="fa fa-lock"></i> Reset Password</h2>
+    <p class="modal-description">
+      We’ll send a secure password reset link to the email below.<br>
+      Please confirm the address before proceeding.
+    </p>
+
+    <input type="email" id="resetEmail" class="input-field" readonly />
+
+    <small class="footer-note">
+      If this email is incorrect, update the user profile before sending.
+    </small>
+
+    <div class="button-group">
+      <button id="cancelReset" class="btn-secondary">Cancel</button>
+      <button id="confirmReset" class="btn-primary">Send Reset Link</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
