@@ -17,6 +17,8 @@ serve(async (req) => {
       phone,
       department
     } = await req.json();
+    console.log("Incoming payload:", await req.json());
+
 
     const supabase = createClient(
       Deno.env.get("PROJECT_URL")!,
