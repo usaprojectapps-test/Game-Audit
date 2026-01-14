@@ -256,3 +256,16 @@ async function initDashboard() {
 }
 
 initDashboard();
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("btnChangePassword");
+
+  if (btn) {
+    btn.addEventListener("click", () => {
+      console.log("Change Password clicked");
+      loadChangePasswordModal();
+    });
+  } else {
+    console.log("btnChangePassword NOT FOUND in DOM");
+  }
+});
