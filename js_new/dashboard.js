@@ -190,63 +190,60 @@ async function loadChangePasswordModal() {
   if (!container) return;
 
   const response = await fetch("/modals/changePassword.html");
-  if (!response.ok) {
-    console.error("changePassword.html not found");
-    return;
-  }
-
   const html = await response.text();
   container.innerHTML = html;
 
-  const modal = container.querySelector(".modal");
-  if (!modal) {
-    console.error("Modal element not found in loaded HTML");
-    return;
-  }
+  // ⭐ Wait for DOM to update
+  setTimeout(() => {
+    const modal = container.querySelector(".modal");
+    if (!modal) {
+      console.error("Modal not found");
+      return;
+    }
 
-  const closeBtn = modal.querySelector(".close");
-  const cancelBtn = modal.querySelector("#cancelChangePassword");
-  const saveBtn = modal.querySelector("#saveChangePassword");
-  const status = modal.querySelector("#changePasswordStatus");
+    const closeBtn = modal.querySelector(".close");
+    const cancelBtn = modal.querySelector("#cancelChangePassword");
+    const saveBtn = modal.querySelector("#saveChangePassword");
+    const status = modal.querySelector("#changePasswordStatus");
 
-  if (closeBtn) closeBtn.onclick = () => modal.remove();
-  if (cancelBtn) cancelBtn.onclick = () => modal.remove();
+    console.log("Modal elements:", { closeBtn, cancelBtn, saveBtn });
 
-  if (saveBtn) {
-    saveBtn.onclick = async () => {
-      console.log("Save clicked");
+    if (closeBtn) closeBtn.onclick = () => modal.remove();
+    if (cancelBtn) cancelBtn.onclick = () => modal.remove();
 
-      const oldPass = modal.querySelector("#oldPassword").value.trim();
-      const newPass = modal.querySelector("#newPassword").value.trim();
-      const confirmPass = modal.querySelector("#confirmPassword").value.trim();
+    if (saveBtn) {
+      saveBtn.onclick = async () => {
+        console.log("Save clicked");
 
-      if (!oldPass || !newPass || !confirmPass) {
-        status.textContent = "Fill all fields.";
-        status.className = "error-text";
-        return;
-      }
+        const oldPass = modal.querySelector("#oldPassword").value.trim();
+        const newPass = modal.querySelector("#newPassword").value.trim();
+        const confirmPass = modal.querySelector("#confirmPassword").value.trim();
 
-      if (newPass !== confirmPass) {
-        status.textContent = "Passwords do not match.";
-        status.className = "error-text";
-        return;
-      }
+        if (!oldPass || !newPass || !confirmPass) {
+          status.textContent = "Fill all fields.";
+          status.className = "error-text";
+          return;
+        }
 
-      const { error } = await supabase.auth.updateUser({ password: newPass });
+        if (newPass !== confirmPass) {
+          status.textContent = "Passwords do not match.";
+          status.className = "error-text";
+          return;
+        }
 
-      if (error) {
-        console.error(error);
-        status.textContent = "Password update failed.";
-        status.className = "error-text";
-      } else {
-        status.textContent = "Password updated successfully.";
-        status.className = "success-text";
-        setTimeout(() => modal.remove(), 1200);
-      }
-    };
-  } else {
-    console.error("Save button not found in modal");
-  }
+        const { error } = await supabase.auth.updateUser({ password: newPass });
+
+        if (error) {
+          status.textContent = "Password update failed.";
+          status.className = "error-text";
+        } else {
+          status.textContent = "Password updated successfully.";
+          status.className = "success-text";
+          setTimeout(() => modal.remove(), 1200);
+        }
+      };
+    }
+  }, 50); // ⭐ This delay fixes everything
 }
 
 // -------------------------------------------------------------
