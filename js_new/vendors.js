@@ -70,6 +70,7 @@ function applyRolePermissions() {
   if (userRole === "SuperAdmin") {
     formId.disabled = false;
     filterLocation.style.display = "block";
+    console.log("Showing location filter for SuperAdmin");
   }
 
   if (userRole === "LocationAdmin") {
@@ -119,6 +120,7 @@ async function loadLocationsMap() {
   locationMap = Object.fromEntries(data.map(loc => [loc.id, loc.name]));
 
   if (userRole === "SuperAdmin") {
+    console.log("Populating location dropdown with:", data);
     filterLocation.innerHTML = `<option value="">All Locations</option>`;
     data.forEach(loc => {
       const opt = document.createElement("option");
