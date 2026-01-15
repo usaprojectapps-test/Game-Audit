@@ -117,8 +117,8 @@ let locationMap = {};
 
 async function loadLocationsMap() {
   const { data, error } = await supabase
-    .from("locations") // ✅ correct table name
-    .select("id, LocationName");
+    .from("locations")
+    .select("id, name");
 
   if (error || !data) {
     console.error("Location load error:", error);
@@ -127,20 +127,20 @@ async function loadLocationsMap() {
   }
 
   locationMap = Object.fromEntries(
-    data.map(loc => [loc.id, loc.LocationName])
+    data.map(loc => [loc.id, loc.name])
   );
 
-  // Populate SuperAdmin location filter
   if (userRole === "SuperAdmin") {
     filterLocation.innerHTML = `<option value="">All Locations</option>`;
     data.forEach(loc => {
       const opt = document.createElement("option");
       opt.value = loc.id;
-      opt.textContent = loc.LocationName;
+      opt.textContent = loc.name;
       filterLocation.appendChild(opt);
     });
   }
 }
+
 // -------------------------------------------------------------
 // LOAD VENDORS
 // -------------------------------------------------------------
