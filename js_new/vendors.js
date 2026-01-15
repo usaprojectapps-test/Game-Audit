@@ -4,6 +4,19 @@
 import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 
+export function initVendorsModule() {
+
+  // all your element assignments
+  const filterLocation = document.getElementById("vendorFilterLocation");
+  console.log("Filter element:", filterLocation);
+
+  // all your event listeners
+  // all your loadUserProfile()
+  // all your loadLocationsMap()
+  // all your loadVendors()
+  // everything inside vendors.js
+
+
 // -------------------------------------------------------------
 // ELEMENTS
 // -------------------------------------------------------------
@@ -358,3 +371,4 @@ deleteBtn.addEventListener("click", deleteVendor);
   await loadLocationsMap();
   await loadVendors(true);
 })();
+}
