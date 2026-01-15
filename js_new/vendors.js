@@ -116,13 +116,20 @@ formPhone.addEventListener("blur", () => {
 let locationMap = {};
 
 async function loadLocationsMap() {
-  const { data } = await supabase
-    .from("Locations")
+  const { data, error } = await supabase
+    .from("Locations") // we will fix this name
     .select("id, LocationName");
+
+  if (error || !data) {
+    console.error("Location load error:", error);
+    locationMap = {};
+    return;
+  }
 
   locationMap = Object.fromEntries(
     data.map(loc => [loc.id, loc.LocationName])
   );
+}
 
   // Populate SuperAdmin location filter
   if (userRole === "SuperAdmin") {
