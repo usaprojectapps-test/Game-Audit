@@ -96,3 +96,15 @@ tr:hover {
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+.module-wrapper.horizontal {
+  display: flex;
+  width: 100%;
+}
+
+.module-table,
+.module-form {
+  width: 50%;
+  padding: 20px;
+  box-sizing: border-box;
+}
