@@ -1,17 +1,18 @@
 // Supabase client
 const supabase = window.supabase;
 
-// Role + location from JWT
+// User role + location from JWT/localStorage
 const userRole = localStorage.getItem("role");
 const userLocationId = localStorage.getItem("location_id");
 
-// DOM elements
+// DOM references
 const tableBody = document.getElementById("machines-table-body");
-const formTitle = document.getElementById("machines-form-title");
-const formMode = document.getElementById("machines-form-mode");
-const toastContainer = document.getElementById("machines-toast-container");
+const searchInput = document.getElementById("machines-search-input");
+const healthFilter = document.getElementById("machines-health-filter");
+const locationFilter = document.getElementById("machines-location-filter");
+const refreshBtn = document.getElementById("machines-refresh-btn");
+const exportBtn = document.getElementById("machines-export-csv-btn");
 
-// Inputs
 const idInput = document.getElementById("machines-machineid-input");
 const nameInput = document.getElementById("machines-machinename-input");
 const vendorSelect = document.getElementById("machines-vendor-select");
@@ -20,25 +21,28 @@ const healthSelect = document.getElementById("machines-health-select");
 const lastServiceInput = document.getElementById("machines-lastservice-input");
 const notesInput = document.getElementById("machines-notes-input");
 
-// Buttons
 const saveBtn = document.getElementById("machines-save-btn");
 const deleteBtn = document.getElementById("machines-delete-btn");
 const resetBtn = document.getElementById("machines-reset-btn");
 
-// QR
 const qrPreview = document.getElementById("machines-qr-preview");
 const generateQRBtn = document.getElementById("machines-generate-qr-btn");
 const printQRBtn = document.getElementById("machines-print-qr-btn");
 const downloadQRBtn = document.getElementById("machines-download-qr-btn");
 
-// Summary
 const summaryHealth = document.getElementById("machines-summary-health");
 const summaryLastService = document.getElementById("machines-summary-lastservice");
 const summaryVendor = document.getElementById("machines-summary-vendor");
 const summaryLocation = document.getElementById("machines-summary-location");
 
-// Timeline
 const timelineContent = document.getElementById("machines-timeline-content");
+
+const paginationText = document.getElementById("machines-pagination-text");
+const prevPageBtn = document.getElementById("machines-prev-page");
+const nextPageBtn = document.getElementById("machines-next-page");
+const currentPageLabel = document.getElementById("machines-current-page");
+
+const toastContainer = document.getElementById("machines-toast-container");
 
 // State
 let selectedMachineId = null;
@@ -47,41 +51,63 @@ let pageSize = 10;
 
 // Load vendors
 async function loadVendors() {
-  const { data, error } = await supabase.from("vendors").select("vendorid, vendorname");
-  if (data) {
-    vendorSelect.innerHTML = `<option value="">Select vendor</option>`;
-    data.forEach(v => {
-      const option = document.createElement("option");
-      option.value = v.vendorid;
-      option.textContent = `${v.vendorid} - ${v.vendorname}`;
-      vendorSelect.appendChild(option);
-    });
-  }
+  const { data } = await supabase.from("vendors").select("vendorid, vendorname").order("vendorid");
+  vendorSelect.innerHTML = `<option value="">Select vendor</option>`;
+  data?.forEach(v => {
+    const opt = document.createElement("option");
+    opt.value = v.vendorid;
+    opt.textContent = `${v.vendorid} - ${v.vendorname}`;
+    vendorSelect.appendChild(opt);
+  });
 }
 
 // Load locations (SuperAdmin only)
 async function loadLocations() {
-  if (userRole !== "SuperAdmin") return;
-  const { data } = await supabase.from("locations").select("id, locationname");
+  if (userRole !== "SuperAdmin") {
+    document.querySelectorAll(".superadmin-only").forEach(el => el.style.display = "none");
+    return;
+  }
+  const { data } = await supabase.from("locations").select("id, locationname").order("locationname");
   locationSelect.innerHTML = `<option value="">Select location</option>`;
-  data.forEach(loc => {
-    const option = document.createElement("option");
-    option.value = loc.id;
-    option.textContent = loc.locationname;
-    locationSelect.appendChild(option);
+  locationFilter.innerHTML = `<option value="">All locations</option>`;
+  data?.forEach(loc => {
+    const opt1 = document.createElement("option");
+    opt1.value = loc.id;
+    opt1.textContent = loc.locationname;
+    locationSelect.appendChild(opt1);
+
+    const opt2 = document.createElement("option");
+    opt2.value = loc.id;
+    opt2.textContent = loc.locationname;
+    locationFilter.appendChild(opt2);
   });
 }
 
-// Load machines table
+// Load machines
 async function loadMachines() {
-  const { data } = await supabase
-    .from("machines")
-    .select("*")
-    .order("createdat", { ascending: false })
-    .range((currentPage - 1) * pageSize, currentPage * pageSize - 1);
+  let query = supabase.from("machines").select("*").order("createdat", { ascending: false });
+
+  if (searchInput.value.trim()) {
+    query = query.or(`machineid.ilike.%${searchInput.value}%,machinename.ilike.%${searchInput.value}%`);
+  }
+
+  if (healthFilter.value) {
+    query = query.eq("healthstatus", healthFilter.value);
+  }
+
+  if (userRole === "SuperAdmin") {
+    if (locationFilter.value) query = query.eq("locationid", locationFilter.value);
+  } else {
+    query = query.eq("locationid", userLocationId);
+  }
+
+  const from = (currentPage - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  const { data, count } = await query.range(from, to).select("*", { count: "exact" });
 
   tableBody.innerHTML = "";
-  data.forEach(row => {
+  data?.forEach(row => {
     const tr = document.createElement("tr");
     tr.onclick = () => selectMachine(row);
     tr.innerHTML = `
@@ -94,11 +120,18 @@ async function loadMachines() {
     `;
     tableBody.appendChild(tr);
   });
+
+  paginationText.textContent = `Showing ${data?.length || 0} of ${count || 0}`;
+  currentPageLabel.textContent = currentPage;
+
+  prevPageBtn.disabled = currentPage === 1;
+  nextPageBtn.disabled = (from + data.length) >= count;
 }
 
 // Select machine
 function selectMachine(row) {
   selectedMachineId = row.machineid;
+
   idInput.value = row.machineid;
   nameInput.value = row.machinename;
   vendorSelect.value = row.vendorid;
@@ -106,8 +139,7 @@ function selectMachine(row) {
   healthSelect.value = row.healthstatus;
   lastServiceInput.value = formatDateInput(row.lastservicedate);
   notesInput.value = row.notes || "";
-  formTitle.textContent = "Edit Machine";
-  formMode.textContent = "Edit";
+
   renderQR(row.qrcode);
   loadSummary(row);
   loadTimeline(row.machineid);
@@ -124,41 +156,33 @@ async function saveMachine() {
   const lastService = new Date(lastServiceInput.value).getTime();
   const notes = notesInput.value.trim();
   const qrcode = `MACHINE:${id}`;
+  const now = Date.now();
 
   if (!id || !name || !vendorid || !locationid) {
     showToast("Please fill all required fields", "error");
     return;
   }
 
-  const now = Date.now();
-
   if (!selectedMachineId) {
-    const { data: exists } = await supabase
-      .from("machines")
-      .select("machineid")
-      .eq("machineid", id)
-      .maybeSingle();
-
+    const { data: exists } = await supabase.from("machines").select("machineid").eq("machineid", id).maybeSingle();
     if (exists) {
       showToast("Machine already exists", "warning");
       return;
     }
 
-    const { error } = await supabase.from("machines").insert([
-      {
-        machineid: id,
-        machinename: name,
-        vendorid,
-        vendorname,
-        locationid,
-        healthstatus: health,
-        lastservicedate: lastService,
-        notes,
-        qrcode,
-        createdat: now,
-        updatedat: now,
-      },
-    ]);
+    const { error } = await supabase.from("machines").insert([{
+      machineid: id,
+      machinename: name,
+      vendorid,
+      vendorname,
+      locationid,
+      healthstatus: health,
+      lastservicedate: lastService,
+      notes,
+      qrcode,
+      createdat: now,
+      updatedat: now
+    }]);
 
     if (!error) {
       showToast("Machine created", "success");
@@ -166,20 +190,17 @@ async function saveMachine() {
       loadMachines();
     }
   } else {
-    const { error } = await supabase
-      .from("machines")
-      .update({
-        machinename: name,
-        vendorid,
-        vendorname,
-        locationid,
-        healthstatus: health,
-        lastservicedate: lastService,
-        notes,
-        qrcode,
-        updatedat: now,
-      })
-      .eq("machineid", selectedMachineId);
+    const { error } = await supabase.from("machines").update({
+      machinename: name,
+      vendorid,
+      vendorname,
+      locationid,
+      healthstatus: health,
+      lastservicedate: lastService,
+      notes,
+      qrcode,
+      updatedat: now
+    }).eq("machineid", selectedMachineId);
 
     if (!error) {
       showToast("Machine updated", "success");
@@ -210,19 +231,13 @@ function resetForm() {
   healthSelect.value = "Good";
   lastServiceInput.value = "";
   notesInput.value = "";
-  formTitle.textContent = "Add Machine";
-  formMode.textContent = "New";
   qrPreview.innerHTML = `<span class="qr-placeholder-text">QR will appear here</span>`;
 }
 
-// QR logic
+// QR
 function renderQR(text) {
   qrPreview.innerHTML = "";
-  new QRCode(qrPreview, {
-    text,
-    width: 128,
-    height: 128,
-  });
+  new QRCode(qrPreview, { text, width: 128, height: 128 });
 }
 
 // Summary
@@ -233,41 +248,69 @@ function loadSummary(row) {
   summaryLocation.textContent = row.locationid;
 }
 
-// Timeline (placeholder)
-function loadTimeline(machineid) {
+// Timeline placeholder
+function loadTimeline() {
   timelineContent.innerHTML = `<div class="timeline-empty">No events yet</div>`;
 }
 
 // Helpers
 function formatDate(ms) {
   if (!ms) return "—";
-  const d = new Date(ms);
-  return d.toLocaleDateString();
+  return new Date(ms).toLocaleDateString();
 }
 
 function formatDateInput(ms) {
   if (!ms) return "";
-  const d = new Date(ms);
-  return d.toISOString().split("T")[0];
+  return new Date(ms).toISOString().split("T")[0];
 }
 
 function getHealthIcon(status) {
-  if (status === "Good") return "🟢";
-  if (status === "Warning") return "🟡";
-  if (status === "Critical") return "🔴";
-  return "—";
+  return status === "Good" ? "🟢" :
+         status === "Warning" ? "🟡" :
+         status === "Critical" ? "🔴" : "—";
 }
 
 function showToast(msg, type = "info") {
-  const toast = document.createElement("div");
-  toast.className = `toast toast-${type}`;
-  toast.textContent = msg;
-  toastContainer.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
+  const t = document.createElement("div");
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  toastContainer.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
 }
 
-// Event listeners
+// Pagination
+prevPageBtn.onclick = () => {
+  currentPage--;
+  loadMachines();
+};
+
+nextPageBtn.onclick = () => {
+  currentPage++;
+  loadMachines();
+};
+
+// Events
+searchInput.oninput = loadMachines;
+healthFilter.onchange = loadMachines;
+locationFilter.onchange = loadMachines;
+refreshBtn.onclick = loadMachines;
 saveBtn.onclick = saveMachine;
 deleteBtn.onclick = deleteMachine;
 resetBtn.onclick = resetForm;
-generateQRBtn.onclick = () => renderQR
+generateQRBtn.onclick = () => renderQR(`MACHINE:${idInput.value}`);
+printQRBtn.onclick = () => window.print();
+downloadQRBtn.onclick = () => {
+  const img = qrPreview.querySelector("img");
+  if (!img) return;
+  const a = document.createElement("a");
+  a.href = img.src;
+  a.download = `${idInput.value}_qr.png`;
+  a.click();
+};
+
+// Init
+(async function init() {
+  await loadVendors();
+  await loadLocations();
+  await loadMachines();
+})();
