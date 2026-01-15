@@ -220,13 +220,8 @@ async function saveVendor() {
     VenStatus: formStatus.value,
     VenNotes: formNotes.value.trim(),
     updatedAt: Date.now(),
+    location_id: userLocationId
   };
-
-  if (userRole === "SuperAdmin") {
-    vendorData.location_id = userLocationId; // keep existing
-  } else {
-    vendorData.location_id = userLocationId;
-  }
 
   const { data: exists } = await supabase
     .from("Vendors")
@@ -241,10 +236,22 @@ async function saveVendor() {
       .from("Vendors")
       .update(vendorData)
       .eq("VendorId", id);
+
+    if (result.error) {
+      console.error("Update error:", result.error);
+      return showToast("Failed to update vendor", "error");
+    }
+
     showToast("Vendor updated", "success");
   } else {
     vendorData.createdAt = Date.now();
     result = await supabase.from("Vendors").insert(vendorData);
+
+    if (result.error) {
+      console.error("Insert error:", result.error);
+      return showToast("Failed to create vendor", "error");
+    }
+
     showToast("Vendor created", "success");
   }
 
@@ -252,6 +259,7 @@ async function saveVendor() {
   clearForm();
   loadVendors(true);
 }
+
 // -------------------------------------------------------------
 // DELETE VENDOR
 // -------------------------------------------------------------
