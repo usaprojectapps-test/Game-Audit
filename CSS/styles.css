@@ -380,21 +380,30 @@ body {
   }
 }
 
+/* Header row layout */
 .filters-row {
   display: flex;
-  gap: 12px;
   align-items: center;
-  flex-wrap: wrap;
+  gap: 12px;
+  flex-wrap: nowrap; /* IMPORTANT */
 }
 
+/* Each filter item */
 .filter-group {
-  flex: 1;
-  min-width: 120px;
+  display: flex;
+  align-items: center;
 }
 
+/* Make search bar wider */
 .filter-group.wide {
-  flex: 2;
+  flex: 1;
 }
+
+/* Prevent buttons from wrapping */
+.filter-group button {
+  margin-left: 6px;
+}
+
 /*    MAchines Copleted */
 
 .module-right .form-card {
