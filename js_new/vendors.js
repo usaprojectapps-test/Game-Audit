@@ -2,6 +2,8 @@
 // SUPABASE IMPORT
 // -------------------------------------------------------------
 import { supabase } from "/js_new/supabaseClient.js"; 
+import { showToast } from "./toast.js";
+
 // Make sure this file exports: export const supabase = createClient(URL, KEY);
 
 // -------------------------------------------------------------
