@@ -4,7 +4,18 @@
 import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 
+// -------------------------------------------------------------
+// AUTO INITIALIZER
+// -------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  // Wait a tiny bit to ensure module HTML is inserted
+  setTimeout(() => {
+    initVendorsModule();
+  }, 50);
+});
+
 export function initVendorsModule() {
+  console.log("Vendors module initializing...");
 
   // -------------------------------------------------------------
   // ELEMENTS
@@ -30,6 +41,11 @@ export function initVendorsModule() {
   const deleteBtn = document.getElementById("VendorDeleteBtn");
 
   console.log("Filter element:", filterLocation);
+
+  if (!tableBody) {
+    console.warn("Vendors HTML not ready yet.");
+    return;
+  }
 
   // -------------------------------------------------------------
   // STATE
@@ -360,4 +376,4 @@ export function initVendorsModule() {
     await loadVendors(true);
   })();
 
-} // END OF initVendorsModule
+} // END initVendorsModule
