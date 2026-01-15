@@ -244,3 +244,4 @@ downloadQRBtn.onclick = () => {
   a.href = img.src;
   a.download = `${idInput.value}_qr.png`;
   a.click
+}
