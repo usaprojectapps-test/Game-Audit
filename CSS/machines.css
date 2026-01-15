@@ -92,3 +92,26 @@ th {
 tr:hover {
   background: #f0f4f8;
 }
+/* Machines */
+
+.module-body {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.module-left,
+.module-right {
+  width: 50%;
+}
+
+@media (max-width: 768px) {
+  .module-body {
+    flex-direction: column;
+  }
+
+  .module-left,
+  .module-right {
+    width: 100%;
+  }
+}
