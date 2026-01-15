@@ -354,6 +354,10 @@ deleteBtn.addEventListener("click", deleteVendor);
 // -------------------------------------------------------------
 (async () => {
   await loadUserProfile();
+  if (!userLocationId && userRole !== "SuperAdmin") {
+    console.warn("User location not loaded yet — delaying vendor load");
+    return;
+  }
   await loadLocationsMap();
   await loadVendors(true);
 })();
