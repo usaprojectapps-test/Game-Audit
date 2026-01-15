@@ -108,3 +108,14 @@ tr:hover {
   padding: 20px;
   box-sizing: border-box;
 }
+
+@media (max-width: 768px) {
+  .module-wrapper.horizontal {
+    flex-direction: column;
+  }
+
+  .module-table,
+  .module-form {
+    width: 100%;
+  }
+}
