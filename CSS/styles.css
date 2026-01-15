@@ -380,6 +380,31 @@ body {
   }
 }
 
+.filters-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 120px;
+}
+
+.filter-group.wide {
+  flex: 2;
+}
+/*    MAchines Copleted */
+
+.module-right .form-card {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.module-right .card-header {
+  margin-bottom: 8px;
+}
 
 .module-search-bar {
   display: flex;

@@ -22,36 +22,27 @@
       <!-- Filters -->
       <div class="card filters-card">
         <div class="filters-row">
+        <div class="filter-group wide">
+          <input type="text" id="machines-search-input" class="input" placeholder="Search by Machine ID or Name" />
+        </div>
 
-          <div class="filter-group">
-            <label class="filter-label">Search</label>
-            <input
-              type="text"
-              id="machines-search-input"
-              class="input"
-              placeholder="Search by Machine ID or Name"
-            />
-          </div>
+        <div class="filter-group">
+          <select id="machines-health-filter" class="select">
+            <option value="">All</option>
+            <option value="Good">Good</option>
+            <option value="Warning">Warning</option>
+            <option value="Critical">Critical</option>
+          </select>
+        </div>
 
-          <div class="filter-group">
-            <label class="filter-label">Health</label>
-            <select id="machines-health-filter" class="select">
-              <option value="">All</option>
-              <option value="Good">Good</option>
-              <option value="Warning">Warning</option>
-              <option value="Critical">Critical</option>
-            </select>
-          </div>
-
-          <div class="filter-group superadmin-only">
-            <label class="filter-label">Location</label>
-            <select id="machines-location-filter" class="select">
-              <option value="">All locations</option>
-            </select>
-          </div>
-
+        <div class="filter-group superadmin-only">
+          <select id="machines-location-filter" class="select">
+            <option value="">All locations</option>
+          </select>
         </div>
       </div>
+
+    </div>
 
       <!-- Table -->
       <div class="card table-card">
