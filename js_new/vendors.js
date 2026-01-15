@@ -8,7 +8,7 @@ import { showToast } from "./toast.js";
 // ELEMENTS
 // -------------------------------------------------------------
 const tableBody = document.getElementById("vendorTableBody");
-const searchInput = document.getElementById("Vendorsearch");
+const searchInput = document.getElementById("vendorSearch");
 const filterStatus = document.getElementById("vendorFilterStatus");
 const filterLocation = document.getElementById("vendorFilterLocation");
 
@@ -24,7 +24,7 @@ const formAddress = document.getElementById("vendorFormAddress");
 const formStatus = document.getElementById("vendorFormStatus");
 const formNotes = document.getElementById("vendorFormNotes");
 
-const saveBtn = document.getElementById("VendorsaveBtn");
+const saveBtn = document.getElementById("VendorSaveBtn");
 const deleteBtn = document.getElementById("VendorDeleteBtn");
 
 // -------------------------------------------------------------
@@ -244,10 +244,8 @@ async function saveVendor() {
     updatedAt: Date.now(),
     location_id: userLocationId
   };
-    // ⭐ ADD THIS LINE HERE 
-    console.log("Insert payload:", vendorData);
-  
-    const { data: exists } = await supabase
+
+  const { data: exists } = await supabase
     .from("Vendors")
     .select("VendorId")
     .eq("VendorId", id)
@@ -349,10 +347,6 @@ deleteBtn.addEventListener("click", deleteVendor);
 // -------------------------------------------------------------
 (async () => {
   await loadUserProfile();
-  if (!userLocationId && userRole !== "SuperAdmin") {
-    console.warn("User location not loaded yet — delaying vendor load");
-    return;
-  }
   await loadLocationsMap();
   await loadVendors(true);
 })();
