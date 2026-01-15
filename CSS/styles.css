@@ -967,22 +967,23 @@ tr:hover {
   padding: 10px 14px;
   margin-top: 6px;
   margin-bottom: 16px;
-  border: none;
+  border: 1px solid rgba(0, 80, 160, 0.3); 
+  box-shadow: 0 0 4px rgba(0, 80, 160, 0.1); 
   border-radius: 8px;
-  background: rgba(255,255,255,0.06);
-  color: white;
+  background: rgba(255, 255, 255, 0.85); /* brighter fill */ 
+  color: #003366; /* deep blue text */
   font-size: 14px;
 }
 .modal-content input::placeholder {
-  color: rgba(0, 51, 102, 0.5);
+  color: rgba(0, 51, 102, 0.6);
 }
 
 .modal-content input::placeholder {
-  color: rgba(0, 51, 102, 0.5);
+  color: rgba(0, 51, 102, 0.6);
 }
 
 .modal-content input::placeholder {
-  color: rgba(0, 51, 102, 0.5);
+  color: rgba(0, 51, 102, 0.6);
 }
 
 .btn-primary {
