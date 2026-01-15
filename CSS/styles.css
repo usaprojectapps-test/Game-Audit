@@ -1045,3 +1045,7 @@ tr:hover {
   font-size: 13px;
   margin-top: 8px;
 }
+.btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

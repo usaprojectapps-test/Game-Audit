@@ -1,7 +1,7 @@
 // -------------------------------------------------------------
-// IMPORT FIREBASE
+// IMPORTS
 // -------------------------------------------------------------
-import { db } from "/js_new/firebase.js";
+import { db, auth } from "/js_new/firebase.js";
 import {
   collection,
   doc,
@@ -13,7 +13,8 @@ import {
   query,
   orderBy,
   limit,
-  startAfter
+  startAfter,
+  where
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
 import { showToast } from "/js_new/toast.js";
@@ -41,20 +42,78 @@ const saveBtn = document.getElementById("vendorSaveBtn");
 const deleteBtn = document.getElementById("vendorDeleteBtn");
 
 // -------------------------------------------------------------
-// PAGINATION STATE
+// STATE: PAGINATION + USER CONTEXT
 // -------------------------------------------------------------
 let lastVisible = null;
 let firstVisible = null;
 let currentPage = 1;
 
-// Track last saved vendor for highlight
 let lastSavedVendorId = null;
+
+let userRole = null;
+let userLocationId = null;
+
+// -------------------------------------------------------------
+// LOAD USER PROFILE (ROLE + LOCATION)
+// -------------------------------------------------------------
+async function loadUserProfile() {
+  const user = auth.currentUser;
+  if (!user) {
+    console.warn("No authenticated user found.");
+    return;
+  }
+
+  const userRef = doc(db, "Users", user.uid);
+  const snap = await getDoc(userRef);
+
+  if (!snap.exists()) {
+    console.warn("User profile not found in Users collection.");
+    return;
+  }
+
+  const u = snap.data();
+  userRole = u.role || null;
+  userLocationId = u.location_id || null;
+
+  applyRolePermissions();
+}
+
+// -------------------------------------------------------------
+// APPLY ROLE-BASED PERMISSIONS TO UI
+// -------------------------------------------------------------
+function applyRolePermissions() {
+  // Default: enable everything, then restrict
+  saveBtn.disabled = false;
+  deleteBtn.disabled = false;
+  formId.disabled = false;
+
+  // SuperAdmin: view + edit only (no create, no delete)
+  if (userRole === "SuperAdmin") {
+    deleteBtn.disabled = true;
+    // Prevent creating new vendors: only allow editing existing
+    // We can enforce this by disabling Vendor ID field
+    formId.disabled = true;
+  }
+
+  // LocationAdmin: full CRUD (view + create + edit + delete)
+  if (userRole === "LocationAdmin") {
+    saveBtn.disabled = false;
+    deleteBtn.disabled = true; // will enable only when a vendor is loaded
+    formId.disabled = false;
+  }
+
+  // Manager + Audit: view + create + edit (no delete)
+  if (userRole === "Manager" || userRole === "Audit") {
+    deleteBtn.disabled = true;
+    formId.disabled = false;
+  }
+}
 
 // -------------------------------------------------------------
 // AUTO-FORMAT PHONE NUMBER + VALIDATION
 // -------------------------------------------------------------
 formPhone.addEventListener("input", () => {
-  let value = formPhone.value.replace(/\D/g, ""); // remove non-numeric
+  let value = formPhone.value.replace(/\D/g, "");
 
   if (value.length > 3 && value.length <= 6) {
     value = value.replace(/(\d{3})(\d+)/, "$1-$2");
@@ -63,45 +122,64 @@ formPhone.addEventListener("input", () => {
   }
 
   formPhone.value = value;
-
-  // Remove error style while typing
   formPhone.classList.remove("input-error");
 });
 
-// Validate on blur
 formPhone.addEventListener("blur", () => {
-  if (formPhone.value.length !== 12) {
+  if (formPhone.value && formPhone.value.length !== 12) {
     formPhone.classList.add("input-error");
     showToast("Invalid phone number", "error");
   }
 });
 
 // -------------------------------------------------------------
+// BUILD QUERY BASED ON ROLE + LOCATION
+// -------------------------------------------------------------
+function buildVendorQuery(paginateFrom = null) {
+  const baseCollection = collection(db, "Vendors");
+
+  const isSuperAdmin = userRole === "SuperAdmin";
+
+  const constraints = [];
+
+  if (!isSuperAdmin && userLocationId) {
+    constraints.push(where("location_id", "==", userLocationId));
+  }
+
+  constraints.push(orderBy("name"));
+  constraints.push(limit(20));
+
+  if (paginateFrom) {
+    constraints.splice(constraints.length - 1, 0, startAfter(paginateFrom));
+  }
+
+  return query(baseCollection, ...constraints);
+}
+
+// -------------------------------------------------------------
 // LOAD VENDORS
 // -------------------------------------------------------------
 async function loadVendors(reset = false) {
+  if (!userRole) {
+    await loadUserProfile();
+  }
+
   if (reset) {
     lastVisible = null;
     currentPage = 1;
   }
 
-  let q;
-
-  if (!lastVisible) {
-    q = query(collection(db, "Vendors"), orderBy("name"), limit(20));
-  } else {
-    q = query(
-      collection(db, "Vendors"),
-      orderBy("name"),
-      startAfter(lastVisible),
-      limit(20)
-    );
-  }
-
+  const q = buildVendorQuery(lastVisible);
   const snap = await getDocs(q);
 
   if (snap.empty) {
-    tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:10px;">No vendors found</td></tr>`;
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align:center; padding:10px;">
+          No vendors found
+        </td>
+      </tr>`;
+    pageInfo.textContent = `Page ${currentPage}`;
     return;
   }
 
@@ -118,11 +196,11 @@ async function loadVendors(reset = false) {
 function renderTable(docs) {
   tableBody.innerHTML = "";
 
+  const search = searchInput.value.toLowerCase();
+  const statusFilter = filterStatus.value;
+
   docs.forEach((docSnap) => {
     const v = docSnap.data();
-
-    const search = searchInput.value.toLowerCase();
-    const statusFilter = filterStatus.value;
 
     if (
       search &&
@@ -146,7 +224,6 @@ function renderTable(docs) {
       <td>${v.status || ""}</td>
     `;
 
-    // ⭐ Highlight saved vendor
     if (docSnap.id === lastSavedVendorId) {
       row.style.background = "#d4edda";
       setTimeout(() => {
@@ -180,6 +257,11 @@ async function loadVendorDetails(id) {
   formNotes.value = v.notes || "";
 
   formPhone.classList.remove("input-error");
+
+  // Enable delete only for LocationAdmin and only when a vendor is loaded
+  if (userRole === "LocationAdmin") {
+    deleteBtn.disabled = false;
+  }
 }
 
 // -------------------------------------------------------------
@@ -193,12 +275,14 @@ async function saveVendor() {
     return;
   }
 
-  // ⭐ PHONE VALIDATION
-  if (formPhone.value.length !== 12) {
+  if (formPhone.value && formPhone.value.length !== 12) {
     formPhone.classList.add("input-error");
     showToast("Invalid phone number", "error");
     return;
   }
+
+  const vendorRef = doc(db, "Vendors", id);
+  const vendorSnap = await getDoc(vendorRef);
 
   const vendorData = {
     name: formName.value.trim(),
@@ -210,8 +294,22 @@ async function saveVendor() {
     updatedAt: Date.now()
   };
 
-  const vendorRef = doc(db, "Vendors", id);
-  const vendorSnap = await getDoc(vendorRef);
+  if (!userLocationId && userRole !== "SuperAdmin") {
+    showToast("No location assigned to user", "error");
+    return;
+  }
+
+  // Always keep location_id on vendor
+  if (userRole === "SuperAdmin") {
+    // SuperAdmin can edit existing vendors but not create new
+    if (!vendorSnap.exists()) {
+      showToast("SuperAdmin cannot create new vendors", "error");
+      return;
+    }
+    vendorData.location_id = vendorSnap.data().location_id || null;
+  } else {
+    vendorData.location_id = userLocationId;
+  }
 
   try {
     if (vendorSnap.exists()) {
@@ -237,9 +335,14 @@ async function saveVendor() {
 }
 
 // -------------------------------------------------------------
-// DELETE VENDOR (WITH CONFIRMATION)
+// DELETE VENDOR (ONLY LOCATIONADMIN)
 // -------------------------------------------------------------
 async function deleteVendor() {
+  if (userRole !== "LocationAdmin") {
+    showToast("Only Location Admin can delete vendors", "error");
+    return;
+  }
+
   const id = formId.value.trim();
   if (!id) {
     showToast("Select a vendor to delete", "warning");
@@ -275,6 +378,10 @@ function clearForm() {
   formNotes.value = "";
 
   formPhone.classList.remove("input-error");
+
+  if (userRole === "LocationAdmin") {
+    deleteBtn.disabled = true;
+  }
 }
 
 // -------------------------------------------------------------
@@ -302,4 +409,7 @@ deleteBtn.addEventListener("click", deleteVendor);
 // -------------------------------------------------------------
 // INITIAL LOAD
 // -------------------------------------------------------------
-loadVendors(true);
+(async () => {
+  await loadUserProfile();
+  await loadVendors(true);
+})();

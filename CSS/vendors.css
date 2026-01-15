@@ -92,3 +92,7 @@ th {
 tr:hover {
   background: #f0f4f8;
 }
+.btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
