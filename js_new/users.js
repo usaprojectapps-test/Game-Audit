@@ -425,7 +425,7 @@ function openResetModal() {
     return;
   }
 
-  document.getElementById("resetEmail").value = emailInput.value;
+  document.getElementById("resetEmailUser").value = emailInput.value;
   document.getElementById("resetModal").style.display = "flex";
 }
 
@@ -434,7 +434,7 @@ function closeResetModal() {
 }
 
 async function confirmResetPassword() {
-  const email = document.getElementById("resetEmail").value;
+  const email = document.getElementById("resetEmailUser").value;
 
   const { error } = await supabase.functions.invoke("reset_password", {
     body: { email }
