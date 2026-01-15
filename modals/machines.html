@@ -1,188 +1,242 @@
-<div class="module-container" style="display:flex; gap:20px; align-items:flex-start; max-width:1400px; margin:auto;">
-
-  <!-- LEFT SIDE -->
-<div style="flex:1.2; display:flex; flex-direction:column; gap:12px;">
-
-  <!-- SEARCH + FILTERS -->
-  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-    
-    <!-- Search bar -->
-    <div style="flex:1; display:flex; align-items:center; gap:8px;">
-      <input id="machineSearch" type="text" placeholder="Search machine no / vendor" style="flex:1; padding:8px 12px; border-radius:6px; border:1px solid #ccc; font-size:14px; box-shadow:0 1px 2px rgba(0,0,0,0.05);">
-      <button class="btn-icon">🔍</button>
+<div id="machines-module" class="module machines-module">
+  <!-- Header -->
+  <div class="module-header">
+    <div class="module-title-group">
+      <h2 class="module-title">Machines</h2>
+      <p class="module-subtitle">Manage machines, health, vendors, and QR codes</p>
     </div>
-
-    <!-- Filters -->
-    <div style="display:flex; gap:8px;">
-      <select id="machineFilterVendor" style="padding:6px 10px; border-radius:6px; border:1px solid #ccc; font-size:14px;">
-        <option value="">All Vendors</option>
-      </select>
-
-      <select id="machineFilterStatus" style="padding:6px 10px; border-radius:6px; border:1px solid #ccc; font-size:14px;">
-        <option value="">All Status</option>
-        <option value="Active">Active</option>
-        <option value="Inactive">Inactive</option>
-        <option value="Repair">Repair</option>
-      </select>
+    <div class="module-header-actions">
+      <button id="machines-refresh-btn" class="btn btn-secondary">Refresh</button>
+      <button id="machines-export-csv-btn" class="btn btn-secondary">Export CSV</button>
     </div>
   </div>
 
-  <!-- TABLE -->
-  <div class="card" style="padding:0; overflow-x:auto;">
-  <table class="machine-table">
-    <thead>
-      <tr>
-        <th>Machine No</th>
-        <th>Vendor</th>
-        <th>Type</th>
-        <th>Status</th>
-        <th>Health</th>
-      </tr>
-    </thead>
-    <tbody id="machineTableBody"></tbody>
-  </table>
-</div>
+  <div class="module-body machines-layout">
+    <!-- Left side: filters + table -->
+    <div class="machines-left">
+      <!-- Filters -->
+      <div class="machines-filters card">
+        <div class="filters-row">
+          <div class="filter-group">
+            <label for="machines-search-input" class="filter-label">Search</label>
+            <input
+              type="text"
+              id="machines-search-input"
+              class="input"
+              placeholder="Search by Machine ID or Name"
+            />
+          </div>
 
-  <!-- PAGINATION -->
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
-    <div id="machinePageInfo" style="font-size:12px; color:var(--text-light); font-weight:500;"></div>
-    <div style="display:flex; gap:6px;">
-      <button id="machinePrevPage" class="btn btn-secondary">Prev</button>
-      <button id="machineNextPage" class="btn btn-secondary">Next</button>
+          <div class="filter-group">
+            <label for="machines-health-filter" class="filter-label">Health</label>
+            <select id="machines-health-filter" class="select">
+              <option value="">All</option>
+              <option value="Good">Good</option>
+              <option value="Warning">Warning</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+
+          <div class="filter-group superadmin-only">
+            <label for="machines-location-filter" class="filter-label">Location</label>
+            <select id="machines-location-filter" class="select">
+              <option value="">All locations</option>
+              <!-- JS will populate -->
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="machines-table card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Machine ID</th>
+                <th>Machine Name</th>
+                <th>Vendor</th>
+                <th>Health</th>
+                <th>Last Service</th>
+                <th>Location</th>
+              </tr>
+            </thead>
+            <tbody id="machines-table-body">
+              <!-- JS will populate rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="table-footer">
+          <div class="pagination-info">
+            <span id="machines-pagination-text">Showing 0 of 0</span>
+          </div>
+          <div class="pagination-controls">
+            <button id="machines-prev-page" class="btn btn-icon" disabled>&lt;</button>
+            <span id="machines-current-page" class="pagination-page">1</span>
+            <button id="machines-next-page" class="btn btn-icon" disabled>&gt;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right side: form + insights -->
+    <div class="machines-right">
+      <!-- Form -->
+      <div class="machines-form card">
+        <div class="card-header">
+          <h3 id="machines-form-title">Add Machine</h3>
+          <span id="machines-form-mode" class="badge badge-secondary">New</span>
+        </div>
+
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="machines-machineid-input" class="form-label">Machine ID</label>
+              <input
+                type="text"
+                id="machines-machineid-input"
+                class="input"
+                placeholder="M001"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="machines-machinename-input" class="form-label">Machine Name</label>
+              <input
+                type="text"
+                id="machines-machinename-input"
+                class="input"
+                placeholder="Machine name"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="machines-vendor-select" class="form-label">Vendor</label>
+              <select id="machines-vendor-select" class="select">
+                <option value="">Select vendor</option>
+                <!-- JS will populate: value = vendorid, text = "vendorid - vendorname" -->
+              </select>
+            </div>
+
+            <div class="form-group superadmin-only">
+              <label for="machines-location-select" class="form-label">Location</label>
+              <select id="machines-location-select" class="select">
+                <option value="">Select location</option>
+                <!-- JS will populate -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="machines-health-select" class="form-label">Health Status</label>
+              <select id="machines-health-select" class="select">
+                <option value="Good">Good</option>
+                <option value="Warning">Warning</option>
+                <option value="Critical">Critical</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="machines-lastservice-input" class="form-label">Last Service Date</label>
+              <input
+                type="date"
+                id="machines-lastservice-input"
+                class="input"
+              />
+            </div>
+
+            <div class="form-group form-group-full">
+              <label for="machines-notes-input" class="form-label">Notes</label>
+              <textarea
+                id="machines-notes-input"
+                class="textarea"
+                rows="3"
+                placeholder="Add notes about this machine"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer form-actions">
+          <div class="left-actions">
+            <button id="machines-reset-btn" class="btn btn-secondary">Clear</button>
+          </div>
+          <div class="right-actions">
+            <button id="machines-delete-btn" class="btn btn-danger">Delete</button>
+            <button id="machines-save-btn" class="btn btn-primary">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- QR + Insights -->
+      <div class="machines-insights card">
+        <div class="card-body machines-insights-body">
+          <!-- QR Section -->
+          <div class="machines-qr-section">
+            <div class="section-header">
+              <h4>Machine QR Code</h4>
+            </div>
+            <div class="qr-preview-wrapper">
+              <div id="machines-qr-preview" class="qr-preview">
+                <!-- JS will render QR canvas or image -->
+                <span class="qr-placeholder-text">QR will appear here</span>
+              </div>
+            </div>
+            <div class="qr-actions">
+              <button id="machines-generate-qr-btn" class="btn btn-secondary">
+                Generate QR
+              </button>
+              <button id="machines-print-qr-btn" class="btn btn-secondary">
+                Print
+              </button>
+              <button id="machines-download-qr-btn" class="btn btn-secondary">
+                Download
+              </button>
+            </div>
+          </div>
+
+          <!-- Summary + Timeline -->
+          <div class="machines-summary-timeline">
+            <div class="machines-summary-section">
+              <div class="section-header">
+                <h4>Machine Summary</h4>
+              </div>
+              <div id="machines-summary-content" class="summary-content">
+                <div class="summary-row">
+                  <span class="summary-label">Health:</span>
+                  <span id="machines-summary-health" class="summary-value">—</span>
+                </div>
+                <div class="summary-row">
+                  <span class="summary-label">Last Service:</span>
+                  <span id="machines-summary-lastservice" class="summary-value">—</span>
+                </div>
+                <div class="summary-row">
+                  <span class="summary-label">Vendor:</span>
+                  <span id="machines-summary-vendor" class="summary-value">—</span>
+                </div>
+                <div class="summary-row">
+                  <span class="summary-label">Location:</span>
+                  <span id="machines-summary-location" class="summary-value">—</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="machines-timeline-section">
+              <div class="section-header">
+                <h4>Machine Timeline</h4>
+              </div>
+              <div id="machines-timeline-content" class="timeline-content">
+                <!-- JS will populate timeline items -->
+                <div class="timeline-empty">No events yet</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- Toast container -->
+  <div id="machines-toast-container" class="toast-container"></div>
 </div>
-
-  <!-- RIGHT SIDE -->
-  <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
-
-    <!-- ADD / EDIT FORM -->
-    <div class="card">
-      <div class="card-header">Add / Edit Machine</div>
-
-      <!-- Row 1: Machine No + Vendor -->
-      <div class="form-row-2col">
-        <div class="form-group">
-          <label>Machine No</label>
-          <input id="machineFormNo" type="text">
-        </div>
-
-        <div class="form-group">
-          <label>Vendor</label>
-          <select id="machineFormVendor">
-            <option value="">Select Vendor</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Row 2: Type + Location -->
-      <div class="form-row-2col">
-        <div class="form-group">
-          <label>Type</label>
-          <select id="machineFormType">
-            <option value="">Select Type</option>
-            <option value="777">777</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Location</label>
-          <input id="machineFormLocation" type="text">
-        </div>
-      </div>
-
-      <!-- Row 3: Machine Model + Serial Number -->
-      <div class="form-row-2col">
-        <div class="form-group">
-          <label>Machine Model</label>
-          <input id="machineFormModel" type="text">
-        </div>
-
-        <div class="form-group">
-          <label>Serial Number</label>
-          <input id="machineFormSerial" type="text">
-        </div>
-      </div>
-
-      <!-- Row 4: Status + Install Date -->
-      <div class="form-row-2col">
-        <div class="form-group">
-          <label>Status</label>
-          <select id="machineFormStatus">
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-            <option value="Repair">Repair</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Installation Date</label>
-          <input id="machineFormInstallDate" type="date">
-        </div>
-      </div>
-
-      <!-- Row 5: Notes -->
-      <div class="form-row-2col">
-        <div class="form-group" style="flex:1;">
-          <label>Notes</label>
-          <input id="machineFormNotes" type="text">
-        </div>
-      </div>
-
-      <!-- ACTION BUTTONS -->
-      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
-        <button id="machineDeleteBtn" class="btn btn-danger">Delete</button>
-        <button id="machineSaveBtn" class="btn btn-primary">Save</button>
-      </div>
-    </div>
-
-    <!-- DETAILS HEADER -->
-    <div class="card">
-      <div class="card-header" id="machineDetailTitle">Select a machine</div>
-      <div class="card-subtitle" id="machineDetailSubtitle">
-        Machine details, QR, performance & timeline will appear here.
-      </div>
-    </div>
-
-    <!-- QR + ACTIONS -->
-    <div style="display:flex; gap:10px;">
-
-      <!-- QR -->
-      <div class="card" style="flex:0 0 150px; text-align:center;">
-        <div style="font-size:13px; margin-bottom:6px;">Machine QR</div>
-        <canvas id="machineQrCanvas" width="128" height="128"></canvas>
-      </div>
-
-      <!-- SUMMARY PLACEHOLDER -->
-      <div class="card" style="flex:1;">
-        <div class="card-header">Performance Summary</div>
-        <div id="machineSummaryContent" style="font-size:13px; color:var(--text-light);">
-          Summary will be available in Reports.
-        </div>
-      </div>
-
-      <!-- ACTION BUTTONS -->
-      <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
-        <button id="machinePrintQrBtn" class="btn btn-secondary">Print QR</button>
-        <button id="machineExportBtn" class="btn btn-secondary">Download QR</button>
-      </div>
-
-    </div>
-
-    <!-- TIMELINE PLACEHOLDER -->
-    <div class="card" style="max-height:260px; overflow-y:auto;">
-      <div class="card-header">Activity Timeline</div>
-      <div id="machineTimelineList" style="display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--text-light);">
-        Activity timeline will be available in Reports.
-      </div>
-    </div>
-
-  </div>
-
-</div>
-<!-- Firebase -->
-<script type="module" src="/js_new/firebase.js"></script>
-
-<!-- Machines Logic -->
-<script type="module" src="/js_new/machines.js"></script>
