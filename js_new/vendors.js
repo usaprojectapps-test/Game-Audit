@@ -1,23 +1,8 @@
 // -------------------------------------------------------------
-// IMPORTS
+// SUPABASE IMPORT
 // -------------------------------------------------------------
-import { db, auth } from "/js_new/firebase.js";
-import {
-  collection,
-  doc,
-  getDocs,
-  getDoc,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  orderBy,
-  limit,
-  startAfter,
-  where
-} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
-
-import { showToast } from "/js_new/toast.js";
+import { supabase } from "/js_new/supabaseClient.js"; 
+// Make sure this file exports: export const supabase = createClient(URL, KEY);
 
 // -------------------------------------------------------------
 // ELEMENTS
@@ -42,332 +27,247 @@ const saveBtn = document.getElementById("vendorSaveBtn");
 const deleteBtn = document.getElementById("vendorDeleteBtn");
 
 // -------------------------------------------------------------
-// STATE: PAGINATION + USER CONTEXT
+// STATE
 // -------------------------------------------------------------
-let lastVisible = null;
-let firstVisible = null;
-let currentPage = 1;
-
-let lastSavedVendorId = null;
-
 let userRole = null;
 let userLocationId = null;
+
+let currentPage = 1;
+const pageSize = 20;
+
+let lastSavedVendorId = null;
 
 // -------------------------------------------------------------
 // LOAD USER PROFILE (ROLE + LOCATION)
 // -------------------------------------------------------------
 async function loadUserProfile() {
-  const user = auth.currentUser;
-  if (!user) {
-    console.warn("No authenticated user found.");
+  const { data: authData } = await supabase.auth.getUser();
+  if (!authData?.user) return;
+
+  const userId = authData.user.id;
+
+  const { data, error } = await supabase
+    .from("Users")
+    .select("role, location_id")
+    .eq("id", userId)
+    .single();
+
+  if (error) {
+    console.error("User load error:", error);
     return;
   }
 
-  const userRef = doc(db, "Users", user.uid);
-  const snap = await getDoc(userRef);
-
-  if (!snap.exists()) {
-    console.warn("User profile not found in Users collection.");
-    return;
-  }
-
-  const u = snap.data();
-  userRole = u.role || null;
-  userLocationId = u.location_id || null;
+  userRole = data.role;
+  userLocationId = data.location_id;
 
   applyRolePermissions();
 }
-
 // -------------------------------------------------------------
-// APPLY ROLE-BASED PERMISSIONS TO UI
+// APPLY ROLE PERMISSIONS
 // -------------------------------------------------------------
 function applyRolePermissions() {
-  // Default: enable everything, then restrict
-  saveBtn.disabled = false;
-  deleteBtn.disabled = false;
-  formId.disabled = false;
+  deleteBtn.disabled = true; // default
 
-  // SuperAdmin: view + edit only (no create, no delete)
   if (userRole === "SuperAdmin") {
+    formId.disabled = true; // cannot create
     deleteBtn.disabled = true;
-    // Prevent creating new vendors: only allow editing existing
-    // We can enforce this by disabling Vendor ID field
-    formId.disabled = true;
   }
 
-  // LocationAdmin: full CRUD (view + create + edit + delete)
   if (userRole === "LocationAdmin") {
-    saveBtn.disabled = false;
-    deleteBtn.disabled = true; // will enable only when a vendor is loaded
     formId.disabled = false;
+    deleteBtn.disabled = true; // enabled only after selecting vendor
   }
 
-  // Manager + Audit: view + create + edit (no delete)
   if (userRole === "Manager" || userRole === "Audit") {
-    deleteBtn.disabled = true;
     formId.disabled = false;
+    deleteBtn.disabled = true;
   }
 }
 
 // -------------------------------------------------------------
-// AUTO-FORMAT PHONE NUMBER + VALIDATION
+// PHONE FORMAT (000-000-0000)
 // -------------------------------------------------------------
 formPhone.addEventListener("input", () => {
-  let value = formPhone.value.replace(/\D/g, "");
+  let v = formPhone.value.replace(/\D/g, "");
 
-  if (value.length > 3 && value.length <= 6) {
-    value = value.replace(/(\d{3})(\d+)/, "$1-$2");
-  } else if (value.length > 6) {
-    value = value.replace(/(\d{3})(\d{3})(\d+)/, "$1-$2-$3");
+  if (v.length > 3 && v.length <= 6) {
+    v = v.replace(/(\d{3})(\d+)/, "$1-$2");
+  } else if (v.length > 6) {
+    v = v.replace(/(\d{3})(\d{3})(\d+)/, "$1-$2-$3");
   }
 
-  formPhone.value = value;
-  formPhone.classList.remove("input-error");
+  formPhone.value = v;
 });
 
 formPhone.addEventListener("blur", () => {
   if (formPhone.value && formPhone.value.length !== 12) {
-    formPhone.classList.add("input-error");
-    showToast("Invalid phone number", "error");
+    showToast("Phone must be 000-000-0000", "error");
   }
 });
-
-// -------------------------------------------------------------
-// BUILD QUERY BASED ON ROLE + LOCATION
-// -------------------------------------------------------------
-function buildVendorQuery(paginateFrom = null) {
-  const baseCollection = collection(db, "Vendors");
-
-  const isSuperAdmin = userRole === "SuperAdmin";
-
-  const constraints = [];
-
-  if (!isSuperAdmin && userLocationId) {
-    constraints.push(where("location_id", "==", userLocationId));
-  }
-
-  constraints.push(orderBy("name"));
-  constraints.push(limit(20));
-
-  if (paginateFrom) {
-    constraints.splice(constraints.length - 1, 0, startAfter(paginateFrom));
-  }
-
-  return query(baseCollection, ...constraints);
-}
-
 // -------------------------------------------------------------
 // LOAD VENDORS
 // -------------------------------------------------------------
 async function loadVendors(reset = false) {
-  if (!userRole) {
-    await loadUserProfile();
+  if (reset) currentPage = 1;
+
+  const from = (currentPage - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase
+    .from("Vendors")
+    .select("*")
+    .order("VendorName", { ascending: true })
+    .range(from, to);
+
+  if (userRole !== "SuperAdmin") {
+    query = query.eq("location_id", userLocationId);
   }
 
-  if (reset) {
-    lastVisible = null;
-    currentPage = 1;
-  }
+  const { data, error } = await query;
 
-  const q = buildVendorQuery(lastVisible);
-  const snap = await getDocs(q);
-
-  if (snap.empty) {
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="4" style="text-align:center; padding:10px;">
-          No vendors found
-        </td>
-      </tr>`;
-    pageInfo.textContent = `Page ${currentPage}`;
+  if (error) {
+    console.error("Load error:", error);
     return;
   }
 
-  firstVisible = snap.docs[0];
-  lastVisible = snap.docs[snap.docs.length - 1];
-
-  renderTable(snap.docs);
+  renderTable(data);
   pageInfo.textContent = `Page ${currentPage}`;
 }
-
 // -------------------------------------------------------------
 // RENDER TABLE
 // -------------------------------------------------------------
-function renderTable(docs) {
+function renderTable(rows) {
   tableBody.innerHTML = "";
 
   const search = searchInput.value.toLowerCase();
   const statusFilter = filterStatus.value;
 
-  docs.forEach((docSnap) => {
-    const v = docSnap.data();
-
+  rows.forEach((v) => {
     if (
       search &&
       !(
-        v.name?.toLowerCase().includes(search) ||
-        docSnap.id.toLowerCase().includes(search)
+        v.VendorName?.toLowerCase().includes(search) ||
+        v.VendorId?.toLowerCase().includes(search)
       )
-    ) {
-      return;
-    }
+    ) return;
 
-    if (statusFilter && v.status !== statusFilter) return;
+    if (statusFilter && v.VenStatus !== statusFilter) return;
 
     const row = document.createElement("tr");
-    row.dataset.id = docSnap.id;
+    row.dataset.id = v.VendorId;
 
     row.innerHTML = `
-      <td>${docSnap.id}</td>
-      <td>${v.name || ""}</td>
-      <td>${v.phone || ""}</td>
-      <td>${v.status || ""}</td>
+      <td>${v.VendorId}</td>
+      <td>${v.VendorName}</td>
+      <td>${v.VenContPerPhone}</td>
+      <td>${v.VenStatus}</td>
     `;
 
-    if (docSnap.id === lastSavedVendorId) {
+    if (v.VendorId === lastSavedVendorId) {
       row.style.background = "#d4edda";
       setTimeout(() => {
         row.style.transition = "background 1.5s ease";
         row.style.background = "transparent";
       }, 300);
-
-      row.scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
-    row.addEventListener("click", () => loadVendorDetails(docSnap.id));
+    row.addEventListener("click", () => loadVendorDetails(v.VendorId));
     tableBody.appendChild(row);
   });
 }
-
 // -------------------------------------------------------------
-// LOAD SINGLE VENDOR DETAILS
+// LOAD SINGLE VENDOR
 // -------------------------------------------------------------
 async function loadVendorDetails(id) {
-  const snap = await getDoc(doc(db, "Vendors", id));
-  if (!snap.exists()) return;
+  const { data, error } = await supabase
+    .from("Vendors")
+    .select("*")
+    .eq("VendorId", id)
+    .single();
 
-  const v = snap.data();
+  if (error) return;
 
-  formId.value = id;
-  formName.value = v.name || "";
-  formContact.value = v.contactPerson || "";
-  formPhone.value = v.phone || "";
-  formAddress.value = v.address || "";
-  formStatus.value = v.status === "Inactive" ? "Inactive" : "Active";
-  formNotes.value = v.notes || "";
+  formId.value = data.VendorId;
+  formName.value = data.VendorName;
+  formContact.value = data.VenContPerson;
+  formPhone.value = data.VenContPerPhone;
+  formAddress.value = data.VenAddress;
+  formStatus.value = data.VenStatus;
+  formNotes.value = data.VenNotes;
 
-  formPhone.classList.remove("input-error");
-
-  // Enable delete only for LocationAdmin and only when a vendor is loaded
   if (userRole === "LocationAdmin") {
     deleteBtn.disabled = false;
   }
 }
-
 // -------------------------------------------------------------
-// SAVE VENDOR (CREATE OR UPDATE)
+// SAVE VENDOR
 // -------------------------------------------------------------
 async function saveVendor() {
   const id = formId.value.trim();
 
-  if (!id) {
-    showToast("Vendor ID is required", "error");
-    return;
-  }
-
-  if (formPhone.value && formPhone.value.length !== 12) {
-    formPhone.classList.add("input-error");
-    showToast("Invalid phone number", "error");
-    return;
-  }
-
-  const vendorRef = doc(db, "Vendors", id);
-  const vendorSnap = await getDoc(vendorRef);
+  if (!id) return showToast("Vendor ID required", "error");
+  if (formPhone.value.length !== 12)
+    return showToast("Phone must be 000-000-0000", "error");
 
   const vendorData = {
-    name: formName.value.trim(),
-    contactPerson: formContact.value.trim(),
-    phone: formPhone.value.trim(),
-    address: formAddress.value.trim(),
-    status: formStatus.value,
-    notes: formNotes.value.trim(),
-    updatedAt: Date.now()
+    VendorId: id,
+    VendorName: formName.value.trim(),
+    VenContPerson: formContact.value.trim(),
+    VenContPerPhone: formPhone.value.trim(),
+    VenAddress: formAddress.value.trim(),
+    VenStatus: formStatus.value,
+    VenNotes: formNotes.value.trim(),
+    updatedAt: Date.now(),
   };
 
-  if (!userLocationId && userRole !== "SuperAdmin") {
-    showToast("No location assigned to user", "error");
-    return;
-  }
-
-  // Always keep location_id on vendor
   if (userRole === "SuperAdmin") {
-    // SuperAdmin can edit existing vendors but not create new
-    if (!vendorSnap.exists()) {
-      showToast("SuperAdmin cannot create new vendors", "error");
-      return;
-    }
-    vendorData.location_id = vendorSnap.data().location_id || null;
+    vendorData.location_id = userLocationId; // keep existing
   } else {
     vendorData.location_id = userLocationId;
   }
 
-  try {
-    if (vendorSnap.exists()) {
-      await updateDoc(vendorRef, vendorData);
-      showToast("Vendor updated successfully", "success");
-    } else {
-      vendorData.createdAt = Date.now();
-      await setDoc(vendorRef, vendorData);
-      showToast("New vendor added", "success");
-    }
+  const { data: exists } = await supabase
+    .from("Vendors")
+    .select("VendorId")
+    .eq("VendorId", id)
+    .maybeSingle();
 
-    lastSavedVendorId = id;
+  let result;
 
-    setTimeout(() => {
-      clearForm();
-      loadVendors(true);
-    }, 200);
-
-  } catch (error) {
-    console.error("Save error:", error);
-    showToast("Error saving vendor", "error");
+  if (exists) {
+    result = await supabase
+      .from("Vendors")
+      .update(vendorData)
+      .eq("VendorId", id);
+    showToast("Vendor updated", "success");
+  } else {
+    vendorData.createdAt = Date.now();
+    result = await supabase.from("Vendors").insert(vendorData);
+    showToast("Vendor created", "success");
   }
-}
 
+  lastSavedVendorId = id;
+  clearForm();
+  loadVendors(true);
+}
 // -------------------------------------------------------------
-// DELETE VENDOR (ONLY LOCATIONADMIN)
+// DELETE VENDOR
 // -------------------------------------------------------------
 async function deleteVendor() {
-  if (userRole !== "LocationAdmin") {
-    showToast("Only Location Admin can delete vendors", "error");
-    return;
-  }
+  if (userRole !== "LocationAdmin")
+    return showToast("Only Location Admin can delete", "error");
 
   const id = formId.value.trim();
-  if (!id) {
-    showToast("Select a vendor to delete", "warning");
-    return;
-  }
+  if (!id) return showToast("Select a vendor first", "warning");
 
-  const confirmDelete = confirm("Are you sure you want to delete this vendor?");
-  if (!confirmDelete) return;
+  if (!confirm("Delete this vendor?")) return;
 
-  try {
-    await deleteDoc(doc(db, "Vendors", id));
-    showToast("Vendor deleted", "warning");
+  await supabase.from("Vendors").delete().eq("VendorId", id);
 
-    clearForm();
-    loadVendors(true);
-
-  } catch (error) {
-    console.error("Delete error:", error);
-    showToast("Error deleting vendor", "error");
-  }
+  showToast("Vendor deleted", "warning");
+  clearForm();
+  loadVendors(true);
 }
-
-// -------------------------------------------------------------
-// CLEAR FORM
-// -------------------------------------------------------------
 function clearForm() {
   formId.value = "";
   formName.value = "";
@@ -376,17 +276,9 @@ function clearForm() {
   formAddress.value = "";
   formStatus.value = "Active";
   formNotes.value = "";
-
-  formPhone.classList.remove("input-error");
-
-  if (userRole === "LocationAdmin") {
-    deleteBtn.disabled = true;
-  }
+  deleteBtn.disabled = true;
 }
 
-// -------------------------------------------------------------
-// EVENTS
-// -------------------------------------------------------------
 searchInput.addEventListener("input", () => loadVendors(true));
 filterStatus.addEventListener("change", () => loadVendors(true));
 
@@ -398,17 +290,14 @@ nextPageBtn.addEventListener("click", () => {
 prevPageBtn.addEventListener("click", () => {
   if (currentPage > 1) {
     currentPage--;
-    lastVisible = null;
-    loadVendors(true);
+    loadVendors();
   }
 });
 
 saveBtn.addEventListener("click", saveVendor);
 deleteBtn.addEventListener("click", deleteVendor);
 
-// -------------------------------------------------------------
 // INITIAL LOAD
-// -------------------------------------------------------------
 (async () => {
   await loadUserProfile();
   await loadVendors(true);
