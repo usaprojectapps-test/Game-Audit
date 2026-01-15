@@ -1,0 +1,10 @@
+{
+  "headers": [
+    {
+      "source": "/js_new/(.*).js",
+      "headers": [
+        { "key": "Content-Type", "value": "application/javascript" }
+      ]
+    }
+  ]
+}
