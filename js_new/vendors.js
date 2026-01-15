@@ -25,7 +25,7 @@ const formStatus = document.getElementById("vendorFormStatus");
 const formNotes = document.getElementById("vendorFormNotes");
 
 const saveBtn = document.getElementById("VendorsaveBtn");
-const deleteBtn = document.getElementById("vendorDeleteBtn");
+const deleteBtn = document.getElementById("VendorDeleteBtn");
 
 // -------------------------------------------------------------
 // STATE
