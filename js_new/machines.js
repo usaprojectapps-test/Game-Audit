@@ -5,7 +5,7 @@ const SUPABASE_URL = "https://kjfzdmmloryzbuiixceh.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZnpkbW1sb3J5emJ1aWl4Y2VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3OTkyODQsImV4cCI6MjA4MzM3NTI4NH0.ivmARw-Nj0kegWTV3GZwbyKeHx0c7eQRUtGww1S8B8M";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ---------------------------------------------------------
 // USER CONTEXT
@@ -133,9 +133,9 @@ async function loadMachines() {
 
   if (userRole === "SuperAdmin") {
     if (locationFilter.value)
-      query = query.eq("locationid", locationFilter.value);
+      query = query.eq("location_id", locationFilter.value);
   } else {
-    query = query.eq("locationid", userLocationId);
+    query = query.eq("location_id", userLocationId);
   }
 
   const from = (currentPage - 1) * pageSize;
@@ -156,7 +156,7 @@ async function loadMachines() {
       <td>${row.vendorid}</td>
       <td>${getHealthIcon(row.healthstatus)}</td>
       <td>${formatDate(row.lastservicedate)}</td>
-      <td>${row.locationid}</td>
+      <td>${row.location_id}</td>
     `;
     tableBody.appendChild(tr);
   });
@@ -179,7 +179,7 @@ function selectMachine(row) {
   idInput.value = row.machineid;
   nameInput.value = row.machinename;
   vendorSelect.value = row.vendorid;
-  locationSelect.value = row.locationid;
+  locationSelect.value = row.location_id;
   healthSelect.value = row.healthstatus;
   lastServiceInput.value = formatDateInput(row.lastservicedate);
   notesInput.value = row.notes || "";
