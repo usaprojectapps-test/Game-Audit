@@ -27,6 +27,9 @@ const formNotes = document.getElementById("vendorFormNotes");
 const saveBtn = document.getElementById("VendorSaveBtn");
 const deleteBtn = document.getElementById("VendorDeleteBtn");
 
+const filterLocation = document.getElementById("vendorFilterLocation");
+console.log("Filter element:", filterLocation);
+
 // -------------------------------------------------------------
 // STATE
 // -------------------------------------------------------------
