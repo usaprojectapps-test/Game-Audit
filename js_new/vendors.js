@@ -272,12 +272,21 @@ async function deleteVendor() {
 
   if (!confirm("Delete this vendor?")) return;
 
-  await supabase.from("Vendors").delete().eq("VendorId", id);
+  const { error } = await supabase
+    .from("Vendors")
+    .delete()
+    .eq("VendorId", id);
+
+  if (error) {
+    console.error("Delete error:", error);
+    return showToast("Failed to delete vendor", "error");
+  }
 
   showToast("Vendor deleted", "warning");
   clearForm();
   loadVendors(true);
 }
+
 function clearForm() {
   formId.value = "";
   formName.value = "";
