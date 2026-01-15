@@ -43,24 +43,17 @@ let locationMap = {};
 // LOAD USER PROFILE
 // -------------------------------------------------------------
 async function loadUserProfile() {
-  const { data: authData } = await supabase.auth.getUser();
-  if (!authData?.user) return;
+  const { data: sessionData } = await supabase.auth.getSession();
 
-  const userId = authData.user.id;
-
-  const { data, error } = await supabase
-    .from("users")
-    .select("role, location_id")
-    .eq("id", userId)
-    .single();
-
-  if (error) {
-    console.error("User load error:", error);
+  if (!sessionData?.session) {
+    console.error("No session found");
     return;
   }
 
-  userRole = data.role;
-  userLocationId = data.location_id;
+  const jwt = sessionData.session.user.user_metadata;
+
+  userRole = jwt.role;
+  userLocationId = jwt.location_id;
 
   applyRolePermissions();
 }
