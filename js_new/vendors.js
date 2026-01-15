@@ -251,8 +251,10 @@ async function saveVendor() {
     updatedAt: Date.now(),
     location_id: userLocationId
   };
-
-  const { data: exists } = await supabase
+    // ⭐ ADD THIS LINE HERE 
+    console.log("Insert payload:", vendorData);
+  
+    const { data: exists } = await supabase
     .from("Vendors")
     .select("VendorId")
     .eq("VendorId", id)
