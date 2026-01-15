@@ -175,10 +175,7 @@ async function loadVendors(reset = false) {
   pageInfo.textContent = `Page ${currentPage}`;
 }
 
-// -------------------------------------------------------------
-// RENDER TABLE
-// -------------------------------------------------------------
-function renderTable(rows) {
+/function renderTable(rows) {
   tableBody.innerHTML = "";
 
   const search = searchInput.value.toLowerCase();
@@ -199,7 +196,6 @@ function renderTable(rows) {
     const row = document.createElement("tr");
     row.dataset.id = v.VendorId;
 
-    // Highlight vendors from selected location
     if (v.location_id === highlightLocation) {
       row.style.background = "rgba(0, 150, 255, 0.15)";
     }
@@ -207,8 +203,8 @@ function renderTable(rows) {
     row.innerHTML = `
       <td>${v.VendorId}</td>
       <td>${v.VendorName}</td>
-      <td>${v.VenContPerPhone}</td>
-      <td>${v.VenStatus}</td>
+      <td>${v.VenContPerPhone || "—"}</td>
+      <td>${v.VenStatus || "—"}</td>
       <td>${locationMap[v.location_id] || "Unknown"}</td>
     `;
 
