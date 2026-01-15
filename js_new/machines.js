@@ -224,7 +224,7 @@ async function saveMachine() {
       return;
     }
 
-    const { error } = await supabase.from("machines").insert([
+    const { error } = await client.from("machines").insert([
       {
         machineid: id,
         machinename: name,
