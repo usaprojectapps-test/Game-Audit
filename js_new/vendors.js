@@ -47,7 +47,7 @@ async function loadUserProfile() {
   const userId = authData.user.id;
 
   const { data, error } = await supabase
-    .from("Users")
+    .from("users")
     .select("role, location_id")
     .eq("id", userId)
     .single();
