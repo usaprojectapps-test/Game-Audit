@@ -53,6 +53,8 @@ async function loadUserProfile() {
   const jwt = sessionData.session.user.user_metadata;
 
   userRole = jwt.role;
+  console.log("User role:", userRole);
+  console.log("Location ID:", userLocationId);
   userLocationId = jwt.location_id;
 
   applyRolePermissions();
