@@ -969,20 +969,20 @@ tr:hover {
   margin-bottom: 16px;
   border: none;
   border-radius: 8px;
-  background: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.06);
   color: white;
   font-size: 14px;
 }
 .modal-content input::placeholder {
-  color: rgba(255,255,255,0.5);
+  color: rgba(0, 51, 102, 0.5);
 }
 
 .modal-content input::placeholder {
-  color: rgba(255,255,255,0.5);
+  color: rgba(0, 51, 102, 0.5);
 }
 
 .modal-content input::placeholder {
-  color: rgba(255,255,255,0.5);
+  color: rgba(0, 51, 102, 0.5);
 }
 
 .btn-primary {
