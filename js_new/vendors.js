@@ -106,6 +106,20 @@ formPhone.addEventListener("blur", () => {
     showToast("Phone must be 000-000-0000", "error");
   }
 });
+
+// Location Mapping
+let locationMap = {};
+
+async function loadLocationsMap() {
+  const { data } = await supabase
+    .from("Locations")
+    .select("id, LocationName");
+
+  locationMap = Object.fromEntries(
+    data.map(loc => [loc.id, loc.LocationName])
+  );
+}
+
 // -------------------------------------------------------------
 // LOAD VENDORS
 // -------------------------------------------------------------
@@ -163,6 +177,7 @@ function renderTable(rows) {
       <td>${v.VendorName}</td>
       <td>${v.VenContPerPhone}</td>
       <td>${v.VenStatus}</td>
+      <td>${locationMap[v.location_id] || "Unknown"}</td>
     `;
 
     if (v.VendorId === lastSavedVendorId) {
@@ -319,5 +334,7 @@ deleteBtn.addEventListener("click", deleteVendor);
 // INITIAL LOAD
 (async () => {
   await loadUserProfile();
+  await loadLocationsMap();
   await loadVendors(true);
+
 })();
