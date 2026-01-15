@@ -8,7 +8,7 @@ import { showToast } from "./toast.js";
 // ELEMENTS
 // -------------------------------------------------------------
 const tableBody = document.getElementById("vendorTableBody");
-const searchInput = document.getElementById("vendorSearch");
+const searchInput = document.getElementById("Vendorsearch");
 const filterStatus = document.getElementById("vendorFilterStatus");
 const filterLocation = document.getElementById("vendorFilterLocation");
 
@@ -24,7 +24,7 @@ const formAddress = document.getElementById("vendorFormAddress");
 const formStatus = document.getElementById("vendorFormStatus");
 const formNotes = document.getElementById("vendorFormNotes");
 
-const saveBtn = document.getElementById("vendorSaveBtn");
+const saveBtn = document.getElementById("VendorsaveBtn");
 const deleteBtn = document.getElementById("vendorDeleteBtn");
 
 // -------------------------------------------------------------
@@ -127,7 +127,7 @@ async function loadLocationsMap() {
 }
 
 // -------------------------------------------------------------
-// LOAD VENDORS
+// LOAD Vendors
 // -------------------------------------------------------------
 async function loadVendors(reset = false) {
   if (reset) currentPage = 1;
