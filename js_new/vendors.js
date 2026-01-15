@@ -4,14 +4,15 @@
 import { supabase } from "/js_new/supabaseClient.js"; 
 import { showToast } from "./toast.js";
 
-// Make sure this file exports: export const supabase = createClient(URL, KEY);
-
 // -------------------------------------------------------------
 // ELEMENTS
 // -------------------------------------------------------------
 const tableBody = document.getElementById("vendorTableBody");
 const searchInput = document.getElementById("vendorSearch");
 const filterStatus = document.getElementById("vendorFilterStatus");
+
+// SuperAdmin-only location filter (added in HTML)
+const filterLocation = document.getElementById("vendorFilterLocation");
 
 const pageInfo = document.getElementById("vendorPageInfo");
 const prevPageBtn = document.getElementById("vendorPrevPage");
@@ -40,7 +41,7 @@ const pageSize = 20;
 let lastSavedVendorId = null;
 
 // -------------------------------------------------------------
-// LOAD USER PROFILE (ROLE + LOCATION)
+// LOAD USER PROFILE
 // -------------------------------------------------------------
 async function loadUserProfile() {
   const { data: authData } = await supabase.auth.getUser();
@@ -64,20 +65,22 @@ async function loadUserProfile() {
 
   applyRolePermissions();
 }
+
 // -------------------------------------------------------------
 // APPLY ROLE PERMISSIONS
 // -------------------------------------------------------------
 function applyRolePermissions() {
-  deleteBtn.disabled = true; // default
+  deleteBtn.disabled = true;
 
   if (userRole === "SuperAdmin") {
-    formId.disabled = true; // cannot create
-    deleteBtn.disabled = true;
+    formId.disabled = false;
+    deleteBtn.disabled = true; // enabled only after selecting vendor
+    filterLocation.style.display = "block"; // show location filter
   }
 
   if (userRole === "LocationAdmin") {
     formId.disabled = false;
-    deleteBtn.disabled = true; // enabled only after selecting vendor
+    deleteBtn.disabled = true;
   }
 
   if (userRole === "Manager" || userRole === "Audit") {
@@ -87,7 +90,7 @@ function applyRolePermissions() {
 }
 
 // -------------------------------------------------------------
-// PHONE FORMAT (000-000-0000)
+// PHONE FORMAT
 // -------------------------------------------------------------
 formPhone.addEventListener("input", () => {
   let v = formPhone.value.replace(/\D/g, "");
@@ -107,7 +110,9 @@ formPhone.addEventListener("blur", () => {
   }
 });
 
-// Location Mapping
+// -------------------------------------------------------------
+// LOCATION MAP
+// -------------------------------------------------------------
 let locationMap = {};
 
 async function loadLocationsMap() {
@@ -118,6 +123,17 @@ async function loadLocationsMap() {
   locationMap = Object.fromEntries(
     data.map(loc => [loc.id, loc.LocationName])
   );
+
+  // Populate SuperAdmin location filter
+  if (userRole === "SuperAdmin") {
+    filterLocation.innerHTML = `<option value="">All Locations</option>`;
+    data.forEach(loc => {
+      const opt = document.createElement("option");
+      opt.value = loc.id;
+      opt.textContent = loc.LocationName;
+      filterLocation.appendChild(opt);
+    });
+  }
 }
 
 // -------------------------------------------------------------
@@ -135,7 +151,11 @@ async function loadVendors(reset = false) {
     .order("VendorName", { ascending: true })
     .range(from, to);
 
-  if (userRole !== "SuperAdmin") {
+  // SuperAdmin can filter by location
+  if (userRole === "SuperAdmin") {
+    const selectedLoc = filterLocation.value;
+    if (selectedLoc) query = query.eq("location_id", selectedLoc);
+  } else {
     query = query.eq("location_id", userLocationId);
   }
 
@@ -149,6 +169,7 @@ async function loadVendors(reset = false) {
   renderTable(data);
   pageInfo.textContent = `Page ${currentPage}`;
 }
+
 // -------------------------------------------------------------
 // RENDER TABLE
 // -------------------------------------------------------------
@@ -157,6 +178,7 @@ function renderTable(rows) {
 
   const search = searchInput.value.toLowerCase();
   const statusFilter = filterStatus.value;
+  const highlightLocation = filterLocation.value || userLocationId;
 
   rows.forEach((v) => {
     if (
@@ -172,6 +194,11 @@ function renderTable(rows) {
     const row = document.createElement("tr");
     row.dataset.id = v.VendorId;
 
+    // Highlight vendors from selected location
+    if (v.location_id === highlightLocation) {
+      row.style.background = "rgba(0, 150, 255, 0.15)";
+    }
+
     row.innerHTML = `
       <td>${v.VendorId}</td>
       <td>${v.VendorName}</td>
@@ -180,18 +207,11 @@ function renderTable(rows) {
       <td>${locationMap[v.location_id] || "Unknown"}</td>
     `;
 
-    if (v.VendorId === lastSavedVendorId) {
-      row.style.background = "#d4edda";
-      setTimeout(() => {
-        row.style.transition = "background 1.5s ease";
-        row.style.background = "transparent";
-      }, 300);
-    }
-
     row.addEventListener("click", () => loadVendorDetails(v.VendorId));
     tableBody.appendChild(row);
   });
 }
+
 // -------------------------------------------------------------
 // LOAD SINGLE VENDOR
 // -------------------------------------------------------------
@@ -212,12 +232,11 @@ async function loadVendorDetails(id) {
   formStatus.value = data.VenStatus;
   formNotes.value = data.VenNotes;
 
-  if (userRole === "LocationAdmin") {
-    deleteBtn.disabled = false;
-  }
+  deleteBtn.disabled = false;
 }
+
 // -------------------------------------------------------------
-// SAVE VENDOR
+// SAVE VENDOR (INSERT + UPDATE)
 // -------------------------------------------------------------
 async function saveVendor() {
   const id = formId.value.trim();
@@ -279,9 +298,6 @@ async function saveVendor() {
 // DELETE VENDOR
 // -------------------------------------------------------------
 async function deleteVendor() {
-  if (userRole !== "LocationAdmin")
-    return showToast("Only Location Admin can delete", "error");
-
   const id = formId.value.trim();
   if (!id) return showToast("Select a vendor first", "warning");
 
@@ -302,6 +318,9 @@ async function deleteVendor() {
   loadVendors(true);
 }
 
+// -------------------------------------------------------------
+// CLEAR FORM
+// -------------------------------------------------------------
 function clearForm() {
   formId.value = "";
   formName.value = "";
@@ -313,8 +332,12 @@ function clearForm() {
   deleteBtn.disabled = true;
 }
 
+// -------------------------------------------------------------
+// EVENTS
+// -------------------------------------------------------------
 searchInput.addEventListener("input", () => loadVendors(true));
 filterStatus.addEventListener("change", () => loadVendors(true));
+filterLocation.addEventListener("change", () => loadVendors(true));
 
 nextPageBtn.addEventListener("click", () => {
   currentPage++;
@@ -331,10 +354,11 @@ prevPageBtn.addEventListener("click", () => {
 saveBtn.addEventListener("click", saveVendor);
 deleteBtn.addEventListener("click", deleteVendor);
 
+// -------------------------------------------------------------
 // INITIAL LOAD
+// -------------------------------------------------------------
 (async () => {
   await loadUserProfile();
   await loadLocationsMap();
   await loadVendors(true);
-
 })();
