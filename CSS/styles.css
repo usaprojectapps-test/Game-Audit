@@ -923,12 +923,21 @@ tr:hover {
   cursor: pointer;
 }
 
-.header-clock {
-  color: white;
-  font-size: 14px;
-  margin-right: 20px;
-  opacity: 0.9;
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
+.header-clock {
+  font-size: 14px;
+  color: #ccc;
+}
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
 
 #modalContainer .modal {
   position: fixed;
