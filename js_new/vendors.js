@@ -117,7 +117,7 @@ let locationMap = {};
 
 async function loadLocationsMap() {
   const { data, error } = await supabase
-    .from("Locations") // we will fix this name
+    .from("locations") // ✅ correct table name
     .select("id, LocationName");
 
   if (error || !data) {
@@ -129,7 +129,6 @@ async function loadLocationsMap() {
   locationMap = Object.fromEntries(
     data.map(loc => [loc.id, loc.LocationName])
   );
-}
 
   // Populate SuperAdmin location filter
   if (userRole === "SuperAdmin") {
@@ -142,7 +141,6 @@ async function loadLocationsMap() {
     });
   }
 }
-
 // -------------------------------------------------------------
 // LOAD VENDORS
 // -------------------------------------------------------------
