@@ -1,11 +1,21 @@
-// Supabase client
-const supabase = window.supabase;
+// ---------------------------------------------------------
+// SUPABASE CLIENT
+// ---------------------------------------------------------
+const SUPABASE_URL = "https://kjfzdmmloryzbuiixceh.supabase.co";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZnpkbW1sb3J5emJ1aWl4Y2VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3OTkyODQsImV4cCI6MjA4MzM3NTI4NH0.ivmARw-Nj0kegWTV3GZwbyKeHx0c7eQRUtGww1S8B8M";
 
-// User role + location from JWT/localStorage
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ---------------------------------------------------------
+// USER CONTEXT
+// ---------------------------------------------------------
 const userRole = localStorage.getItem("role");
 const userLocationId = localStorage.getItem("location_id");
 
-// DOM references
+// ---------------------------------------------------------
+// DOM ELEMENTS
+// ---------------------------------------------------------
 const tableBody = document.getElementById("machines-table-body");
 const searchInput = document.getElementById("machines-search-input");
 const healthFilter = document.getElementById("machines-health-filter");
@@ -44,16 +54,25 @@ const currentPageLabel = document.getElementById("machines-current-page");
 
 const toastContainer = document.getElementById("machines-toast-container");
 
-// State
+// ---------------------------------------------------------
+// STATE
+// ---------------------------------------------------------
 let selectedMachineId = null;
 let currentPage = 1;
 let pageSize = 10;
 
-// Load vendors
+// ---------------------------------------------------------
+// LOAD VENDORS
+// ---------------------------------------------------------
 async function loadVendors() {
-  const { data } = await supabase.from("vendors").select("vendorid, vendorname").order("vendorid");
+  const { data } = await supabase
+    .from("vendors")
+    .select("vendorid, vendorname")
+    .order("vendorid");
+
   vendorSelect.innerHTML = `<option value="">Select vendor</option>`;
-  data?.forEach(v => {
+
+  data?.forEach((v) => {
     const opt = document.createElement("option");
     opt.value = v.vendorid;
     opt.textContent = `${v.vendorid} - ${v.vendorname}`;
@@ -61,16 +80,26 @@ async function loadVendors() {
   });
 }
 
-// Load locations (SuperAdmin only)
+// ---------------------------------------------------------
+// LOAD LOCATIONS (SUPERADMIN ONLY)
+// ---------------------------------------------------------
 async function loadLocations() {
   if (userRole !== "SuperAdmin") {
-    document.querySelectorAll(".superadmin-only").forEach(el => el.style.display = "none");
+    document
+      .querySelectorAll(".superadmin-only")
+      .forEach((el) => (el.style.display = "none"));
     return;
   }
-  const { data } = await supabase.from("locations").select("id, locationname").order("locationname");
+
+  const { data } = await supabase
+    .from("locations")
+    .select("id, locationname")
+    .order("locationname");
+
   locationSelect.innerHTML = `<option value="">Select location</option>`;
   locationFilter.innerHTML = `<option value="">All locations</option>`;
-  data?.forEach(loc => {
+
+  data?.forEach((loc) => {
     const opt1 = document.createElement("option");
     opt1.value = loc.id;
     opt1.textContent = loc.locationname;
@@ -83,12 +112,19 @@ async function loadLocations() {
   });
 }
 
-// Load machines
+// ---------------------------------------------------------
+// LOAD MACHINES
+// ---------------------------------------------------------
 async function loadMachines() {
-  let query = supabase.from("machines").select("*").order("createdat", { ascending: false });
+  let query = supabase
+    .from("machines")
+    .select("*")
+    .order("createdat", { ascending: false });
 
   if (searchInput.value.trim()) {
-    query = query.or(`machineid.ilike.%${searchInput.value}%,machinename.ilike.%${searchInput.value}%`);
+    query = query.or(
+      `machineid.ilike.%${searchInput.value}%,machinename.ilike.%${searchInput.value}%`
+    );
   }
 
   if (healthFilter.value) {
@@ -96,7 +132,8 @@ async function loadMachines() {
   }
 
   if (userRole === "SuperAdmin") {
-    if (locationFilter.value) query = query.eq("locationid", locationFilter.value);
+    if (locationFilter.value)
+      query = query.eq("locationid", locationFilter.value);
   } else {
     query = query.eq("locationid", userLocationId);
   }
@@ -104,10 +141,13 @@ async function loadMachines() {
   const from = (currentPage - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  const { data, count } = await query.range(from, to).select("*", { count: "exact" });
+  const { data, count } = await query
+    .range(from, to)
+    .select("*", { count: "exact" });
 
   tableBody.innerHTML = "";
-  data?.forEach(row => {
+
+  data?.forEach((row) => {
     const tr = document.createElement("tr");
     tr.onclick = () => selectMachine(row);
     tr.innerHTML = `
@@ -121,14 +161,18 @@ async function loadMachines() {
     tableBody.appendChild(tr);
   });
 
-  paginationText.textContent = `Showing ${data?.length || 0} of ${count || 0}`;
+  paginationText.textContent = `Showing ${data?.length || 0} of ${
+    count || 0
+  }`;
   currentPageLabel.textContent = currentPage;
 
   prevPageBtn.disabled = currentPage === 1;
-  nextPageBtn.disabled = (from + data.length) >= count;
+  nextPageBtn.disabled = from + data.length >= count;
 }
 
-// Select machine
+// ---------------------------------------------------------
+// SELECT MACHINE
+// ---------------------------------------------------------
 function selectMachine(row) {
   selectedMachineId = row.machineid;
 
@@ -145,13 +189,18 @@ function selectMachine(row) {
   loadTimeline(row.machineid);
 }
 
-// Save machine
+// ---------------------------------------------------------
+// SAVE MACHINE
+// ---------------------------------------------------------
 async function saveMachine() {
   const id = idInput.value.trim();
   const name = nameInput.value.trim();
   const vendorid = vendorSelect.value;
-  const vendorname = vendorSelect.options[vendorSelect.selectedIndex]?.text?.split(" - ")[1] || "";
-  const locationid = userRole === "SuperAdmin" ? locationSelect.value : userLocationId;
+  const vendorname =
+    vendorSelect.options[vendorSelect.selectedIndex]?.text?.split(" - ")[1] ||
+    "";
+  const locationid =
+    userRole === "SuperAdmin" ? locationSelect.value : userLocationId;
   const health = healthSelect.value;
   const lastService = new Date(lastServiceInput.value).getTime();
   const notes = notesInput.value.trim();
@@ -164,25 +213,32 @@ async function saveMachine() {
   }
 
   if (!selectedMachineId) {
-    const { data: exists } = await supabase.from("machines").select("machineid").eq("machineid", id).maybeSingle();
+    const { data: exists } = await supabase
+      .from("machines")
+      .select("machineid")
+      .eq("machineid", id)
+      .maybeSingle();
+
     if (exists) {
       showToast("Machine already exists", "warning");
       return;
     }
 
-    const { error } = await supabase.from("machines").insert([{
-      machineid: id,
-      machinename: name,
-      vendorid,
-      vendorname,
-      locationid,
-      healthstatus: health,
-      lastservicedate: lastService,
-      notes,
-      qrcode,
-      createdat: now,
-      updatedat: now
-    }]);
+    const { error } = await supabase.from("machines").insert([
+      {
+        machineid: id,
+        machinename: name,
+        vendorid,
+        vendorname,
+        locationid,
+        healthstatus: health,
+        lastservicedate: lastService,
+        notes,
+        qrcode,
+        createdat: now,
+        updatedat: now,
+      },
+    ]);
 
     if (!error) {
       showToast("Machine created", "success");
@@ -190,17 +246,20 @@ async function saveMachine() {
       loadMachines();
     }
   } else {
-    const { error } = await supabase.from("machines").update({
-      machinename: name,
-      vendorid,
-      vendorname,
-      locationid,
-      healthstatus: health,
-      lastservicedate: lastService,
-      notes,
-      qrcode,
-      updatedat: now
-    }).eq("machineid", selectedMachineId);
+    const { error } = await supabase
+      .from("machines")
+      .update({
+        machinename: name,
+        vendorid,
+        vendorname,
+        locationid,
+        healthstatus: health,
+        lastservicedate: lastService,
+        notes,
+        qrcode,
+        updatedat: now,
+      })
+      .eq("machineid", selectedMachineId);
 
     if (!error) {
       showToast("Machine updated", "success");
@@ -210,10 +269,17 @@ async function saveMachine() {
   }
 }
 
-// Delete machine
+// ---------------------------------------------------------
+// DELETE MACHINE
+// ---------------------------------------------------------
 async function deleteMachine() {
   if (!selectedMachineId) return;
-  const { error } = await supabase.from("machines").delete().eq("machineid", selectedMachineId);
+
+  const { error } = await supabase
+    .from("machines")
+    .delete()
+    .eq("machineid", selectedMachineId);
+
   if (!error) {
     showToast("Machine deleted", "success");
     resetForm();
@@ -221,7 +287,9 @@ async function deleteMachine() {
   }
 }
 
-// Reset form
+// ---------------------------------------------------------
+// RESET FORM
+// ---------------------------------------------------------
 function resetForm() {
   selectedMachineId = null;
   idInput.value = "";
@@ -234,13 +302,17 @@ function resetForm() {
   qrPreview.innerHTML = `<span class="qr-placeholder-text">QR will appear here</span>`;
 }
 
-// QR
+// ---------------------------------------------------------
+// QR CODE
+// ---------------------------------------------------------
 function renderQR(text) {
   qrPreview.innerHTML = "";
   new QRCode(qrPreview, { text, width: 128, height: 128 });
 }
 
-// Summary
+// ---------------------------------------------------------
+// SUMMARY
+// ---------------------------------------------------------
 function loadSummary(row) {
   summaryHealth.textContent = row.healthstatus;
   summaryLastService.textContent = formatDate(row.lastservicedate);
@@ -248,12 +320,16 @@ function loadSummary(row) {
   summaryLocation.textContent = row.locationid;
 }
 
-// Timeline placeholder
+// ---------------------------------------------------------
+// TIMELINE (PLACEHOLDER)
+// ---------------------------------------------------------
 function loadTimeline() {
   timelineContent.innerHTML = `<div class="timeline-empty">No events yet</div>`;
 }
 
-// Helpers
+// ---------------------------------------------------------
+// HELPERS
+// ---------------------------------------------------------
 function formatDate(ms) {
   if (!ms) return "—";
   return new Date(ms).toLocaleDateString();
@@ -265,9 +341,13 @@ function formatDateInput(ms) {
 }
 
 function getHealthIcon(status) {
-  return status === "Good" ? "🟢" :
-         status === "Warning" ? "🟡" :
-         status === "Critical" ? "🔴" : "—";
+  return status === "Good"
+    ? "🟢"
+    : status === "Warning"
+    ? "🟡"
+    : status === "Critical"
+    ? "🔴"
+    : "—";
 }
 
 function showToast(msg, type = "info") {
@@ -278,7 +358,9 @@ function showToast(msg, type = "info") {
   setTimeout(() => t.remove(), 3000);
 }
 
-// Pagination
+// ---------------------------------------------------------
+// PAGINATION
+// ---------------------------------------------------------
 prevPageBtn.onclick = () => {
   currentPage--;
   loadMachines();
@@ -289,7 +371,9 @@ nextPageBtn.onclick = () => {
   loadMachines();
 };
 
-// Events
+// ---------------------------------------------------------
+// EVENTS
+// ---------------------------------------------------------
 searchInput.oninput = loadMachines;
 healthFilter.onchange = loadMachines;
 locationFilter.onchange = loadMachines;
@@ -297,8 +381,10 @@ refreshBtn.onclick = loadMachines;
 saveBtn.onclick = saveMachine;
 deleteBtn.onclick = deleteMachine;
 resetBtn.onclick = resetForm;
+
 generateQRBtn.onclick = () => renderQR(`MACHINE:${idInput.value}`);
 printQRBtn.onclick = () => window.print();
+
 downloadQRBtn.onclick = () => {
   const img = qrPreview.querySelector("img");
   if (!img) return;
@@ -308,7 +394,9 @@ downloadQRBtn.onclick = () => {
   a.click();
 };
 
-// Init
+// ---------------------------------------------------------
+// INIT
+// ---------------------------------------------------------
 (async function init() {
   await loadVendors();
   await loadLocations();
