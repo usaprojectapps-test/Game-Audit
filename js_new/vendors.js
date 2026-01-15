@@ -1,7 +1,7 @@
 // -------------------------------------------------------------
 // SUPABASE IMPORT
 // -------------------------------------------------------------
-import { supabase } from "/js_new/supabaseClient.js"; 
+import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 
 // -------------------------------------------------------------
@@ -10,8 +10,6 @@ import { showToast } from "./toast.js";
 const tableBody = document.getElementById("vendorTableBody");
 const searchInput = document.getElementById("vendorSearch");
 const filterStatus = document.getElementById("vendorFilterStatus");
-
-// SuperAdmin-only location filter (added in HTML)
 const filterLocation = document.getElementById("vendorFilterLocation");
 
 const pageInfo = document.getElementById("vendorPageInfo");
@@ -39,6 +37,7 @@ let currentPage = 1;
 const pageSize = 20;
 
 let lastSavedVendorId = null;
+let locationMap = {};
 
 // -------------------------------------------------------------
 // LOAD USER PROFILE
@@ -74,18 +73,15 @@ function applyRolePermissions() {
 
   if (userRole === "SuperAdmin") {
     formId.disabled = false;
-    deleteBtn.disabled = true; // enabled only after selecting vendor
-    filterLocation.style.display = "block"; // show location filter
+    filterLocation.style.display = "block";
   }
 
   if (userRole === "LocationAdmin") {
     formId.disabled = false;
-    deleteBtn.disabled = true;
   }
 
   if (userRole === "Manager" || userRole === "Audit") {
     formId.disabled = false;
-    deleteBtn.disabled = true;
   }
 }
 
@@ -113,8 +109,6 @@ formPhone.addEventListener("blur", () => {
 // -------------------------------------------------------------
 // LOCATION MAP
 // -------------------------------------------------------------
-let locationMap = {};
-
 async function loadLocationsMap() {
   const { data, error } = await supabase
     .from("locations")
@@ -126,9 +120,7 @@ async function loadLocationsMap() {
     return;
   }
 
-  locationMap = Object.fromEntries(
-    data.map(loc => [loc.id, loc.name])
-  );
+  locationMap = Object.fromEntries(data.map(loc => [loc.id, loc.name]));
 
   if (userRole === "SuperAdmin") {
     filterLocation.innerHTML = `<option value="">All Locations</option>`;
@@ -156,11 +148,10 @@ async function loadVendors(reset = false) {
     .order("VendorName", { ascending: true })
     .range(from, to);
 
-  // SuperAdmin can filter by location
   if (userRole === "SuperAdmin") {
     const selectedLoc = filterLocation.value;
     if (selectedLoc) query = query.eq("location_id", selectedLoc);
-  } else {
+  } else if (userLocationId) {
     query = query.eq("location_id", userLocationId);
   }
 
@@ -171,11 +162,14 @@ async function loadVendors(reset = false) {
     return;
   }
 
-  renderTable(data);
+  renderTable(data || []);
   pageInfo.textContent = `Page ${currentPage}`;
 }
 
-/function renderTable(rows) {
+// -------------------------------------------------------------
+// RENDER TABLE
+// -------------------------------------------------------------
+function renderTable(rows) {
   tableBody.innerHTML = "";
 
   const search = searchInput.value.toLowerCase();
@@ -223,27 +217,27 @@ async function loadVendorDetails(id) {
     .eq("VendorId", id)
     .single();
 
-  if (error) return;
+  if (error || !data) return;
 
   formId.value = data.VendorId;
   formName.value = data.VendorName;
-  formContact.value = data.VenContPerson;
-  formPhone.value = data.VenContPerPhone;
-  formAddress.value = data.VenAddress;
-  formStatus.value = data.VenStatus;
-  formNotes.value = data.VenNotes;
+  formContact.value = data.VenContPerson || "";
+  formPhone.value = data.VenContPerPhone || "";
+  formAddress.value = data.VenAddress || "";
+  formStatus.value = data.VenStatus || "Active";
+  formNotes.value = data.VenNotes || "";
 
   deleteBtn.disabled = false;
 }
 
 // -------------------------------------------------------------
-// SAVE VENDOR (INSERT + UPDATE)
+// SAVE VENDOR
 // -------------------------------------------------------------
 async function saveVendor() {
   const id = formId.value.trim();
 
   if (!id) return showToast("Vendor ID required", "error");
-  if (formPhone.value.length !== 12)
+  if (formPhone.value && formPhone.value.length !== 12)
     return showToast("Phone must be 000-000-0000", "error");
 
   const vendorData = {

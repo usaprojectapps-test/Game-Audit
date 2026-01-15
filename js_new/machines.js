@@ -21,6 +21,7 @@ const locationFilter = document.getElementById("machines-location-filter");
 
 const tableBody = document.getElementById("machines-table-body");
 const paginationText = document.getElementById("machines-pagination-text");
+const currentPageSpan = document.getElementById("machines-current-page");
 const prevPageBtn = document.getElementById("machines-prev-page");
 const nextPageBtn = document.getElementById("machines-next-page");
 
@@ -40,12 +41,12 @@ const summaryVendor = document.getElementById("machines-summary-vendor");
 const summaryLocation = document.getElementById("machines-summary-location");
 
 const timelineContent = document.getElementById("machines-timeline-content");
-const toastContainer = document.getElementById("machines-toast-container");
 
 // -------------------------------------------------------------
 // STATE
 // -------------------------------------------------------------
 let currentPage = 1;
+const pageSize = 20;
 let selectedMachineId = null;
 
 // -------------------------------------------------------------
@@ -75,28 +76,40 @@ function getHealthIcon(status) {
 // LOADERS
 // -------------------------------------------------------------
 async function loadVendors() {
-  const { data, error } = await supabase.from("vendors").select("vendorid,vendorname");
-  if (error) return showToast("Failed to load vendors", "error");
+  const { data, error } = await supabase
+    .from("Vendors")
+    .select("VendorId, VendorName")
+    .order("VendorName", { ascending: true });
+
+  if (error) {
+    console.error("Vendor load error:", error);
+    return showToast("Failed to load vendors", "error");
+  }
 
   vendorSelect.innerHTML = `<option value="">Select vendor</option>`;
-  data.forEach(v => {
+  (data || []).forEach(v => {
     const opt = document.createElement("option");
-    opt.value = v.vendorid;
-    opt.textContent = v.vendorname;
+    opt.value = v.VendorId;
+    opt.textContent = v.VendorName;
     vendorSelect.appendChild(opt);
   });
 }
 
 async function loadLocations() {
-  const role = supabase.auth.getUser()?.user_metadata?.role;
-  if (role !== "SuperAdmin") return;
+  const { data, error } = await supabase
+    .from("locations")
+    .select("id, name")
+    .order("name", { ascending: true });
 
-  const { data, error } = await supabase.from("locations").select("id,name");
-  if (error) return showToast("Failed to load locations", "error");
+  if (error) {
+    console.error("Location load error:", error);
+    return showToast("Failed to load locations", "error");
+  }
 
   locationSelect.innerHTML = `<option value="">Select location</option>`;
   locationFilter.innerHTML = `<option value="">All locations</option>`;
-  data.forEach(loc => {
+
+  (data || []).forEach(loc => {
     const opt1 = document.createElement("option");
     opt1.value = loc.id;
     opt1.textContent = loc.name;
@@ -109,22 +122,37 @@ async function loadLocations() {
   });
 }
 
-async function loadMachines() {
-  const query = supabase.from("machines").select("*").order("createdat", { ascending: false });
+async function loadMachines(reset = false) {
+  if (reset) currentPage = 1;
+
+  const from = (currentPage - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase
+    .from("machines")
+    .select("*")
+    .order("createdat", { ascending: false })
+    .range(from, to);
 
   const search = searchInput.value.trim();
   const health = healthFilter.value;
   const location = locationFilter.value;
 
-  if (search) query.ilike("machinename", `%${search}%`);
-  if (health) query.eq("healthstatus", health);
-  if (location) query.eq("location_id", location);
+  if (search) query = query.ilike("machinename", `%${search}%`);
+  if (health) query = query.eq("healthstatus", health);
+  if (location) query = query.eq("location_id", location);
 
   const { data, error } = await query;
-  if (error) return showToast("Failed to load machines", "error");
 
+  if (error) {
+    console.error("Machine load error:", error);
+    return showToast("Failed to load machines", "error");
+  }
+
+  const rows = data || [];
   tableBody.innerHTML = "";
-  data.forEach(machine => {
+
+  rows.forEach(machine => {
     const tr = document.createElement("tr");
     tr.onclick = () => selectMachine(machine);
     tr.innerHTML = `
@@ -133,12 +161,16 @@ async function loadMachines() {
       <td>${machine.vendorname || "—"}</td>
       <td>${getHealthIcon(machine.healthstatus)}</td>
       <td>${formatDate(machine.lastservicedate)}</td>
-      <td>${machine.location_id}</td>
+      <td>${machine.location_id || "—"}</td>
     `;
     tableBody.appendChild(tr);
   });
 
-  paginationText.textContent = `Showing ${data.length} of ${data.length}`;
+  paginationText.textContent = `Showing ${rows.length} of ${rows.length}`;
+  currentPageSpan.textContent = String(currentPage);
+
+  prevPageBtn.disabled = currentPage === 1;
+  nextPageBtn.disabled = rows.length < pageSize;
 }
 
 // -------------------------------------------------------------
@@ -146,11 +178,11 @@ async function loadMachines() {
 // -------------------------------------------------------------
 function selectMachine(machine) {
   selectedMachineId = machine.machineid;
-  idInput.value = machine.machineid;
-  nameInput.value = machine.machinename;
+  idInput.value = machine.machineid || "";
+  nameInput.value = machine.machinename || "";
   vendorSelect.value = machine.vendorid || "";
   locationSelect.value = machine.location_id || "";
-  healthSelect.value = machine.healthstatus || "";
+  healthSelect.value = machine.healthstatus || "Good";
   lastServiceInput.value = formatDateInput(machine.lastservicedate);
   notesInput.value = machine.notes || "";
 
@@ -184,42 +216,76 @@ function resetForm() {
 // SAVE / DELETE
 // -------------------------------------------------------------
 async function saveMachine() {
+  const machineId = idInput.value.trim();
+  const machineName = nameInput.value.trim();
+
+  if (!machineId || !machineName) {
+    return showToast("Machine ID and Name are required", "error");
+  }
+
+  const selectedVendorOption = vendorSelect.selectedOptions[0];
   const payload = {
-    machineid: idInput.value.trim(),
-    machinename: nameInput.value.trim(),
+    machineid: machineId,
+    machinename: machineName,
     vendorid: vendorSelect.value || null,
+    vendorname: selectedVendorOption ? selectedVendorOption.textContent : null,
     location_id: locationSelect.value || null,
     healthstatus: healthSelect.value,
-    lastservicedate: lastServiceInput.value ? new Date(lastServiceInput.value).getTime() : null,
+    lastservicedate: lastServiceInput.value
+      ? new Date(lastServiceInput.value).getTime()
+      : null,
     notes: notesInput.value.trim(),
     updatedat: Date.now(),
   };
 
-  if (!payload.machineid || !payload.machinename) {
-    return showToast("Machine ID and Name are required", "error");
-  }
-
   if (selectedMachineId) {
-    const { error } = await supabase.from("machines").update(payload).eq("machineid", selectedMachineId);
-    if (error) return showToast("Update failed", "error");
+    const { error } = await supabase
+      .from("machines")
+      .update(payload)
+      .eq("machineid", selectedMachineId);
+
+    if (error) {
+      console.error("Machine update error:", error);
+      return showToast("Update failed", "error");
+    }
+
     showToast("Machine updated", "success");
   } else {
     payload.createdat = Date.now();
-    const { error } = await supabase.from("machines").insert(payload);
-    if (error) return showToast("Insert failed", "error");
+
+    const { error } = await supabase
+      .from("machines")
+      .insert(payload);
+
+    if (error) {
+      console.error("Machine insert error:", error);
+      return showToast("Insert failed", "error");
+    }
+
     showToast("Machine added", "success");
   }
 
-  await loadMachines();
+  await loadMachines(true);
   resetForm();
 }
 
 async function deleteMachine() {
-  if (!selectedMachineId) return showToast("No machine selected", "error");
-  const { error } = await supabase.from("machines").delete().eq("machineid", selectedMachineId);
-  if (error) return showToast("Delete failed", "error");
+  if (!selectedMachineId) {
+    return showToast("No machine selected", "error");
+  }
+
+  const { error } = await supabase
+    .from("machines")
+    .delete()
+    .eq("machineid", selectedMachineId);
+
+  if (error) {
+    console.error("Machine delete error:", error);
+    return showToast("Delete failed", "error");
+  }
+
   showToast("Machine deleted", "success");
-  await loadMachines();
+  await loadMachines(true);
   resetForm();
 }
 
@@ -228,8 +294,12 @@ async function deleteMachine() {
 // -------------------------------------------------------------
 generateQRBtn.onclick = () => {
   qrPreview.innerHTML = "";
+  if (!idInput.value.trim()) {
+    return showToast("Enter Machine ID before generating QR", "warning");
+  }
+  // Assumes QRCode library is loaded globally
   new QRCode(qrPreview, {
-    text: `MACHINE:${idInput.value}`,
+    text: `MACHINE:${idInput.value.trim()}`,
     width: 128,
     height: 128,
   });
@@ -242,6 +312,40 @@ downloadQRBtn.onclick = () => {
   if (!img) return;
   const a = document.createElement("a");
   a.href = img.src;
-  a.download = `${idInput.value}_qr.png`;
-  a.click
-}
+  a.download = `${idInput.value.trim() || "machine"}_qr.png`;
+  a.click();
+};
+
+// -------------------------------------------------------------
+// EVENTS
+// -------------------------------------------------------------
+searchInput.addEventListener("input", () => loadMachines(true));
+healthFilter.addEventListener("change", () => loadMachines(true));
+locationFilter.addEventListener("change", () => loadMachines(true));
+
+refreshBtn.addEventListener("click", () => loadMachines(true));
+
+prevPageBtn.addEventListener("click", () => {
+  if (currentPage > 1) {
+    currentPage--;
+    loadMachines();
+  }
+});
+
+nextPageBtn.addEventListener("click", () => {
+  currentPage++;
+  loadMachines();
+});
+
+saveBtn.addEventListener("click", saveMachine);
+deleteBtn.addEventListener("click", deleteMachine);
+resetBtn.addEventListener("click", resetForm);
+
+// -------------------------------------------------------------
+// INITIAL LOAD
+// -------------------------------------------------------------
+(async () => {
+  await loadVendors();
+  await loadLocations();
+  await loadMachines(true);
+})();
