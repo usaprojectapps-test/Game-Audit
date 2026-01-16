@@ -107,36 +107,36 @@
               <input type="date" id="machines-lastservice-input" class="input" />
             </div>
 
-            <!-- Notes + QR + QR Buttons in one row -->
-          <div class="form-group form-group-full notes-qr-button-row">
-            <!-- Notes -->
-            <div class="notes-column">
-              <label class="form-label">Notes</label>
-              <textarea id="machines-notes-input" class="textarea" rows="2" style="width: 100%; resize: vertical;"></textarea>
-            </div>
+           <!-- Notes + QR preview + QR buttons in one row -->
+        <div class="form-group form-group-full notes-qr-inline-row">
+          <!-- Notes -->
+          <div class="notes-column">
+            <label class="form-label">Notes</label>
+            <textarea id="machines-notes-input" class="textarea" rows="2" style="width: 100%; resize: vertical;"></textarea>
+          </div>
 
-            <!-- QR Preview -->
-            <div class="qr-column">
-              <label class="form-label">Machine QR Code</label>
-              <div id="machines-qr-preview" class="qr-preview">
-                <span class="qr-placeholder-text">QR will appear here</span>
-              </div>
-            </div>
-
-            <!-- QR Buttons stacked vertically -->
-            <div class="qr-button-column">
-              <button id="machines-generate-qr-btn" class="btn btn-secondary">Generate QR</button>
-              <button id="machines-print-qr-btn" class="btn btn-secondary">Print</button>
-              <button id="machines-download-qr-btn" class="btn btn-secondary">Download</button>
+          <!-- QR Preview -->
+          <div class="qr-column">
+            <label class="form-label">Machine QR Code</label>
+            <div id="machines-qr-preview" class="qr-preview">
+              <span class="qr-placeholder-text">QR will appear here</span>
             </div>
           </div>
 
-          <!-- Form action buttons aligned horizontally -->
-          <div class="form-actions button-row">
-            <button id="machines-reset-btn" class="btn btn-secondary">Clear</button>
-            <button id="machines-delete-btn" class="btn btn-danger">Delete</button>
-            <button id="machines-save-btn" class="btn btn-primary">Save</button>
+          <!-- QR Buttons stacked vertically -->
+          <div class="qr-button-column">
+            <button id="machines-generate-qr-btn" class="btn btn-secondary">Generate QR</button>
+            <button id="machines-print-qr-btn" class="btn btn-secondary">Print</button>
+            <button id="machines-download-qr-btn" class="btn btn-secondary">Download</button>
           </div>
+        </div>
+
+        <!-- Form action buttons aligned horizontally -->
+        <div class="form-actions button-row">
+          <button id="machines-reset-btn" class="btn btn-secondary">Clear</button>
+          <button id="machines-delete-btn" class="btn btn-danger">Delete</button>
+          <button id="machines-save-btn" class="btn btn-primary">Save</button>
+        </div>
 
         </div>
       </div>

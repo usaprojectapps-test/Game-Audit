@@ -411,19 +411,20 @@ body {
   margin-bottom: 12px;
 }
 
-.notes-qr-button-row {
+.notes-qr-inline-row {
   display: flex;
-  gap: 16px;
+  gap: 24px;
   align-items: flex-start;
   margin-bottom: 16px;
 }
 
 .notes-column {
   flex: 1;
+  min-width: 300px;
 }
 
 .qr-column {
-  width: 180px;
+  width: 160px;
 }
 
 .qr-preview {
@@ -440,6 +441,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 140px;
 }
 
 .button-row {
@@ -447,6 +449,7 @@ body {
   justify-content: flex-end;
   gap: 12px;
 }
+
 
 /*    MAchines Copleted */
 
