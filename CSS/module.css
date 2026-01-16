@@ -189,17 +189,26 @@
 /*------------------------------*/
 .vendor-wrapper {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   width: 92%;
   max-width: 1400px;
   margin: 30px auto;
 }
 
-.vendor-left,
-.vendor-right {
-  width: 50%;
-  flex: 0 0 50%;
+.vendor-left {
+  flex: 0 0 52%;
 }
+
+.vendor-right {
+  flex: 0 0 48%;
+  padding: 28px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
 
 @media (max-width: 768px) {
   .vendor-wrapper {
@@ -221,15 +230,7 @@
   border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
 }
-.vendor-right {
-  width: 50%;
-  padding: 24px 28px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
+
 .vendor-search-bar input {
   flex: 1;
   padding: 10px 14px;
@@ -262,4 +263,11 @@
   gap: 12px;
   margin-bottom: 16px;
   flex-wrap: wrap;
+}
+.card-header {
+  font-size: 20px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 16px;
+  font-family: 'Sora', sans-serif;
 }
