@@ -1,29 +1,95 @@
 /* ============================================================
    UNIVERSAL MODULE LAYOUT — 50/50 LEFT TABLE + RIGHT FORM
    ============================================================ */
-.module-body {
-  display: flex !important;
-  flex-direction: row !important;
-  gap: 20px !important;
+.module-wrapper {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 20px;
   width: 100%;
+  max-width: 1400px;
+  margin: 30px auto;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .module-left,
 .module-right {
-  width: 50% !important;
-  flex: 0 0 50% !important;
+  flex: 1 1 0;
+  max-width: 50%;
+  min-width: 0;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  padding: 20px;
 }
 
-/* Mobile */
 @media (max-width: 768px) {
-  .module-body {
-    flex-direction: column !important;
+  .module-wrapper {
+    flex-direction: column;
   }
+
   .module-left,
   .module-right {
-    width: 100% !important;
-    flex: 0 0 100% !important;
+    flex: 0 0 100%;
+    max-width: 100%;
   }
+}
+select,
+input,
+textarea {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.12);
+  color: white;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+select option {
+  background-color: #1e1e1e;
+  color: white;
+}
+.table-wrapper {
+  width: 100%;
+  max-height: 420px;
+  overflow-y: auto;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #e2e8f0;
+}
+
+.table-wrapper th {
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.table-wrapper td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+}
+
+.table-wrapper tr:hover td {
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 /* ============================================================
@@ -76,8 +142,9 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 14px 20px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
+
 
 .form-group {
   display: flex;
