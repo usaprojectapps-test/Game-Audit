@@ -416,6 +416,7 @@ body {
   display: flex;
   gap: 16px;
   align-items: flex-start;
+  margin-bottom: 12px;
 }
 
 .notes-column {
@@ -439,18 +440,20 @@ body {
   border: 1px solid #ccc;
 }
 
-.qr-actions-vertical {
+.qr-actions-row {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .button-row {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 16px;
 }
+
+
 /*    MAchines Copleted */
 
 .module-right .form-card {

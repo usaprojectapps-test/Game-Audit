@@ -109,24 +109,34 @@
             </div>
 
             <!-- Notes + QR side-by-side -->
-            <div class="form-group form-group-full notes-qr-row">
-              <div class="notes-column">
-                <label class="form-label">Notes</label>
-                <textarea id="machines-notes-input" class="textarea" rows="2" style="width: 100%; resize: vertical;"></textarea>
-              </div>
+          <div class="form-group form-group-full notes-qr-row">
+            <div class="notes-column">
+              <label class="form-label">Notes</label>
+              <textarea id="machines-notes-input" class="textarea" rows="2" style="width: 100%; resize: vertical;"></textarea>
+            </div>
 
-              <div class="qr-column">
-                <label class="form-label">Machine QR Code</label>
-                <div id="machines-qr-preview" class="qr-preview">
-                  <span class="qr-placeholder-text">QR will appear here</span>
-                </div>
-                <div class="qr-actions-vertical">
-                  <button id="machines-generate-qr-btn" class="btn btn-secondary">Generate QR</button>
-                  <button id="machines-print-qr-btn" class="btn btn-secondary">Print</button>
-                  <button id="machines-download-qr-btn" class="btn btn-secondary">Download</button>
-                </div>
+            <div class="qr-column">
+              <label class="form-label">Machine QR Code</label>
+              <div id="machines-qr-preview" class="qr-preview">
+                <span class="qr-placeholder-text">QR will appear here</span>
               </div>
             </div>
+          </div>
+
+          <!-- QR action buttons below -->
+          <div class="qr-actions-row">
+            <button id="machines-generate-qr-btn" class="btn btn-secondary">Generate QR</button>
+            <button id="machines-print-qr-btn" class="btn btn-secondary">Print</button>
+            <button id="machines-download-qr-btn" class="btn btn-secondary">Download</button>
+          </div>
+
+          <!-- Form action buttons below -->
+          <div class="form-actions button-row">
+            <button id="machines-reset-btn" class="btn btn-secondary">Clear</button>
+            <button id="machines-delete-btn" class="btn btn-danger">Delete</button>
+            <button id="machines-save-btn" class="btn btn-primary">Save</button>
+          </div>
+
 
           </div>
         </div>
