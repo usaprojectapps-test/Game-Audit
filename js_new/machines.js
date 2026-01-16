@@ -310,44 +310,95 @@ async function deleteMachine() {
 // -------------------------------------------------------------
 generateQRBtn.onclick = () => {
   const machineId = idInput.value.trim();
+  const machineName = nameInput.value.trim();
+
   if (!machineId) {
     return showToast("Enter Machine ID before generating QR", "warning");
   }
 
-  // Clear only the QR canvas, NOT the label
+  // Clear only the canvas
   const qrCanvas = document.getElementById("machines-qr-canvas");
   qrCanvas.innerHTML = "";
 
-  // Generate QR inside the canvas
+  // Generate QR
   new QRCode(qrCanvas, {
     text: `MACHINE:${machineId}`,
     width: 128,
     height: 128,
   });
 
-  // Update label
-  document.getElementById("machines-qr-label").textContent =
-    `Machine ID: ${machineId}`;
+  // ⭐ Update label (ID + Name)
+  document.getElementById("machines-qr-label").innerHTML = `
+    <div style="font-weight:600;">Machine ID: ${machineId}</div>
+    <div style="font-size:13px; opacity:0.8;">${machineName || ""}</div>
+  `;
 };
+
 
 // -------------------------------------------------------------
 // QR PRINT
 // -------------------------------------------------------------
 document.getElementById("machines-print-qr-btn").addEventListener("click", () => {
-  const qrContent = document.getElementById("machines-qr-preview");
+  const machineId = idInput.value.trim();
+  const machineName = nameInput.value.trim();
+  const vendorName = vendorSelect.options[vendorSelect.selectedIndex]?.text || "";
+  const locationName = locationSelect.options[locationSelect.selectedIndex]?.text || "";
+
+  const qrCanvas = document.getElementById("machines-qr-canvas");
+  const qrImage = qrCanvas.querySelector("img") || qrCanvas.querySelector("canvas");
+
+  if (!qrImage) {
+    return showToast("Generate QR before printing", "warning");
+  }
+
+  const qrSrc = qrImage.src || qrImage.toDataURL();
+
   const printWindow = window.open("", "_blank");
   printWindow.document.write(`
     <html>
-      <head><title>Print QR</title></head>
-      <body style="margin:0; display:flex; justify-content:center; align-items:center; height:100vh;">
-        ${qrContent.innerHTML}
+      <head>
+        <title>Machine QR Ticket</title>
+      </head>
+      <body style="
+        margin:0;
+        font-family:Arial, sans-serif;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        height:100vh;
+        background:#fff;
+      ">
+        <div style="
+          width:300px;
+          padding:20px;
+          border:2px solid #000;
+          border-radius:10px;
+          text-align:center;
+        ">
+          <h2 style="margin:0 0 10px 0;">MACHINE QR TICKET</h2>
+
+          <div style="text-align:left; margin-bottom:15px; font-size:14px;">
+            <strong>Machine ID:</strong> ${machineId}<br>
+            <strong>Machine Name:</strong> ${machineName}<br>
+            <strong>Vendor:</strong> ${vendorName}<br>
+            <strong>Location:</strong> ${locationName}<br>
+          </div>
+
+          <img src="${qrSrc}" style="width:150px; height:150px; margin-bottom:10px;" />
+
+          <div style="font-size:12px; opacity:0.7;">
+            Generated on ${new Date().toLocaleString()}
+          </div>
+        </div>
       </body>
     </html>
   `);
+
   printWindow.document.close();
   printWindow.focus();
   printWindow.print();
 });
+
 
 downloadQRBtn.onclick = () => {
   const img = qrPreview.querySelector("img");
