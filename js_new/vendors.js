@@ -5,15 +5,16 @@ import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 
 // -------------------------------------------------------------
-// AUTO INITIALIZER (works with your module loader)
+// AUTO INITIALIZER (corrected)
 // -------------------------------------------------------------
-setTimeout(() => {
-  document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => initVendorsModule(), 100);
 });
 
-
-  function initVendorsModule() {
+// -------------------------------------------------------------
+// MAIN MODULE FUNCTION
+// -------------------------------------------------------------
+function initVendorsModule() {
   console.log("Vendors module initializing...");
 
   // -------------------------------------------------------------
@@ -123,7 +124,7 @@ setTimeout(() => {
   });
 
   // -------------------------------------------------------------
-  // LOCATION MAP
+  // LOAD LOCATIONS
   // -------------------------------------------------------------
   async function loadLocationsMap() {
     const { data, error } = await supabase
@@ -141,7 +142,6 @@ setTimeout(() => {
     if (userRole === "SuperAdmin") {
       console.log("Populating location dropdown with:", data);
       filterLocation.innerHTML = `<option value="">All Locations</option>`;
-      console.log("Dropdown innerHTML after population:", filterLocation.innerHTML);
 
       data.forEach(loc => {
         const opt = document.createElement("option");
@@ -153,7 +153,7 @@ setTimeout(() => {
   }
 
   // -------------------------------------------------------------
-  // LOAD Vendors
+  // LOAD VENDORS
   // -------------------------------------------------------------
   async function loadVendors(reset = false) {
     if (reset) currentPage = 1;
@@ -368,16 +368,15 @@ setTimeout(() => {
   saveBtn.addEventListener("click", saveVendor);
   deleteBtn.addEventListener("click", deleteVendor);
 
-// -------------------------------------------------------------
-// INITIAL LOAD
-// -------------------------------------------------------------
-(async () => {
-  await loadUserProfile();
-  await loadLocationsMap();
-  setTimeout(() => loadVendors(true), 50);
-})();
+  // -------------------------------------------------------------
+  // INITIAL LOAD
+  // -------------------------------------------------------------
+  (async () => {
+    await loadUserProfile();
+    await loadLocationsMap();
+    setTimeout(() => loadVendors(true), 50);
+  })();
 } // END initVendorsModule
 
 // Make function available globally
 window.initVendorsModule = initVendorsModule;
-} // <-- FINAL CLOSING BRACE (MISSING IN YOUR FILE)
