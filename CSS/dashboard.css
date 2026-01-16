@@ -308,3 +308,19 @@ body {
   background: #f8d7da;
   color: #721c24;
 }
+.module-body {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 20px !important;
+}
+
+.module-left,
+.module-right {
+  width: 50% !important;
+  flex: 0 0 50% !important;
+}
+
+@media (max-width: 768px) {
+  .module-body {
+    flex-direction: column;
+  }
