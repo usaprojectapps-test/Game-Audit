@@ -367,11 +367,11 @@ export function initVendorsModule() {
   deleteBtn.addEventListener("click", deleteVendor);
 
   // -------------------------------------------------------------
-  // INITIAL LOAD
-  // -------------------------------------------------------------
-  (async () => {
-  await loadUserProfile();       // Get role and location_id
-  await loadLocationsMap();     // Populate dropdown
-  setTimeout(() => loadVendors(true), 50);  // Load vendors after dropdown is ready
+// INITIAL LOAD
+// -------------------------------------------------------------
+(async () => {
+  await loadUserProfile();       
+  await loadLocationsMap();      
+  setTimeout(() => loadVendors(true), 50);
 })();
-}
+} // END initVendorsModule
