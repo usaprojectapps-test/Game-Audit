@@ -404,6 +404,53 @@ body {
   margin-left: 6px;
 }
 
+.filters-row.compact-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.notes-qr-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.notes-column {
+  flex: 1;
+}
+
+.qr-column {
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.qr-preview {
+  width: 100%;
+  height: 120px;
+  background: #f4f4f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ccc;
+}
+
+.qr-actions-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.button-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
 /*    MAchines Copleted */
 
 .module-right .form-card {
