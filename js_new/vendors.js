@@ -117,24 +117,28 @@ function initVendorsModule() {
     // -------------------------------------------------------------
     // APPLY ROLE PERMISSIONS
     // -------------------------------------------------------------
-    function applyRolePermissions() {
+      function applyRolePermissions() {
       if (deleteBtn) deleteBtn.disabled = true;
 
-      // default hide location filter; show only for SuperAdmin
+      // hide by default
       if (filterLocation) filterLocation.style.display = "none";
 
-      if (userRole === "SuperAdmin") {
+      const role = (userRole || "").toString().trim().toLowerCase();
+
+      if (role.includes("super")) {
         if (formId) formId.disabled = false;
         if (filterLocation) filterLocation.style.display = "block";
-        console.log("Showing location filter for SuperAdmin");
+        console.log("Showing location filter for SuperAdmin (role match)", userRole);
       }
 
-      if (userRole === "LocationAdmin") {
+      if (role.includes("location")) {
         if (formId) formId.disabled = false;
+        console.log("LocationAdmin permissions applied");
       }
 
-      if (userRole === "Manager" || userRole === "Audit") {
+      if (role.includes("manager") || role.includes("audit")) {
         if (formId) formId.disabled = false;
+        console.log("Manager/Audit permissions applied");
       }
     }
 
@@ -182,6 +186,8 @@ function initVendorsModule() {
             opt.textContent = loc.name;
             filterLocation.appendChild(opt);
           });
+          // show it for debugging; applyRolePermissions will hide/show properly afterwards 
+            filterLocation.style.display = "block";
         }
 
         console.log("Populated location dropdown with:", data);
