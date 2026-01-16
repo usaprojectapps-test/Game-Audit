@@ -1,7 +1,7 @@
 /* ============================================================
    UNIVERSAL MODULE LAYOUT — 50/50 LEFT TABLE + RIGHT FORM
    ============================================================ */
-.module-wrapper {
+module-wrapper {
   display: flex;
   flex-wrap: nowrap;
   gap: 20px;
@@ -25,6 +25,7 @@
   padding: 20px;
 }
 
+/* MOBILE */
 @media (max-width: 768px) {
   .module-wrapper {
     flex-direction: column;
@@ -32,10 +33,10 @@
 
   .module-left,
   .module-right {
-    flex: 0 0 100%;
     max-width: 100%;
   }
 }
+
 select,
 input,
 textarea {
@@ -54,6 +55,8 @@ select option {
   background-color: #1e1e1e;
   color: white;
 }
+
+/* TABLE WRAPPER (GLOBAL) */
 .table-wrapper {
   width: 100%;
   max-height: 420px;
@@ -138,24 +141,31 @@ select option {
    FORM GRID — 2 Columns
    ============================================================ */
 
+/* FORM GRID */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 14px 20px;
-  margin-bottom: 20px;
 }
 
+/* FORM LABELS */
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* FORM ACTIONS */
+.form-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-
-.form-group label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #ffffffcc;
 }
 
 .form-group input,
@@ -324,7 +334,7 @@ select option {
   color: #ccc;
 }
 
-/* HEADER */
+/* CARD HEADER */
 .card-header {
   font-size: 22px;
   font-weight: 600;
@@ -335,6 +345,7 @@ select option {
   padding-bottom: 8px;
 }
 
+
 /* INNER ELEMENTS */
 .card,
 .table-wrapper,
@@ -344,15 +355,6 @@ select option {
   max-width: 100%;
   box-sizing: border-box;
 }
-/*select {
-  background-color: rgba(30, 30, 30, 0.95) !important;
-  color: #ffffff !important;
-}
-
-select option {
-  background-color: rgba(30, 30, 30, 0.95) !important;
-  color: #ffffff !important;
-} */
 
 select {
   padding: 10px 14px;
@@ -383,3 +385,22 @@ select option {
   background-color: #1e1e1e;
   color: white;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* UNIVERSAL MODULE LAYOUT */
+.
+
+
+

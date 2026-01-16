@@ -1,24 +1,26 @@
-<div class="module-left">
+<div class="module-wrapper">
 
   <!-- LEFT: LOCATIONS TABLE -->
-  <div class="module-table glass-card">
+  <div class="module-left">
     <div class="card-header">Locations</div>
 
     <input type="text" id="searchLocation" class="input" placeholder="Search locations...">
 
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Code</th>
-          <th>Name</th>
-          <th>City</th>
-          <th>State</th>
-          <th>Country</th>
-          <th>Role</th>
-        </tr>
-      </thead>
-      <tbody id="locationsTableBody"></tbody>
-    </table>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>City</th>
+            <th>State</th>
+            <th>Country</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody id="locationsTableBody"></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- RIGHT: LOCATION FORM -->
@@ -29,7 +31,6 @@
 
       <div class="form-grid">
 
-        <!-- ROW 1 -->
         <div class="form-group">
           <label>Location Code</label>
           <input type="text" id="locCode" class="input" placeholder="LOC001">
@@ -40,7 +41,6 @@
           <input type="text" id="locName" class="input" placeholder="Main Branch">
         </div>
 
-        <!-- ROW 2 -->
         <div class="form-group">
           <label>Address</label>
           <input type="text" id="locAddress" class="input" placeholder="Street, Area">
@@ -51,7 +51,6 @@
           <input type="text" id="locCity" class="input" placeholder="City">
         </div>
 
-        <!-- ROW 3 -->
         <div class="form-group">
           <label>State</label>
           <input type="text" id="locState" class="input" placeholder="State">
@@ -62,7 +61,6 @@
           <input type="text" id="locCountry" class="input" placeholder="Country">
         </div>
 
-        <!-- ROW 4 -->
         <div class="form-group">
           <label>Contact Person</label>
           <input type="text" id="locContactPerson" class="input" placeholder="John Doe">
@@ -85,29 +83,3 @@
   </div>
 
 </div>
-
-<style>
-  .module-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-
-  .form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px 20px;
-  }
-
-  .form-group label {
-    font-weight: 600;
-    margin-bottom: 4px;
-    display: block;
-  }
-
-  .form-actions {
-    margin-top: 20px;
-    display: flex;
-    gap: 10px;
-  }
-</style>
