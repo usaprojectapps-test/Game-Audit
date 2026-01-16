@@ -4,23 +4,32 @@
 import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 
-console.log("vendors.js executed — top of file", { ready: document.readyState });
+// ----------------------
+// Debug helper (paste here)
+// ----------------------
+const IS_DEV = window.location.hostname === "localhost" || window.location.hostname.endsWith(".local");
+
+function dbg(...args) {
+  if (IS_DEV) console.log(...args);
+}
+
+dbg("vendors.js executed — top of file", { ready: document.readyState });
 
 // -------------------------------------------------------------
 // AUTO INITIALIZER (robust)
 // -------------------------------------------------------------
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", () => {
-    console.log("DOMContentLoaded fired (listener)");
+    dbg("DOMContentLoaded fired (listener)");
     setTimeout(() => {
-      console.log("Calling initVendorsModule() from DOMContentLoaded");
+      dbg("Calling initVendorsModule() from DOMContentLoaded");
       initVendorsModule();
     }, 100);
   });
 } else {
-  console.log("Document already ready, calling initVendorsModule() immediately");
+  dbg("Document already ready, calling initVendorsModule() immediately");
   setTimeout(() => {
-    console.log("Calling initVendorsModule() from readyState !== loading");
+    dbg("Calling initVendorsModule() from readyState !== loading");
     initVendorsModule();
   }, 100);
 }
@@ -29,7 +38,7 @@ if (document.readyState === "loading") {
 // MAIN MODULE FUNCTION
 // -------------------------------------------------------------
 function initVendorsModule() {
-  console.log("Vendors module initializing...");
+  dbg("Vendors module initializing...");
   try {
     // -------------------------------------------------------------
     // ELEMENTS
@@ -54,7 +63,7 @@ function initVendorsModule() {
     const saveBtn = document.getElementById("VendorSaveBtn");
     const deleteBtn = document.getElementById("VendorDeleteBtn");
 
-    console.log("Filter element:", filterLocation);
+    dbg("Filter element:", filterLocation);
 
     if (!tableBody) {
       console.warn("Vendors HTML not ready yet.");
@@ -77,36 +86,36 @@ function initVendorsModule() {
     // LOAD USER PROFILE
     // -------------------------------------------------------------
     async function loadUserProfile() {
-      console.log("🔥 loadUserProfile() CALLED");
+      dbg("🔥 loadUserProfile() CALLED");
 
       // Try to get session; if blocked by browser privacy, log and continue.
       try {
         const { data: sessionData } = await supabase.auth.getSession();
-        console.log("🔥 sessionData:", sessionData);
+        dbg("🔥 sessionData:", sessionData);
 
         if (!sessionData?.session) {
           console.warn("No session found (getSession returned null).");
           // Try fallback: get user (may also be null)
           const { data: userData } = await supabase.auth.getUser();
-          console.log("🔥 fallback getUser:", userData);
+          dbg("🔥 fallback getUser:", userData);
           if (!userData?.user) return;
           const meta = userData.user.user_metadata || {};
           userRole = meta.role || null;
           userLocationId = meta.location_id || null;
-          console.log("User role (fallback):", userRole);
-          console.log("Location ID (fallback):", userLocationId);
+          dbg("User role (fallback):", userRole);
+          dbg("Location ID (fallback):", userLocationId);
           applyRolePermissions();
           return;
         }
 
         const jwt = sessionData.session.user.user_metadata || {};
-        console.log("🔥 JWT metadata:", jwt);
+        dbg("🔥 JWT metadata:", jwt);
 
         userRole = jwt.role || null;
         userLocationId = jwt.location_id || null;
 
-        console.log("User role:", userRole);
-        console.log("Location ID:", userLocationId);
+        dbg("User role:", userRole);
+        dbg("Location ID:", userLocationId);
 
         applyRolePermissions();
       } catch (err) {
@@ -128,17 +137,17 @@ function initVendorsModule() {
       if (role.includes("super")) {
         if (formId) formId.disabled = false;
         if (filterLocation) filterLocation.style.display = "block";
-        console.log("Showing location filter for SuperAdmin (role match)", userRole);
+        dbg("Showing location filter for SuperAdmin (role match)", userRole);
       }
 
       if (role.includes("location")) {
         if (formId) formId.disabled = false;
-        console.log("LocationAdmin permissions applied");
+        dbg("LocationAdmin permissions applied");
       }
 
       if (role.includes("manager") || role.includes("audit")) {
         if (formId) formId.disabled = false;
-        console.log("Manager/Audit permissions applied");
+        dbg("Manager/Audit permissions applied");
       }
     }
 
@@ -190,7 +199,7 @@ function initVendorsModule() {
             filterLocation.style.display = "block";
         }
 
-        console.log("Populated location dropdown with:", data);
+        dbg("Populated location dropdown with:", data);
       } catch (err) {
         console.error("loadLocationsMap error:", err);
       }
@@ -226,7 +235,7 @@ function initVendorsModule() {
           return;
         }
 
-        console.log("Loaded vendors:", data);
+        dbg("Loaded vendors:", data);
         renderTable(data || []);
         if (pageInfo) pageInfo.textContent = `Page ${currentPage}`;
       } catch (err) {
