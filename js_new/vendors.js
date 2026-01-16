@@ -139,6 +139,8 @@ export function initVendorsModule() {
     if (userRole === "SuperAdmin") {
       console.log("Populating location dropdown with:", data);
       filterLocation.innerHTML = `<option value="">All Locations</option>`;
+      console.log("Dropdown innerHTML after population:", filterLocation.innerHTML);
+
       data.forEach(loc => {
         const opt = document.createElement("option");
         opt.value = loc.id;
@@ -368,8 +370,8 @@ export function initVendorsModule() {
   // INITIAL LOAD
   // -------------------------------------------------------------
   (async () => {
-    await loadUserProfile();
-    await loadLocationsMap();
-    await loadVendors(true);
-  })();
+  await loadUserProfile();       // Get role and location_id
+  await loadLocationsMap();     // Populate dropdown
+  setTimeout(() => loadVendors(true), 50);  // Load vendors after dropdown is ready
+})();
 }
