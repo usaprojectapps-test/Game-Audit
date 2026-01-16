@@ -189,7 +189,7 @@
 }
 /* VENDOR TABLE STYLE */
 /*------------------------------*/
-.vendor-wrapper {
+.module-wrapper {
   display: flex;
   flex-wrap: nowrap;
   gap: 20px;
@@ -201,8 +201,8 @@
 }
 
 /* TRUE 50–50 LAYOUT */
-.vendor-left,
-.vendor-right {
+.module-left,
+.module-right {
   flex: 1 1 0;
   max-width: 50%;
   min-width: 0;
@@ -210,8 +210,8 @@
 }
 
 /* CARD LOOK */
-.vendor-left,
-.vendor-right {
+.module-left,
+.module-right {
   background: rgba(255, 255, 255, 0.06);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -221,27 +221,27 @@
 
 /* Mobile stack */
 @media (max-width: 768px) {
-  .vendor-wrapper {
+  .module-wrapper {
     flex-direction: column;
   }
 
-  .vendor-left,
-  .vendor-right {
+  .module-left,
+  .module-right {
     flex: 0 0 100%;
     max-width: 100%;
   }
 }
 
 /* SEARCH BAR */
-.vendor-search-bar {
+.module-search-bar {
   display: flex;
   gap: 12px;
   margin-bottom: 16px;
   flex-wrap: wrap;
 }
 
-.vendor-search-bar input,
-.vendor-search-bar select {
+.module-search-bar input,
+.module-search-bar select {
   padding: 10px 14px;
   border-radius: 10px;
   border: 1px solid rgba(255,255,255,0.2);
@@ -253,7 +253,7 @@
   transition: 0.2s ease;
 }
 
-.vendor-search-bar input::placeholder {
+.module-search-bar input::placeholder {
   color: #ccc;
 }
 
@@ -286,7 +286,7 @@ select option {
   background-color: rgba(30, 30, 30, 0.95) !important;
   color: #ffffff !important;
 } */
- 
+
 select {
   padding: 10px 14px;
   border-radius: 10px;
