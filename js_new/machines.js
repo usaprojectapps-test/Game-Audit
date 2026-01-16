@@ -73,6 +73,12 @@ function getHealthIcon(status) {
 }
 
 // -------------------------------------------------------------
+// GLOBAL MAPS
+// -------------------------------------------------------------
+const locationMap = {};
+const vendorMap = {};
+
+// -------------------------------------------------------------
 // LOADERS
 // -------------------------------------------------------------
 async function loadVendors() {
@@ -87,7 +93,10 @@ async function loadVendors() {
   }
 
   vendorSelect.innerHTML = `<option value="">Select vendor</option>`;
+  vendorMap.clear?.(); // if Map object, otherwise reset manually
   (data || []).forEach(v => {
+    vendorMap[v.VendorId] = v.VendorName;
+
     const opt = document.createElement("option");
     opt.value = v.VendorId;
     opt.textContent = v.VendorName;
@@ -108,8 +117,11 @@ async function loadLocations() {
 
   locationSelect.innerHTML = `<option value="">Select location</option>`;
   locationFilter.innerHTML = `<option value="">All locations</option>`;
+  locationMap.clear?.(); // if Map object, otherwise reset manually
 
   (data || []).forEach(loc => {
+    locationMap[loc.id] = loc.name;
+
     const opt1 = document.createElement("option");
     opt1.value = loc.id;
     opt1.textContent = loc.name;
@@ -155,10 +167,14 @@ async function loadMachines(reset = false) {
   rows.forEach(machine => {
     const tr = document.createElement("tr");
     tr.onclick = () => selectMachine(machine);
+
+    const locationName = locationMap[machine.location_id] || "Unknown";
+    const vendorName = vendorMap[machine.vendorid] || "—";
+
     tr.innerHTML = `
       <td>${machine.machineid}</td>
       <td>${machine.machinename}</td>
-      <td>${machine.vendorname || "—"}</td>
+      <td>${vendorName}</td>
       <td>${getHealthIcon(machine.healthstatus)}</td>
       <td>${formatDate(machine.lastservicedate)}</td>
       <td>${locationName}</td>
