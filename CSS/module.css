@@ -22,12 +22,13 @@
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
-  overflow: hidden; /* ⭐ prevents visual clipping */
+  
 }
 .module-right,
 .form-grid,
 .form-group select {
   min-width: 0;
+  overflow: hidden; /* prevents visual clipping */
 }
 .module-right form {
   max-width: 92%;      /* ⭐ reduces form width */
@@ -136,6 +137,7 @@ textarea:focus {
   width: 100%;
   max-width: calc(100% - 2px); /* prevents overflow from borders */
   box-sizing: border-box;
+  min-width: 0;
 }
 
 
@@ -277,4 +279,11 @@ textarea:focus {
 
 #logoutBtn:hover {
   background-color: #e65c00 !important;
+}
+
+#userForm {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;   /* ⭐ REQUIRED */
 }
