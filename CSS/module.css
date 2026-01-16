@@ -37,6 +37,9 @@
     flex: 0 0 100%;
   }
 }
+.module-right {
+  overflow: hidden;
+}
 
 /* ============================================================
    GLOBAL INPUTS + SELECTS + TEXTAREA
@@ -119,9 +122,10 @@ textarea:focus {
   grid-template-columns: repeat(2, 1fr);
   gap: 14px 20px;
   width: 100%;
-  max-width: 100%;
+  max-width: calc(100% - 2px); /* prevents overflow from borders */
   box-sizing: border-box;
 }
+
 
 .form-group {
   display: flex;
@@ -134,6 +138,16 @@ textarea:focus {
   margin-bottom: 4px;
   display: block;
 }
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
 
 /* ============================================================
    FORM ACTIONS
