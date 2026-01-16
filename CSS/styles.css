@@ -193,6 +193,31 @@ select option {
   color: #ccc;
 }
 
+.filters-row {
+  display: flex;
+  flex-wrap: nowrap;       /* ⭐ Prevent wrapping */
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  overflow-x: auto;        /* ⭐ Prevent clipping if screen is narrow */
+}
+.filters-row input {
+  flex: 1 1 auto;
+  max-width: 300px;
+}
+
+.filters-row select {
+  flex: 0 0 auto;
+  width: 160px;
+}
+
+.filters-row button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+
+
 /* ============================================================
    CARD HEADER
 ============================================================ */
