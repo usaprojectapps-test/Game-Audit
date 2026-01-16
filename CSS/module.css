@@ -22,7 +22,12 @@
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
-  padding: 20px;
+  overflow: hidden; /* ⭐ prevents visual clipping */
+}
+.module-right,
+.form-grid,
+.form-group select {
+  min-width: 0;
 }
 
 /* MOBILE */
