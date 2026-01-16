@@ -202,9 +202,21 @@ textarea:focus {
 .vendor-search-bar,
 .search-row {
   display: flex;
+  flex-wrap: nowrap;         /* ⭐ Prevent wrapping */
+  align-items: center;
   gap: 12px;
   margin-bottom: 16px;
-  flex-wrap: wrap;
+}
+
+.vendor-search-bar input,
+.search-row input {
+  flex: 1 1 auto;
+  max-width: 300px;           /* ⭐ Prevent it from hogging space */
+}
+.vendor-search-bar select,
+.search-row select {
+  flex: 0 0 auto;
+  width: 160px;
 }
 
 .vendor-search-bar input::placeholder {
