@@ -191,22 +191,22 @@
 /*------------------------------*/
 .vendor-wrapper {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 20px;
-  width: 92%;
+  width: 100%;
   max-width: 1400px;
   margin: 30px auto;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
-/* TRUE 50–50 SPLIT */
-..vendor-left,
+.vendor-left,
 .vendor-right {
-  flex: 0 0 50%;
+  flex: 1 1 0;
   max-width: 50%;
   box-sizing: border-box;
+  min-width: 0;
 }
-
 
 /* Optional: card look, but same width */
 .vendor-left,
@@ -283,14 +283,15 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 8px;
 }
-
 .card,
 .table-wrapper,
-.form-grid {
+.form-grid,
+.form-actions {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
 }
+
 
 
 
