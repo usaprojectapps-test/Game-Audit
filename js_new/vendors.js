@@ -263,7 +263,7 @@ function initVendorsModule() {
       VendorId: id,
       VendorName: formName.value.trim(),
       VenContPerson: formContact.value.trim(),
-      VenContPerPhone: formPhone.value.trim(),
+      VenContPhone: formPhone.value.trim(),
       VenAddress: formAddress.value.trim(),
       VenStatus: formStatus.value,
       VenNotes: formNotes.value.trim(),
