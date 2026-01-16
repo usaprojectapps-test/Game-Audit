@@ -49,11 +49,10 @@
 .table-wrapper th {
   position: sticky;
   top: 0;
-  z-index: 2;
   background: rgba(255, 255, 255, 0.12);
   color: #cbd5e1;
-  text-transform: uppercase;
   font-weight: 600;
+  text-transform: uppercase;
   padding: 10px 14px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -65,8 +64,9 @@
 }
 
 .table-wrapper tr:hover td {
-  background: rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.08);
 }
+
 
 /* ============================================================
    FORM GRID — 2 Columns
@@ -98,6 +98,7 @@
   background: rgba(255, 255, 255, 0.12);
   color: white;
   font-size: 14px;
+  font-family: 'Inter', sans-serif;
   outline: none;
   transition: 0.2s ease;
 }
@@ -108,6 +109,7 @@
   border-color: #ffffff;
   background: rgba(255, 255, 255, 0.18);
 }
+
 
 /* ============================================================
    QR ROW — Notes → QR Preview → Buttons (Single Row)
@@ -156,6 +158,7 @@
   margin-top: 16px;
 }
 
+
 /* ============================================================
    LOGOUT BUTTON — Dark Orange
    ============================================================ */
@@ -173,4 +176,12 @@
 
 #logoutBtn:hover {
   background-color: #e65c00 !important;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
