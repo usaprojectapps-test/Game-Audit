@@ -14,7 +14,7 @@
 
 .module-left,
 .module-right {
-  flex: 1 1 0;
+  flex: 0 0 50%;
   max-width: 50%;
   min-width: 0;
   box-sizing: border-box;
@@ -25,6 +25,7 @@
   padding: 20px;
 }
 
+
 /* MOBILE */
 @media (max-width: 768px) {
   .module-wrapper {
@@ -34,8 +35,10 @@
   .module-left,
   .module-right {
     max-width: 100%;
+    flex: 0 0 100%;
   }
 }
+
 
 select,
 input,
