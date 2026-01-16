@@ -56,10 +56,9 @@
       </div>
     </div>
 
-    <!-- RIGHT SIDE: FORM + QR + SUMMARY + TIMELINE -->
+    <!-- RIGHT SIDE: FORM ONLY -->
     <div class="module-right">
 
-      <!-- FORM -->
       <div class="card form-card">
         <div class="card-header">
           <h3 id="machines-form-title">Add Machine</h3>
@@ -107,68 +106,39 @@
               <input type="date" id="machines-lastservice-input" class="input" />
             </div>
 
-           <!-- Notes + QR preview + QR buttons in one row -->
-        <div class="form-group form-group-full notes-qr-inline-row">
-          <!-- Notes -->
-          <div class="notes-column">
-            <label class="form-label">Notes</label>
-            <textarea id="machines-notes-input" class="textarea" rows="2" style="width: 100%; resize: vertical;"></textarea>
-          </div>
+            <!-- OPTION A: Notes → QR Preview → QR Buttons (same row) -->
+            <div class="form-group form-group-full notes-qr-inline-row">
 
-          <!-- QR Preview -->
-          <div class="qr-column">
-            <label class="form-label">Machine QR Code</label>
-            <div id="machines-qr-preview" class="qr-preview">
-              <span class="qr-placeholder-text">QR will appear here</span>
+              <!-- Notes -->
+              <div class="notes-column">
+                <label class="form-label">Notes</label>
+                <textarea id="machines-notes-input" class="textarea" rows="2" style="width: 100%; resize: vertical;"></textarea>
+              </div>
+
+              <!-- QR Preview -->
+              <div class="qr-column">
+                <label class="form-label">Machine QR Code</label>
+                <div id="machines-qr-preview" class="qr-preview">
+                  <span class="qr-placeholder-text">QR will appear here</span>
+                </div>
+              </div>
+
+              <!-- QR Buttons -->
+              <div class="qr-button-column">
+                <button id="machines-generate-qr-btn" class="btn btn-secondary">Generate QR</button>
+                <button id="machines-print-qr-btn" class="btn btn-secondary">Print</button>
+                <button id="machines-download-qr-btn" class="btn btn-secondary">Download</button>
+              </div>
+
             </div>
-          </div>
 
-          <!-- QR Buttons stacked vertically -->
-          <div class="qr-button-column">
-            <button id="machines-generate-qr-btn" class="btn btn-secondary">Generate QR</button>
-            <button id="machines-print-qr-btn" class="btn btn-secondary">Print</button>
-            <button id="machines-download-qr-btn" class="btn btn-secondary">Download</button>
-          </div>
-        </div>
-
-        <!-- Form action buttons aligned horizontally -->
-        <div class="form-actions button-row">
-          <button id="machines-reset-btn" class="btn btn-secondary">Clear</button>
-          <button id="machines-delete-btn" class="btn btn-danger">Delete</button>
-          <button id="machines-save-btn" class="btn btn-primary">Save</button>
-        </div>
-
-        </div>
-      </div>
-
-      <!-- SUMMARY + TIMELINE -->
-      <div class="card insights-card">
-        <div class="insights-section">
-          <h4>Machine Summary</h4>
-          <div class="summary-content">
-            <div class="summary-row">
-              <span class="summary-label">Health:</span>
-              <span id="machines-summary-health" class="summary-value">—</span>
+            <!-- Form action buttons -->
+            <div class="form-actions button-row">
+              <button id="machines-reset-btn" class="btn btn-secondary">Clear</button>
+              <button id="machines-delete-btn" class="btn btn-danger">Delete</button>
+              <button id="machines-save-btn" class="btn btn-primary">Save</button>
             </div>
-            <div class="summary-row">
-              <span class="summary-label">Last Service:</span>
-              <span id="machines-summary-lastservice" class="summary-value">—</span>
-            </div>
-            <div class="summary-row">
-              <span class="summary-label">Vendor:</span>
-              <span id="machines-summary-vendor" class="summary-value">—</span>
-            </div>
-            <div class="summary-row">
-              <span class="summary-label">Location:</span>
-              <span id="machines-summary-location" class="summary-value">—</span>
-            </div>
-          </div>
-        </div>
 
-        <div class="insights-section">
-          <h4>Machine Timeline</h4>
-          <div id="machines-timeline-content" class="timeline-content">
-            <div class="timeline-empty">No events yet</div>
           </div>
         </div>
       </div>
@@ -176,6 +146,5 @@
     </div>
   </div>
 
-  <!-- TOASTS -->
   <div id="machines-toast-container" class="toast-container"></div>
 </div>
