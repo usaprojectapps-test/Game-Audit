@@ -308,18 +308,29 @@ async function deleteMachine() {
 // -------------------------------------------------------------
 // QR
 // -------------------------------------------------------------
+// -------------------------------------------------------------
+// QR
+// -------------------------------------------------------------
 generateQRBtn.onclick = () => {
   qrPreview.innerHTML = "";
-  if (!idInput.value.trim()) {
+
+  const machineId = idInput.value.trim();
+  if (!machineId) {
     return showToast("Enter Machine ID before generating QR", "warning");
   }
-  // Assumes QRCode library is loaded globally
+
+  // Generate QR
   new QRCode(qrPreview, {
-    text: `MACHINE:${idInput.value.trim()}`,
+    text: `MACHINE:${machineId}`,
     width: 128,
     height: 128,
   });
+
+  // ⭐ ADD THIS HERE — QR LABEL BELOW QR CODE
+  document.getElementById("machines-qr-label").textContent =
+    `Machine ID: ${machineId}`;
 };
+
 
 // -------------------------------------------------------------
 // QR PRINT

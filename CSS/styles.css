@@ -339,3 +339,10 @@ select option {
     gap: 10px;
   }
 }
+.qr-label {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
