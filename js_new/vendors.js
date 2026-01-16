@@ -166,13 +166,13 @@ function initVendorsModule() {
       .select("*")
       .order("VendorName", { ascending: true })
       .range(from, to);
-
-    if (userRole === "SuperAdmin") {
+    //* TEMP disable to test filtering location
+   /* if (userRole === "SuperAdmin") {
       const selectedLoc = filterLocation.value;
       if (selectedLoc) query = query.eq("location_id", selectedLoc);
     } else if (userLocationId) {
-      query = query.eq("location_id", userLocationId);
-    }
+    //*  query = query.eq("location_id", userLocationId);
+    } */
 
     const { data, error } = await query;
 
