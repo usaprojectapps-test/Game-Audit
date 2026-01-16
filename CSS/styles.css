@@ -12,14 +12,17 @@ body {
 /* -------------------------------
    MODULE LAYOUT: Left + Right
 -------------------------------- */
+/* FINAL OVERRIDE FOR ALL MODULES */
 .module-body {
-  display: flex;
-  gap: 20px;
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 20px !important;
 }
 
 .module-left,
 .module-right {
-  width: 50%;
+  width: 50% !important;
+  flex: 0 0 50% !important;
 }
 
 @media (max-width: 768px) {
@@ -109,6 +112,7 @@ body {
 /* -------------------------------
    TABLE STYLING
 -------------------------------- */
+
 .module-table table {
   width: 100%;
   border-collapse: collapse;
