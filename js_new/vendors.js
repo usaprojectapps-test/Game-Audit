@@ -368,13 +368,14 @@ setTimeout(() => {
   saveBtn.addEventListener("click", saveVendor);
   deleteBtn.addEventListener("click", deleteVendor);
 
-  // -------------------------------------------------------------
+// -------------------------------------------------------------
 // INITIAL LOAD
 // -------------------------------------------------------------
 (async () => {
-  await loadUserProfile();       
-  await loadLocationsMap();      
+  await loadUserProfile();
+  await loadLocationsMap();
   setTimeout(() => loadVendors(true), 50);
-  })();
-  window.initVendorsModule = initVendorsModule; // <-- ADD THIS
+})();
 } // END initVendorsModule
+
+window.initVendorsModule = initVendorsModule;
