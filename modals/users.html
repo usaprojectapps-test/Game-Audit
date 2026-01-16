@@ -1,7 +1,7 @@
-<div class="module-left" style="display: flex; gap: 20px;">
+<div class="module-wrapper">
 
-  <!-- LEFT PANEL: User Table -->
-  <div class="left-panel glass-card" style="flex: 0 0 40%;">
+  <!-- LEFT: USER TABLE -->
+  <div class="module-left">
     <div class="card-header">User Management</div>
     <div class="card-subtitle">Search, filter & manage users</div>
 
@@ -20,7 +20,7 @@
       </select>
     </div>
 
-    <div class="table-container">
+    <div class="table-wrapper">
       <table class="data-table">
         <thead>
           <tr>
@@ -33,16 +33,16 @@
         </thead>
         <tbody id="usersTableBody"></tbody>
       </table>
+    </div>
 
-      <div class="pagination">
-        <button id="prevUsers" class="btn btn-secondary">Prev</button>
-        <button id="nextUsers" class="btn btn-secondary">Next</button>
-      </div>
+    <div class="pagination">
+      <button id="prevUsers" class="btn btn-secondary">Prev</button>
+      <button id="nextUsers" class="btn btn-secondary">Next</button>
     </div>
   </div>
 
-  <!-- RIGHT PANEL: User Form -->
-  <div class="module-right" style="flex: 1;">
+  <!-- RIGHT: USER FORM -->
+  <div class="module-right">
     <div class="card-header">User Details</div>
 
     <form id="userForm">
@@ -114,22 +114,13 @@
 </div>
 
 <!-- RESET PASSWORD MODAL -->
-<div id="resetModal" class="modal" style="
-  display:none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.4);
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-">
-  <div class="modal-content glass-card" style="padding: 20px; width: 350px;">
+<div id="resetModal" class="modal">
+  <div class="modal-content glass-card">
     <h3>Password Reset</h3>
     <p>A reset link will be sent to:</p>
     <input type="email" id="resetEmailUser" class="input" readonly />
 
-    <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+    <div class="modal-actions">
       <button id="cancelReset" class="btn btn-secondary">Cancel</button>
       <button id="confirmReset" class="btn btn-primary">Send Reset Link</button>
     </div>
