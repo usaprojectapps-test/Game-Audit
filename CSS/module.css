@@ -29,6 +29,10 @@
 .form-group select {
   min-width: 0;
 }
+.module-right form {
+  max-width: 92%;      /* ⭐ reduces form width */
+  margin: 0 auto;      /* centers it */
+}
 
 /* MOBILE */
 @media (max-width: 768px) {
