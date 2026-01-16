@@ -170,10 +170,13 @@ select option {
   flex-direction: column;
   gap: 6px;
 }
-
 .form-group input,
 .form-group select,
 .form-group textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -184,12 +187,12 @@ select option {
   outline: none;
   transition: 0.2s ease;
 }
-
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   border-color: #ffffff;
   background: rgba(255, 255, 255, 0.18);
+  box-sizing: border-box;
 }
 
 
