@@ -191,32 +191,29 @@
 /*------------------------------*/
 .vendor-wrapper {
   display: flex;
-  gap: 24px;
   width: 92%;
   max-width: 1400px;
   margin: 30px auto;
+  gap: 20px;
 }
-
-.vendor-left {
-  flex: 0 0 52%;
-}
-
-.vendor-left {
-  flex: 0 0 52%;
-  padding-right: 20px;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-}
-
+/* TRUE 50–50 SPLIT */
+.vendor-left,
 .vendor-right {
-  flex: 0 0 48%;
-  padding: 28px;
+  flex: 0 0 50%;
+  max-width: 50%;
+}
+
+/* Optional: card look, but same width */
+.vendor-left,
+.vendor-right {
   background: rgba(255, 255, 255, 0.06);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  padding: 20px;
 }
 
+/* Mobile stack */
 @media (max-width: 768px) {
   .vendor-wrapper {
     flex-direction: column;
@@ -224,10 +221,11 @@
 
   .vendor-left,
   .vendor-right {
-    width: 100%;
     flex: 0 0 100%;
+    max-width: 100%;
   }
 }
+
 .vendor-left,
 .vendor-right {
   width: 50%;
@@ -280,3 +278,12 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 8px;
 }
+
+
+
+
+
+
+
+
+
