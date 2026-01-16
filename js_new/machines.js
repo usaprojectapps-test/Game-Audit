@@ -161,7 +161,7 @@ async function loadMachines(reset = false) {
       <td>${machine.vendorname || "—"}</td>
       <td>${getHealthIcon(machine.healthstatus)}</td>
       <td>${formatDate(machine.lastservicedate)}</td>
-      <td>${locationMap[v.location_id] || "Unknown"}</td>
+      <td>${locationName}</td>
     `;
     tableBody.appendChild(tr);
   });
