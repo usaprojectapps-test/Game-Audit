@@ -319,13 +319,6 @@ select option {
   position: relative;
 }
 
-#machines-qr-canvas img,
-#machines-qr-canvas canvas {
-  display: block !important;
-  margin: 0 auto !important; /* ⭐ Force center */
-}
-
-
 .qr-button-column {
   display: flex;
   flex-direction: column;
@@ -344,10 +337,33 @@ select option {
     gap: 10px;
   }
 }
-.qr-label {
-  margin-top: 8px;
+
+/* Mini Ticket Style */
+.ticket-preview {
+  width: 180px;
+  padding: 12px;
+  border: 2px solid #000;
+  border-radius: 10px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  font-size: 14px;
+  gap: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Center QR image */
+#machines-qr-canvas img,
+#machines-qr-canvas canvas {
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+/* Label under QR */
+.qr-label {
+  font-size: 13px;
   font-weight: 600;
   color: #333;
+  line-height: 1.2;
 }

@@ -316,21 +316,21 @@ generateQRBtn.onclick = () => {
     return showToast("Enter Machine ID before generating QR", "warning");
   }
 
-  // Clear only the canvas
+  // Clear only QR canvas
   const qrCanvas = document.getElementById("machines-qr-canvas");
   qrCanvas.innerHTML = "";
 
   // Generate QR
   new QRCode(qrCanvas, {
     text: `MACHINE:${machineId}`,
-    width: 128,
-    height: 128,
+    width: 120,
+    height: 120,
   });
 
-  // ⭐ Update label (ID + Name)
+  // Update label
   document.getElementById("machines-qr-label").innerHTML = `
-    <div style="font-weight:600;">Machine ID: ${machineId}</div>
-    <div style="font-size:13px; opacity:0.8;">${machineName || ""}</div>
+    <div>Machine ID: ${machineId}</div>
+    <div style="font-size:12px; opacity:0.8;">${machineName || ""}</div>
   `;
 };
 
