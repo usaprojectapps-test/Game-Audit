@@ -321,7 +321,24 @@ generateQRBtn.onclick = () => {
   });
 };
 
-printQRBtn.onclick = () => window.print();
+// -------------------------------------------------------------
+// QR PRINT
+// -------------------------------------------------------------
+document.getElementById("machines-print-qr-btn").addEventListener("click", () => {
+  const qrContent = document.getElementById("machines-qr-preview");
+  const printWindow = window.open("", "_blank");
+  printWindow.document.write(`
+    <html>
+      <head><title>Print QR</title></head>
+      <body style="margin:0; display:flex; justify-content:center; align-items:center; height:100vh;">
+        ${qrContent.innerHTML}
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+});
 
 downloadQRBtn.onclick = () => {
   const img = qrPreview.querySelector("img");
@@ -356,6 +373,9 @@ nextPageBtn.addEventListener("click", () => {
 saveBtn.addEventListener("click", saveMachine);
 deleteBtn.addEventListener("click", deleteMachine);
 resetBtn.addEventListener("click", resetForm);
+
+
+
 
 // -------------------------------------------------------------
 // INITIAL LOAD
