@@ -5,14 +5,11 @@ import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 
 // -------------------------------------------------------------
-// AUTO INITIALIZER
+// AUTO INITIALIZER (works with your module loader)
 // -------------------------------------------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  // Wait a tiny bit to ensure module HTML is inserted
-  setTimeout(() => {
-    initVendorsModule();
-  }, 50);
-});
+setTimeout(() => {
+  initVendorsModule();
+}, 50);
 
 export function initVendorsModule() {
   console.log("Vendors module initializing...");
@@ -375,5 +372,4 @@ export function initVendorsModule() {
     await loadLocationsMap();
     await loadVendors(true);
   })();
-
-} // END initVendorsModule
+}
