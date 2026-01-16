@@ -40,6 +40,9 @@
 .module-right {
   overflow: hidden;
 }
+.module-right {
+  padding: 18px;
+}
 
 /* ============================================================
    GLOBAL INPUTS + SELECTS + TEXTAREA
