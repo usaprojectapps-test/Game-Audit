@@ -13,7 +13,7 @@ setTimeout(() => {
 });
 
 
-export function initVendorsModule() {
+  function initVendorsModule() {
   console.log("Vendors module initializing...");
 
   // -------------------------------------------------------------
@@ -375,5 +375,6 @@ export function initVendorsModule() {
   await loadUserProfile();       
   await loadLocationsMap();      
   setTimeout(() => loadVendors(true), 50);
-})();
+  })();
+  window.initVendorsModule = initVendorsModule; // <-- ADD THIS
 } // END initVendorsModule
