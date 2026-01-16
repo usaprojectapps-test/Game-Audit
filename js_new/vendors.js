@@ -380,3 +380,4 @@ setTimeout(() => {
 
 // Make function available globally
 window.initVendorsModule = initVendorsModule;
+} // <-- FINAL CLOSING BRACE (MISSING IN YOUR FILE)
