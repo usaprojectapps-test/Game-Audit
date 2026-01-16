@@ -8,8 +8,10 @@ import { showToast } from "./toast.js";
 // AUTO INITIALIZER (works with your module loader)
 // -------------------------------------------------------------
 setTimeout(() => {
-  initVendorsModule();
-}, 50);
+  document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => initVendorsModule(), 100);
+});
+
 
 export function initVendorsModule() {
   console.log("Vendors module initializing...");
