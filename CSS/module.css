@@ -68,7 +68,7 @@ textarea {
   font-family: 'Inter', sans-serif;
   outline: none;
   transition: 0.2s ease;
-  width: 100%;
+  width: 95%;
   max-width: 100%;
   box-sizing: border-box;
 }
