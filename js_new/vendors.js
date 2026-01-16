@@ -4,6 +4,8 @@
 import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 
+console.log("vendors.js executed — top of file", { ready: document.readyState });
+
 // -------------------------------------------------------------
 // AUTO INITIALIZER (corrected)
 // -------------------------------------------------------------
@@ -75,7 +77,7 @@ function initVendorsModule() {
 
     const jwt = sessionData.session.user.user_metadata;
     console.log("🔥 JWT metadata:", jwt);
-    
+
     userRole = jwt.role;
     userLocationId = jwt.location_id;
 
