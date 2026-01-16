@@ -16,7 +16,7 @@
 .module-right {
   flex: 0 0 50%;
   max-width: 50%;
-  min-width: 0;
+  min-width: 0;        /* ⭐ REQUIRED */
   box-sizing: border-box;
   background: rgba(255, 255, 255, 0.06);
   border-radius: 16px;
@@ -24,7 +24,6 @@
   backdrop-filter: blur(12px);
   padding: 20px;
 }
-
 
 /* MOBILE */
 @media (max-width: 768px) {
@@ -38,7 +37,6 @@
     flex: 0 0 100%;
   }
 }
-
 
 select,
 input,
