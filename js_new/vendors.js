@@ -63,7 +63,10 @@ function initVendorsModule() {
   // LOAD USER PROFILE
   // -------------------------------------------------------------
   async function loadUserProfile() {
+    console.log("🔥 loadUserProfile() CALLED");
+
     const { data: sessionData } = await supabase.auth.getSession();
+    console.log("🔥 sessionData:", sessionData);
 
     if (!sessionData?.session) {
       console.error("No session found");
@@ -71,7 +74,8 @@ function initVendorsModule() {
     }
 
     const jwt = sessionData.session.user.user_metadata;
-
+    console.log("🔥 JWT metadata:", jwt);
+    
     userRole = jwt.role;
     userLocationId = jwt.location_id;
 
