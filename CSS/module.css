@@ -185,7 +185,8 @@
   backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
-
+/* VENDOR TABLE STYLE */
+/*------------------------------*/
 .vendor-wrapper {
   display: flex;
   gap: 20px;
@@ -219,4 +220,46 @@
   padding: 20px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
+}
+.vendor-right {
+  width: 50%;
+  padding: 24px 28px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.vendor-search-bar input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.1);
+  color: white;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.vendor-search-bar input::placeholder {
+  color: #ccc;
+}
+.vendor-search-bar select {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.1);
+  color: white;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: 0.2s ease;
+}
+.vendor-search-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 }
