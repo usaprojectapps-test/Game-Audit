@@ -58,7 +58,6 @@
 
     <!-- RIGHT SIDE: FORM ONLY -->
     <div class="module-right">
-
       <div class="card form-card">
         <div class="card-header">
           <h3 id="machines-form-title">Add Machine</h3>
@@ -66,8 +65,9 @@
         </div>
 
         <div class="card-body">
-          <div class="form-grid">
 
+          <!-- FORM GRID -->
+          <div class="form-grid">
             <div class="form-group">
               <label class="form-label">Machine ID</label>
               <input type="text" id="machines-machineid-input" class="input" placeholder="M001" />
@@ -105,46 +105,41 @@
               <label class="form-label">Last Service Date</label>
               <input type="date" id="machines-lastservice-input" class="input" />
             </div>
-
-            <!-- OPTION A: Notes → QR Preview → QR Buttons (same row) -->
-            <div class="form-group form-group-full notes-qr-inline-row">
-
-              <!-- Notes -->
-              <div class="notes-column">
-                <label class="form-label">Notes</label>
-                <textarea id="machines-notes-input" class="textarea" rows="2" style="width: 100%; resize: vertical;"></textarea>
-              </div>
-
-              <!-- QR Preview -->
-              <div class="qr-column">
-                <label class="form-label">Machine QR Code</label>
-                <div id="machines-qr-preview" class="qr-preview">
-                  <span class="qr-placeholder-text">QR will appear here</span>
-                </div>
-              </div>
-
-              <!-- QR Buttons -->
-              <div class="qr-button-column">
-                <button id="machines-generate-qr-btn" class="btn btn-secondary">Generate QR</button>
-                <button id="machines-print-qr-btn" class="btn btn-secondary">Print</button>
-                <button id="machines-download-qr-btn" class="btn btn-secondary">Download</button>
-              </div>
-
-            </div>
-
-            <!-- Form action buttons -->
-            <div class="form-actions button-row">
-              <button id="machines-reset-btn" class="btn btn-secondary">Clear</button>
-              <button id="machines-delete-btn" class="btn btn-danger">Delete</button>
-              <button id="machines-save-btn" class="btn btn-primary">Save</button>
-            </div>
-
           </div>
+
+          <!-- QR ROW OUTSIDE GRID -->
+          <div class="notes-qr-inline-row">
+            <div class="notes-column">
+              <label class="form-label">Notes</label>
+              <textarea id="machines-notes-input" class="textarea" rows="2" style="width: 100%; resize: vertical;"></textarea>
+            </div>
+
+            <div class="qr-column">
+              <label class="form-label">Machine QR Code</label>
+              <div id="machines-qr-preview" class="qr-preview">
+                <span class="qr-placeholder-text">QR will appear here</span>
+              </div>
+            </div>
+
+            <div class="qr-button-column">
+              <button id="machines-generate-qr-btn" class="btn btn-secondary">Generate QR</button>
+              <button id="machines-print-qr-btn" class="btn btn-secondary">Print</button>
+              <button id="machines-download-qr-btn" class="btn btn-secondary">Download</button>
+            </div>
+          </div>
+
+          <!-- ACTION BUTTONS -->
+          <div class="form-actions button-row">
+            <button id="machines-reset-btn" class="btn btn-secondary">Clear</button>
+            <button id="machines-delete-btn" class="btn btn-danger">Delete</button>
+            <button id="machines-save-btn" class="btn btn-primary">Save</button>
+          </div>
+
         </div>
       </div>
-
     </div>
   </div>
 
+  <!-- TOASTS -->
   <div id="machines-toast-container" class="toast-container"></div>
 </div>
