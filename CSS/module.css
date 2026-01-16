@@ -277,3 +277,12 @@
   max-width: 100%;
   box-sizing: border-box;
 }
+select {
+  background-color: rgba(30, 30, 30, 0.95) !important;
+  color: #ffffff !important;
+}
+
+select option {
+  background-color: rgba(30, 30, 30, 0.95) !important;
+  color: #ffffff !important;
+}
