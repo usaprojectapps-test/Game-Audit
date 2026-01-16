@@ -16,7 +16,7 @@
 .module-right {
   flex: 0 0 50%;
   max-width: 50%;
-  min-width: 0;        /* ⭐ REQUIRED */
+  min-width: 0; /* ⭐ REQUIRED to prevent clipping */
   box-sizing: border-box;
   background: rgba(255, 255, 255, 0.06);
   border-radius: 16px;
@@ -38,6 +38,9 @@
   }
 }
 
+/* ============================================================
+   GLOBAL INPUTS + SELECTS + TEXTAREA
+   ============================================================ */
 select,
 input,
 textarea {
@@ -50,6 +53,9 @@ textarea {
   font-family: 'Inter', sans-serif;
   outline: none;
   transition: 0.2s ease;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 select option {
@@ -57,43 +63,11 @@ select option {
   color: white;
 }
 
-/* TABLE WRAPPER (GLOBAL) */
-.table-wrapper {
-  width: 100%;
-  max-height: 420px;
-  overflow-y: auto;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-.table-wrapper table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  color: #e2e8f0;
-}
-
-.table-wrapper th {
-  position: sticky;
-  top: 0;
-  background: rgba(255, 255, 255, 0.12);
-  color: #cbd5e1;
-  font-weight: 600;
-  text-transform: uppercase;
-  padding: 10px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.table-wrapper td {
-  padding: 10px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  white-space: nowrap;
-}
-
-.table-wrapper tr:hover td {
-  background-color: rgba(255, 255, 255, 0.08);
+select:focus,
+input:focus,
+textarea:focus {
+  border-color: #ffffff;
+  background-color: rgba(255,255,255,0.18);
 }
 
 /* ============================================================
@@ -137,30 +111,16 @@ select option {
   background-color: rgba(255, 255, 255, 0.08);
 }
 
-
 /* ============================================================
    FORM GRID — 2 Columns
    ============================================================ */
-
-/* FORM GRID */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 14px 20px;
-}
-
-/* FORM LABELS */
-.form-group label {
-  font-weight: 600;
-  margin-bottom: 4px;
-  display: block;
-}
-
-/* FORM ACTIONS */
-.form-actions {
-  margin-top: 20px;
-  display: flex;
-  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .form-group {
@@ -168,82 +128,102 @@ select option {
   flex-direction: column;
   gap: 6px;
 }
-.form-group input,
-.form-group select,
-.form-group textarea {
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 4px;
   display: block;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.12);
-  color: white;
-  font-size: 14px;
-  font-family: 'Inter', sans-serif;
-  outline: none;
-  transition: 0.2s ease;
-}
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  border-color: #ffffff;
-  background: rgba(255, 255, 255, 0.18);
-  box-sizing: border-box;
-}
-
-
-/* ============================================================
-   QR ROW — Notes → QR Preview → Buttons (Single Row)
-   ============================================================ */
-.notes-qr-inline-row {
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
-  margin-top: 18px;
-  margin-bottom: 18px;
-}
-
-.notes-column {
-  flex: 1;
-  min-width: 260px;
-}
-
-.qr-column {
-  width: 160px;
-}
-
-.qr-preview {
-  width: 100%;
-  height: 120px;
-  background: #f4f4f4;
-  border: 1px solid #ccc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.qr-button-column {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 140px;
 }
 
 /* ============================================================
-   BUTTON ROW
+   FORM ACTIONS
    ============================================================ */
-.button-row {
+.form-actions {
+  margin-top: 20px;
   display: flex;
-  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ============================================================
+   CARD HEADER
+   ============================================================ */
+.card-header {
+  font-size: 22px;
+  font-weight: 600;
+  font-family: 'Sora', sans-serif;
+  color: #ffffff;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 8px;
+}
+
+/* ============================================================
+   VENDOR MODULE (uses same layout)
+   ============================================================ */
+.vendor-wrapper {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 20px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 30px auto;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.vendor-left,
+.vendor-right {
+  flex: 0 0 50%;
+  max-width: 50%;
+  min-width: 0;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .vendor-wrapper {
+    flex-direction: column;
+  }
+
+  .vendor-left,
+  .vendor-right {
+    max-width: 100%;
+    flex: 0 0 100%;
+  }
+}
+
+/* ============================================================
+   SEARCH BAR (Vendor + Users + Locations)
+   ============================================================ */
+.vendor-search-bar,
+.search-row {
+  display: flex;
   gap: 12px;
-  margin-top: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
+.vendor-search-bar input::placeholder {
+  color: #ccc;
+}
 
 /* ============================================================
-   LOGOUT BUTTON — Dark Orange
+   CARD (Generic)
+   ============================================================ */
+.card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* ============================================================
+   LOGOUT BUTTON
    ============================================================ */
 #logoutBtn {
   background-color: #cc5500 !important;
@@ -259,133 +239,4 @@ select option {
 
 #logoutBtn:hover {
   background-color: #e65c00 !important;
-}
-
-.card {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 20px;
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-}
-/* VENDOR TABLE STYLE */
-/*------------------------------*/
-.vendor-wrapper {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 20px;
-  width: 100%;
-  max-width: 1400px;
-  margin: 30px auto;
-  box-sizing: border-box;
-  overflow-x: hidden;
-}
-
-/* TRUE 50–50 LAYOUT */
-.vendor-left,
-.vendor-right {
-  flex: 1 1 0;
-  max-width: 50%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-/* CARD LOOK */
-.vendor-left,
-.vendor-right {
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  padding: 20px;
-}
-
-/* Mobile stack */
-@media (max-width: 768px) {
-  .vendor-wrapper {
-    flex-direction: column;
-  }
-
-  .vendor-left,
-  .vendor-right {
-    flex: 0 0 100%;
-    max-width: 100%;
-  }
-}
-
-/* SEARCH BAR */
-.vendor-search-bar {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.vendor-search-bar input,
-.vendor-search-bar select {
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.2);
-  background: rgba(255,255,255,0.1);
-  color: white;
-  font-size: 14px;
-  font-family: 'Inter', sans-serif;
-  outline: none;
-  transition: 0.2s ease;
-}
-
-.vendor-search-bar input::placeholder {
-  color: #ccc;
-}
-
-/* CARD HEADER */
-.card-header {
-  font-size: 22px;
-  font-weight: 600;
-  font-family: 'Sora', sans-serif;
-  color: #ffffff;
-  margin-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 8px;
-}
-
-
-/* INNER ELEMENTS */
-.card,
-.table-wrapper,
-.form-grid,
-.form-actions {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-select {
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.25);
-  background-color: rgba(255,255,255,0.12);
-  color: white;
-  font-size: 14px;
-  font-family: 'Inter', sans-serif;
-  outline: none;
-  transition: 0.2s ease;
-  appearance: none;
-  cursor: pointer;
-}
-
-/* Dropdown arrow fix for WebKit browsers */
-select::-ms-expand {
-  display: none;
-}
-
-select:focus {
-  border-color: #ffffff;
-  background-color: rgba(255,255,255,0.18);
-}
-
-/* Dropdown options */
-select option {
-  background-color: #1e1e1e;
-  color: white;
 }
