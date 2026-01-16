@@ -71,10 +71,12 @@
 /* ============================================================
    FORM GRID — 2 Columns
    ============================================================ */
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 14px 20px;
+  margin-bottom: 24px;
 }
 
 .form-group {
@@ -199,6 +201,12 @@
   flex: 0 0 52%;
 }
 
+.vendor-left {
+  flex: 0 0 52%;
+  padding-right: 20px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .vendor-right {
   flex: 0 0 48%;
   padding: 28px;
@@ -208,7 +216,6 @@
   backdrop-filter: blur(12px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
-
 
 @media (max-width: 768px) {
   .vendor-wrapper {
@@ -265,9 +272,11 @@
   flex-wrap: wrap;
 }
 .card-header {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 600;
-  color: white;
-  margin-bottom: 16px;
   font-family: 'Sora', sans-serif;
+  color: #ffffff;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 8px;
 }
