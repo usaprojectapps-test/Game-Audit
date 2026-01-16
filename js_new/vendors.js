@@ -378,4 +378,5 @@ setTimeout(() => {
 })();
 } // END initVendorsModule
 
+// Make function available globally
 window.initVendorsModule = initVendorsModule;
