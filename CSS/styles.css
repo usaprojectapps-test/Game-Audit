@@ -403,7 +403,6 @@ body {
 .filter-group button {
   margin-left: 6px;
 }
-
 .filters-row.compact-row {
   display: flex;
   gap: 12px;
@@ -452,7 +451,6 @@ body {
   justify-content: flex-end;
   gap: 12px;
 }
-
 /*    MAchines Copleted */
 
 .module-right .form-card {
