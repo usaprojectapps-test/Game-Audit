@@ -277,7 +277,7 @@
   max-width: 100%;
   box-sizing: border-box;
 }
-select {
+/*select {
   background-color: rgba(30, 30, 30, 0.95) !important;
   color: #ffffff !important;
 }
@@ -285,4 +285,34 @@ select {
 select option {
   background-color: rgba(30, 30, 30, 0.95) !important;
   color: #ffffff !important;
+} */
+ 
+select {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background-color: rgba(255,255,255,0.12);
+  color: white;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: 0.2s ease;
+  appearance: none;
+  cursor: pointer;
+}
+
+/* Dropdown arrow fix for WebKit browsers */
+select::-ms-expand {
+  display: none;
+}
+
+select:focus {
+  border-color: #ffffff;
+  background-color: rgba(255,255,255,0.18);
+}
+
+/* Dropdown options */
+select option {
+  background-color: #1e1e1e;
+  color: white;
 }
