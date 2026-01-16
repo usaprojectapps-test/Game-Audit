@@ -411,11 +411,11 @@ body {
   margin-bottom: 12px;
 }
 
-.notes-qr-row {
+.notes-qr-button-row {
   display: flex;
   gap: 16px;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .notes-column {
@@ -424,9 +424,6 @@ body {
 
 .qr-column {
   width: 180px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
 .qr-preview {
@@ -439,11 +436,10 @@ body {
   border: 1px solid #ccc;
 }
 
-.qr-actions-row {
+.qr-button-column {
   display: flex;
-  justify-content: flex-start;
-  gap: 10px;
-  margin-bottom: 16px;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .button-row {
@@ -451,6 +447,7 @@ body {
   justify-content: flex-end;
   gap: 12px;
 }
+
 /*    MAchines Copleted */
 
 .module-right .form-card {
