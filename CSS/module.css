@@ -1,7 +1,7 @@
 /* ============================================================
    UNIVERSAL MODULE LAYOUT — 50/50 LEFT TABLE + RIGHT FORM
    ============================================================ */
-module-wrapper {
+.module-wrapper {
   display: flex;
   flex-wrap: nowrap;
   gap: 20px;
@@ -385,22 +385,3 @@ select option {
   background-color: #1e1e1e;
   color: white;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* UNIVERSAL MODULE LAYOUT */
-.
-
-
-
