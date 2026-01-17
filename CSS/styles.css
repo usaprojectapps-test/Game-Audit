@@ -370,3 +370,31 @@ select option {
   color: #333;
   line-height: 1.2;
 }
+/* AUDIT CONTAINER */
+/* -------------------------------------------------*/
+.audit-container {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.audit-left,
+.audit-right {
+  width: 50%;
+  background: #ffffff10;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+#auditTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+#auditTable th,
+#auditTable td {
+  padding: 8px;
+  border-bottom: 1px solid #ccc;
+  text-align: left;
+}

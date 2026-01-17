@@ -142,4 +142,42 @@ auditSaveBtn.addEventListener("click", async () => {
   auditCurIn.value = "";
   auditCurOut.value = "";
   auditJackpot.value = "";
+
+  loadAuditList();
 });
+
+// -------------------------------------------------------------
+// LOAD AUDIT LIST (LEFT TABLE)
+// -------------------------------------------------------------
+async function loadAuditList() {
+  const date = document.getElementById("auditListDate").value;
+  if (!date) return;
+
+  const { data, error } = await supabase
+    .from("audit_entries")
+    .select("*")
+    .eq("location_id", userLocationId)
+    .eq("date", date)
+    .order("machine_no", { ascending: true });
+
+  const tbody = document.querySelector("#auditTable tbody");
+  tbody.innerHTML = "";
+
+  if (error || !data.length) {
+    tbody.innerHTML = `<tr><td colspan="4">No entries</td></tr>`;
+    return;
+  }
+
+  data.forEach(row => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${row.machine_no}</td>
+        <td>${row.cur_in}</td>
+        <td>${row.cur_out}</td>
+        <td>${row.jackpot}</td>
+      </tr>
+    `;
+  });
+}
+
+document.getElementById("auditListDate").addEventListener("change", loadAuditList);
