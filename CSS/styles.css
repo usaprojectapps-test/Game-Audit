@@ -340,7 +340,7 @@ select option {
 
 /* Mini Ticket Style */
 .ticket-preview {
-  width: 160px;                 /* slightly narrower */
+  width: 120px;                 /* slightly narrower */
   padding: 8px 10px;            /* reduced padding */
   border: 2px solid #000;
   border-radius: 8px;
