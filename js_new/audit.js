@@ -1,125 +1,145 @@
-// /js_new/audit.js
+// -------------------------------------------------------------
+// DOM ELEMENTS
+// -------------------------------------------------------------
+const auditMachineNo = document.getElementById("auditMachineNo");
+const auditDate = document.getElementById("auditDate");
+const auditPrevIn = document.getElementById("auditPrevIn");
+const auditPrevOut = document.getElementById("auditPrevOut");
+const auditCurIn = document.getElementById("auditCurIn");
+const auditCurOut = document.getElementById("auditCurOut");
+const auditJackpot = document.getElementById("auditJackpot");
+const auditStatus = document.getElementById("auditStatus");
+const auditSaveBtn = document.getElementById("auditSaveBtn");
 
-import { db } from "./firebase.js";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  addDoc,
-  orderBy,
-  limit,
-  Timestamp
-} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+// -------------------------------------------------------------
+// GET LOGGED-IN USER + LOCATION
+// -------------------------------------------------------------
+let currentUser = null;
+let userLocationId = null;
+let userRole = null;
 
-export function setupAuditModal() {
-  const machineInput = document.getElementById("auditMachineNo");
-  const dateInput = document.getElementById("auditDate");
-  const prevIn = document.getElementById("auditPrevIn");
-  const prevOut = document.getElementById("auditPrevOut");
-  const curIn = document.getElementById("auditCurIn");
-  const curOut = document.getElementById("auditCurOut");
-  const statusBox = document.getElementById("auditStatus");
-  const saveBtn = document.getElementById("auditSaveBtn");
+async function loadUser() {
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) return;
 
-  // Validate machine exists
-  async function validateMachine(machineNo) {
-    const q = query(
-      collection(db, "machines"),
-      where("machineNo", "==", machineNo)
-    );
-    const snap = await getDocs(q);
-    return !snap.empty;
-  }
-
-  // Auto-fill previous meters
-  async function autoFillPrevious(machineNo, dateStr) {
-    prevIn.value = "";
-    prevOut.value = "";
-
-    const q = query(
-      collection(db, "audit"),
-      where("machineNo", "==", machineNo),
-      where("dateString", "<", dateStr),
-      orderBy("dateString", "desc"),
-      limit(1)
-    );
-
-    const snap = await getDocs(q);
-
-    if (snap.empty) {
-      alert("No previous audit found. Please enter manually.");
-      return;
-    }
-
-    const data = snap.docs[0].data();
-    prevIn.value = data.prevMeterIn;
-    prevOut.value = data.prevMeterOut;
-  }
-
-  // When date changes → auto-fill previous
-  dateInput.addEventListener("change", async () => {
-    const machineNo = machineInput.value.trim();
-    const dateStr = dateInput.value;
-
-    if (!machineNo || !dateStr) return;
-
-    const exists = await validateMachine(machineNo);
-    if (!exists) {
-      alert("Machine number not found.");
-      return;
-    }
-
-    await autoFillPrevious(machineNo, dateStr);
-  });
-
-  // Save audit entry
-  saveBtn.addEventListener("click", async () => {
-    statusBox.textContent = "";
-    statusBox.className = "";
-
-    const machineNo = machineInput.value.trim();
-    const dateStr = dateInput.value;
-    const prevInVal = prevIn.value;
-    const prevOutVal = prevOut.value;
-    const curInVal = curIn.value;
-    const curOutVal = curOut.value;
-
-    if (!machineNo || !dateStr || !curInVal || !curOutVal) {
-      statusBox.textContent = "Please fill all required fields.";
-      statusBox.className = "error-text";
-      return;
-    }
-
-    const exists = await validateMachine(machineNo);
-    if (!exists) {
-      alert("Machine number not found.");
-      return;
-    }
-
-    try {
-      await addDoc(collection(db, "audit"), {
-        machineNo: machineNo,
-        dateString: dateStr,
-        dateTimestamp: Timestamp.fromDate(new Date(dateStr)),
-        prevMeterIn: Number(prevInVal || 0),
-        prevMeterOut: Number(prevOutVal || 0),
-        curMeterIn: Number(curInVal),
-        curMeterOut: Number(curOutVal),
-        createdAt: Timestamp.now()
-      });
-
-      statusBox.textContent = "Audit saved successfully.";
-      statusBox.className = "success-text";
-
-      setTimeout(() => {
-        document.getElementById("auditModal").style.display = "none";
-      }, 1200);
-
-    } catch (err) {
-      console.error(err);
-      statusBox.textContent = "Error saving audit.";
-      statusBox.className = "error-text";
-    }
-  });
+  currentUser = data.user;
+  userRole = currentUser.user_metadata.role;
+  userLocationId = currentUser.user_metadata.location_id;
 }
+
+loadUser();
+
+// -------------------------------------------------------------
+// AUTO-FILL PREVIOUS METERS
+// -------------------------------------------------------------
+async function loadPreviousAudit() {
+  const machineNo = auditMachineNo.value.trim();
+  const date = auditDate.value;
+
+  if (!machineNo || !date) return;
+
+  const { data, error } = await supabase
+    .from("audit_entries")
+    .select("*")
+    .eq("machine_no", machineNo)
+    .eq("location_id", userLocationId)
+    .lt("date", date)
+    .order("date", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    auditStatus.textContent = "Error loading previous audit";
+    auditStatus.style.color = "red";
+    return;
+  }
+
+  if (data.length === 0) {
+    auditPrevIn.value = "";
+    auditPrevOut.value = "";
+    auditStatus.textContent = "No previous audit found";
+    auditStatus.style.color = "orange";
+    return;
+  }
+
+  const prev = data[0];
+  auditPrevIn.value = prev.cur_in;
+  auditPrevOut.value = prev.cur_out;
+
+  auditStatus.textContent = "Previous audit loaded";
+  auditStatus.style.color = "green";
+}
+
+auditMachineNo.addEventListener("change", loadPreviousAudit);
+auditDate.addEventListener("change", loadPreviousAudit);
+
+// -------------------------------------------------------------
+// VALIDATE DATE (Audit user can edit only today/yesterday)
+// -------------------------------------------------------------
+function canEditSelectedDate(dateStr) {
+  const selected = new Date(dateStr);
+  const today = new Date();
+
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  selected.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  yesterday.setHours(0, 0, 0, 0);
+
+  return selected.getTime() === today.getTime() ||
+         selected.getTime() === yesterday.getTime();
+}
+
+// -------------------------------------------------------------
+// SAVE AUDIT ENTRY
+// -------------------------------------------------------------
+auditSaveBtn.addEventListener("click", async () => {
+  const machineNo = auditMachineNo.value.trim();
+  const date = auditDate.value;
+
+  if (!machineNo || !date) {
+    auditStatus.textContent = "Machine No and Date are required";
+    auditStatus.style.color = "red";
+    return;
+  }
+
+  // Role-based restrictions
+  if (userRole === "Manager") {
+    auditStatus.textContent = "Managers cannot create or edit audits";
+    auditStatus.style.color = "red";
+    return;
+  }
+
+  if (userRole === "Audit" && !canEditSelectedDate(date)) {
+    auditStatus.textContent = "Audit User can edit only today or yesterday";
+    auditStatus.style.color = "red";
+    return;
+  }
+
+  const payload = {
+    machine_no: machineNo,
+    date,
+    prev_in: Number(auditPrevIn.value || 0),
+    prev_out: Number(auditPrevOut.value || 0),
+    cur_in: Number(auditCurIn.value || 0),
+    cur_out: Number(auditCurOut.value || 0),
+    jackpot: Number(auditJackpot.value || 0),
+    location_id: userLocationId,
+    user_id: currentUser.id
+  };
+
+  const { error } = await supabase.from("audit_entries").insert(payload);
+
+  if (error) {
+    auditStatus.textContent = "Failed to save audit";
+    auditStatus.style.color = "red";
+    return;
+  }
+
+  auditStatus.textContent = "Audit saved successfully";
+  auditStatus.style.color = "green";
+
+  auditCurIn.value = "";
+  auditCurOut.value = "";
+  auditJackpot.value = "";
+});

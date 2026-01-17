@@ -1,10 +1,10 @@
-<div class="audit-module" style="max-width:600px; margin:auto;">
+<div class="audit-module" style="max-width:600px; margin:auto; padding:16px;">
 
-  <h3>Audit Entry</h3>
+  <h3 style="margin-bottom:16px;">Audit Entry</h3>
 
   <div class="form-row">
     <label>Machine No</label>
-    <input id="auditMachineNo" type="text">
+    <input id="auditMachineNo" type="text" placeholder="Enter Machine Number">
   </div>
 
   <div class="form-row">
@@ -24,17 +24,22 @@
 
   <div class="form-row">
     <label>Current Meter IN</label>
-    <input id="auditCurIn" type="number">
+    <input id="auditCurIn" type="number" placeholder="Enter Current IN">
   </div>
 
   <div class="form-row">
     <label>Current Meter OUT</label>
-    <input id="auditCurOut" type="number">
+    <input id="auditCurOut" type="number" placeholder="Enter Current OUT">
   </div>
 
-  <div id="auditStatus" style="margin-top:6px;"></div>
+  <div class="form-row">
+    <label>JACKPOT</label>
+    <input id="auditJackpot" type="number" placeholder="Enter Jackpot Amount">
+  </div>
 
-  <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+  <div id="auditStatus" style="margin-top:8px; font-size:14px;"></div>
+
+  <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
     <button id="auditSaveBtn" class="btn btn-primary">Save</button>
   </div>
 
