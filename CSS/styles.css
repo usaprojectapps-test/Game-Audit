@@ -340,7 +340,7 @@ select option {
 
 /* Mini Ticket Style */
 .ticket-preview {
-  width: 120px;                 /* slightly narrower */
+  width: 140px;                 /* slightly narrower */
   padding: 8px 10px;            /* reduced padding */
   border: 2px solid #000;
   border-radius: 8px;
@@ -358,7 +358,7 @@ select option {
 #machines-qr-canvas img,
 #machines-qr-canvas canvas {
   width: 100px !important; /* reduced from 120 */ 
-  height: 100px !important;
+  height: 60px !important;
   display: block !important;
   margin: 0 auto !important;
 }
