@@ -147,6 +147,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // SAVE ENTRY
   // -------------------------------------------------------------
   auditSaveBtn.addEventListener("click", async () => {
+    if (!currentUser || !userLocationId) {
+    auditStatus.textContent = "User not loaded yet. Please wait.";
+    auditStatus.style.color = "red";
+    return;
+    }
+
     const machineNo = auditMachineNo.value.trim();
     const date = auditDate.value;
 
