@@ -506,3 +506,6 @@ select option {
   border-radius: 6px;
   width: 100%;
 }
+.three-col-row {
+  grid-template-columns: repeat(3, 1fr);
+}
