@@ -3,9 +3,28 @@
   <!-- LEFT SIDE -->
   <div class="module-left">
 
-    <div class="form-group">
+    <div class="form-grid">
       <label for="auditListDate">Select Date</label>
       <input type="date" id="auditListDate">
+    </div>
+    <div class="form-grid" style="margin-top: 16px;">
+      <label>Machines Entered</label>
+      <input type="text" id="machinesEnteredCount" readonly>
+    </div>
+    
+    <div class="form-grid three-col-row" style="margin-top: 16px;">
+      <div class="form-group">
+        <label>Total IN</label>
+        <input type="text" id="sumTotalIn" readonly>
+      </div>
+      <div class="form-group">
+        <label>Total OUT</label>
+        <input type="text" id="sumTotalOut" readonly>
+      </div>
+      <div class="form-group">
+        <label>NET</label>
+        <input type="text" id="sumNet" readonly>
+      </div>
     </div>
 
     <div class="table-wrapper" style="margin-top: 16px;">
@@ -25,26 +44,7 @@
       </table>
     </div>
 
-    <div class="form-grid three-col-row" style="margin-top: 16px;">
-      <div class="form-group">
-        <label>Total IN</label>
-        <input type="text" id="sumTotalIn" readonly>
-      </div>
-      <div class="form-group">
-        <label>Total OUT</label>
-        <input type="text" id="sumTotalOut" readonly>
-      </div>
-      <div class="form-group">
-        <label>NET</label>
-        <input type="text" id="sumNet" readonly>
-      </div>
-    </div>
-
-    <div class="form-group" style="margin-top: 16px;">
-      <label>Machines Entered</label>
-      <input type="text" id="machinesEnteredCount" readonly>
-    </div>
-
+    
   </div>
 
   <!-- RIGHT SIDE -->
