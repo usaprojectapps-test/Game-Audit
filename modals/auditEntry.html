@@ -1,21 +1,20 @@
-<div class="audit-container">
+<div class="audit-grid">
 
-  <!-- LEFT SIDE -->
-  <div class="audit-left">
+  <!-- LEFT PANEL -->
+  <div class="glass-card audit-left">
 
     <div class="row-2col">
       <div>
         <label>Date</label>
         <input type="date" id="auditListDate">
       </div>
-
       <div>
         <label>Machines Entered</label>
         <input type="text" id="machinesEnteredCount" readonly>
       </div>
     </div>
 
-    <table id="auditTable" class="audit-table">
+    <table id="auditTable" class="styled-table">
       <thead>
         <tr>
           <th>Machine</th>
@@ -30,17 +29,15 @@
       <tbody></tbody>
     </table>
 
-    <div class="row-3col totals-row">
+    <div class="row-3col">
       <div>
         <label>Total IN</label>
         <input type="text" id="sumTotalIn" readonly>
       </div>
-
       <div>
         <label>Total OUT</label>
         <input type="text" id="sumTotalOut" readonly>
       </div>
-
       <div>
         <label>NET</label>
         <input type="text" id="sumNet" readonly>
@@ -49,8 +46,8 @@
 
   </div>
 
-  <!-- RIGHT SIDE -->
-  <div class="audit-right">
+  <!-- RIGHT PANEL -->
+  <div class="glass-card audit-right">
 
     <label>Date</label>
     <input type="date" id="auditDate">
@@ -93,11 +90,10 @@
       <option value="Critical">Critical</option>
     </select>
 
-    <button id="auditSaveBtn" class="btn-primary">Save Entry</button>
+    <button id="auditSaveBtn" class="btn btn-primary">Save Entry</button>
+    <div id="auditStatus" class="status-text"></div>
 
-    <div id="auditStatus" class="audit-status"></div>
-
-    <div class="row-3col totals-row">
+    <div class="summary-box">
       <label>Total IN</label>
       <input type="text" id="calcTotalIn" readonly>
 

@@ -385,13 +385,6 @@ select option {
   border-radius: 12px;
 }
 
-.row-2col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
 .row-3col {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -556,7 +549,7 @@ select option {
 .summary-box {
   margin-top: 20px;
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 /* Audit dark theme fix */
@@ -594,3 +587,83 @@ select option {
   background-color: rgba(30, 30, 30, 0.9);
   color: #f0f0f0;
 }
+
+.audit-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  padding: 24px;
+}
+
+.audit-left, .audit-right {
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.row-2col, .row-3col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.row-3col {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.scan-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.scan-icon {
+  font-size: 22px;
+  cursor: pointer;
+  color: #ccc;
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.styled-table th, .styled-table td {
+  border: 1px solid #444;
+  padding: 8px;
+  background-color: rgba(30,30,30,0.8);
+  color: #eee;
+}
+
+.audit-grid input,
+.audit-grid select {
+  background-color: rgba(40,40,40,0.9);
+  color: #f0f0f0;
+  border: 1px solid #555;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.audit-grid input:read-only {
+  background-color: rgba(50,50,50,0.6);
+  color: #ccc;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+.status-text {
+  margin-top: 10px;
+  font-weight: bold;
+  color: #f0f0f0;
+}
+
+
