@@ -3,11 +3,12 @@
   <!-- LEFT SIDE -->
   <div class="module-left">
 
-    <div class="form-group" style="margin-bottom: 16px;">
-      <input type="date" id="auditListDate" placeholder="Select Date">
+    <div class="form-group">
+      <label for="auditListDate">Select Date</label>
+      <input type="date" id="auditListDate">
     </div>
 
-    <div class="table-wrapper">
+    <div class="table-wrapper" style="margin-top: 16px;">
       <table id="auditTable">
         <thead>
           <tr>
@@ -24,14 +25,24 @@
       </table>
     </div>
 
-    <div class="audit-summary-row">
-      <input type="text" id="sumTotalIn" placeholder="Total IN" readonly>
-      <input type="text" id="sumTotalOut" placeholder="Total OUT" readonly>
-      <input type="text" id="sumNet" placeholder="NET" readonly>
+    <div class="form-grid" style="margin-top: 16px;">
+      <div class="form-group">
+        <label>Total IN</label>
+        <input type="text" id="sumTotalIn" readonly>
+      </div>
+      <div class="form-group">
+        <label>Total OUT</label>
+        <input type="text" id="sumTotalOut" readonly>
+      </div>
+      <div class="form-group">
+        <label>NET</label>
+        <input type="text" id="sumNet" readonly>
+      </div>
     </div>
 
     <div class="form-group" style="margin-top: 16px;">
-      <input type="text" id="machinesEnteredCount" placeholder="Machines Entered" readonly>
+      <label>Machines Entered</label>
+      <input type="text" id="machinesEnteredCount" readonly>
     </div>
 
   </div>
@@ -96,10 +107,19 @@
 
     <div id="auditStatus" class="audit-status"></div>
 
-    <div class="audit-entry-summary">
-      <input type="text" id="calcTotalIn" placeholder="Total IN" readonly>
-      <input type="text" id="calcTotalOut" placeholder="Total OUT" readonly>
-      <input type="text" id="calcNet" placeholder="NET" readonly>
+    <div class="form-grid" style="margin-top: 16px;">
+      <div class="form-group">
+        <label>Total IN</label>
+        <input type="text" id="calcTotalIn" readonly>
+      </div>
+      <div class="form-group">
+        <label>Total OUT</label>
+        <input type="text" id="calcTotalOut" readonly>
+      </div>
+      <div class="form-group">
+        <label>NET</label>
+        <input type="text" id="calcNet" readonly>
+      </div>
     </div>
 
   </div>
