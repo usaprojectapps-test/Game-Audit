@@ -370,100 +370,11 @@ select option {
   color: #333;
   line-height: 1.2;
 }
-/* AUDIT CONTAINER */
-/* -------------------------------------------------*/
-.audit-container {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 20px;
-  padding: 20px;
-}
+/* -------------------------------------------------------------
+   AUDIT MODULE — Custom Styling
+------------------------------------------------------------- */
 
-.row-3col {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-/* Summary Card */
-.summary-card {
-  background: #ffffff15;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 12px;
-  text-align: center;
-}
-
-.summary-value {
-  font-size: 28px;
-  font-weight: bold;
-  margin-top: 6px;
-}
-
-/* Table */
-#auditTable {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-#auditTable th,
-#auditTable td {
-  padding: 8px;
-  border-bottom: 1px solid #ccc;
-  text-align: left;
-}
-
-/* QR Scan Icon */
-.input-with-icon {
-  position: relative;
-}
-
-.three-col-row {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.three-col-row .col {
-  width: 33%;
-  display: flex;
-  flex-direction: column;
-}
-
-.row {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.col {
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-}
-.stacked-summary {
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.stacked-summary label {
-  font-weight: 500;
-  margin-bottom: 4px;
-}
-
-.stacked-summary input {
-  width: 100%;
-  padding: 6px 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  background: #ffffff10;
-  color: #fff;
-}
-
-/* QR Scanner Overlay */
+/* QR Scanner Modal */
 .qr-overlay {
   position: fixed;
   top: 0;
@@ -513,143 +424,85 @@ select option {
   from { transform: scale(0.8); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+
+/* Scan Icon */
 .scan-row {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 10px;
 }
 
 .scan-icon {
-  cursor: pointer;
   font-size: 22px;
-}
-
-.audit-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 12px;
-}
-
-.audit-table th, .audit-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-.audit-status {
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-.summary-box {
-  margin-top: 20px;
-  display: grid;
-  gap: 12px;
-}
-
-/* Audit dark theme fix */
-.audit-container input,
-.audit-container select,
-.audit-container textarea {
-  background-color: rgba(30, 30, 30, 0.9);
-  color: #f0f0f0;
-  border: 1px solid #555;
-}
-
-.audit-container input:read-only {
-  background-color: rgba(50, 50, 50, 0.6);
+  cursor: pointer;
   color: #ccc;
 }
 
-.audit-container .audit-table th,
-.audit-container .audit-table td {
-  background-color: rgba(20, 20, 20, 0.8);
-  color: #eee;
-  border: 1px solid #444;
-}
-
-.audit-container .audit-status {
-  color: #f0f0f0;
-  background-color: transparent;
-}
-
-.audit-container .btn-primary {
-  background-color: #007bff;
+.scan-icon:hover {
   color: #fff;
 }
 
-.audit-container .summary-box input {
-  background-color: rgba(30, 30, 30, 0.9);
-  color: #f0f0f0;
-}
-.audit-left, .audit-right {
-  padding: 20px;
-  border-radius: 12px;
-}
-
-.row-2col, .row-3col {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.row-3col {
-  grid-template-columns: repeat(3, 1fr);
-}
-
-.scan-row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.scan-icon {
-  font-size: 22px;
-  cursor: pointer;
-  color: #ccc;
-}
-
-.styled-table {
+/* Audit Table */
+#auditTable {
   width: 100%;
   border-collapse: collapse;
+}
+
+#auditTable th,
+#auditTable td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background-color: rgba(30,30,30,0.8);
+  color: #eee;
+  white-space: nowrap;
+}
+
+#auditTable th {
+  background-color: rgba(255,255,255,0.12);
+  color: #cbd5e1;
+  font-weight: 600;
+  text-transform: uppercase;
+  position: sticky;
+  top: 0;
+}
+
+/* Summary Row */
+.audit-summary-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
   margin-top: 16px;
 }
 
-.styled-table th, .styled-table td {
-  border: 1px solid #444;
-  padding: 8px;
-  background-color: rgba(30,30,30,0.8);
-  color: #eee;
-}
-
-.audit-grid input,
-.audit-grid select {
+.audit-summary-row input {
   background-color: rgba(40,40,40,0.9);
   color: #f0f0f0;
   border: 1px solid #555;
   padding: 8px;
   border-radius: 6px;
+  width: 100%;
 }
 
-.audit-grid input:read-only {
-  background-color: rgba(50,50,50,0.6);
-  color: #ccc;
-}
-
-.btn-primary {
-  background-color: #007bff;
-  color: #fff;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 12px;
-}
-
-.status-text {
+/* Status Message */
+.audit-status {
   margin-top: 10px;
-  font-weight: bold;
+  font-weight: 600;
   color: #f0f0f0;
 }
 
+/* Entry Summary Box */
+.audit-entry-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
 
+.audit-entry-summary input {
+  background-color: rgba(40,40,40,0.9);
+  color: #f0f0f0;
+  border: 1px solid #555;
+  padding: 8px;
+  border-radius: 6px;
+  width: 100%;
+}

@@ -1,109 +1,126 @@
-<div class="audit-grid">
+<div class="module-wrapper">
 
-  <!-- LEFT PANEL -->
-  <div class="glass-card audit-left">
+  <!-- LEFT: Machines Entered -->
+  <div class="module-left">
+    <div class="card-header">Audit Entry</div>
 
-    <div class="row-2col">
-      <div>
+    <div class="form-grid" style="margin-bottom: 16px;">
+      <div class="form-group">
         <label>Date</label>
         <input type="date" id="auditListDate">
       </div>
-      <div>
+      <div class="form-group">
         <label>Machines Entered</label>
         <input type="text" id="machinesEnteredCount" readonly>
       </div>
     </div>
 
-    <table id="audit-table" class="styled-table">
-      <thead>
-        <tr>
-          <th>Machine</th>
-          <th>Cur IN</th>
-          <th>Cur OUT</th>
-          <th>Jackpot</th>
-          <th>Total IN</th>
-          <th>Total OUT</th>
-          <th>NET</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div class="table-wrapper">
+      <table id="auditTable">
+        <thead>
+          <tr>
+            <th>Machine</th>
+            <th>Cur IN</th>
+            <th>Cur OUT</th>
+            <th>Jackpot</th>
+            <th>Total IN</th>
+            <th>Total OUT</th>
+            <th>NET</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-    <div class="row-3col">
-      <div>
+    <div class="form-grid" style="margin-top: 16px;">
+      <div class="form-group">
         <label>Total IN</label>
         <input type="text" id="sumTotalIn" readonly>
       </div>
-      <div>
+      <div class="form-group">
         <label>Total OUT</label>
         <input type="text" id="sumTotalOut" readonly>
       </div>
-      <div>
+      <div class="form-group">
         <label>NET</label>
         <input type="text" id="sumNet" readonly>
       </div>
     </div>
-
   </div>
 
-  <!-- RIGHT PANEL -->
-  <div class="glass-card audit-right">
+  <!-- RIGHT: Entry Form -->
+  <div class="module-right">
+    <div class="card-header">Add Audit Entry</div>
 
-    <label>Date</label>
-    <input type="date" id="auditDate">
-
-    <label>Machine No</label>
-    <div class="scan-row">
-      <input type="text" id="auditMachineNo">
-      <span class="scan-icon" onclick="openQRScanner('auditMachineNo')">📷</span>
+    <div class="form-group">
+      <label>Date</label>
+      <input type="date" id="auditDate">
     </div>
 
-    <div class="row-2col">
-      <div>
+    <div class="form-group">
+      <label>Machine No</label>
+      <div class="scan-row">
+        <input type="text" id="auditMachineNo">
+        <span class="scan-icon" onclick="openQRScanner('auditMachineNo')">📷</span>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
         <label>Prev IN</label>
         <input type="number" id="auditPrevIn" readonly>
       </div>
-      <div>
+      <div class="form-group">
         <label>Prev OUT</label>
         <input type="number" id="auditPrevOut" readonly>
       </div>
     </div>
 
-    <div class="row-2col">
-      <div>
+    <div class="form-grid">
+      <div class="form-group">
         <label>Cur IN</label>
         <input type="number" id="auditCurIn">
       </div>
-      <div>
+      <div class="form-group">
         <label>Cur OUT</label>
         <input type="number" id="auditCurOut">
       </div>
     </div>
 
-    <label>Jackpot</label>
-    <input type="number" id="auditJackpot">
-
-    <label>Health</label>
-    <select id="auditHealth">
-      <option value="Good">Good</option>
-      <option value="Warning">Warning</option>
-      <option value="Critical">Critical</option>
-    </select>
-
-    <button id="auditSaveBtn" class="btn btn-primary">Save Entry</button>
-    <div id="auditStatus" class="status-text"></div>
-
-    <div class="summary-box">
-      <label>Total IN</label>
-      <input type="text" id="calcTotalIn" readonly>
-
-      <label>Total OUT</label>
-      <input type="text" id="calcTotalOut" readonly>
-
-      <label>NET</label>
-      <input type="text" id="calcNet" readonly>
+    <div class="form-group">
+      <label>Jackpot</label>
+      <input type="number" id="auditJackpot">
     </div>
 
+    <div class="form-group">
+      <label>Health</label>
+      <select id="auditHealth">
+        <option value="Good">Good</option>
+        <option value="Warning">Warning</option>
+        <option value="Critical">Critical</option>
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <button id="auditSaveBtn" class="btn btn-primary">Save Entry</button>
+    </div>
+
+    <div id="auditStatus" class="audit-status"></div>
+
+    <div class="form-grid" style="margin-top: 16px;">
+      <div class="form-group">
+        <label>Total IN</label>
+        <input type="text" id="calcTotalIn" readonly>
+      </div>
+      <div class="form-group">
+        <label>Total OUT</label>
+        <input type="text" id="calcTotalOut" readonly>
+      </div>
+      <div class="form-group">
+        <label>NET</label>
+        <input type="text" id="calcNet" readonly>
+      </div>
+    </div>
   </div>
 
 </div>
