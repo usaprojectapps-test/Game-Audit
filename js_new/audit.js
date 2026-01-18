@@ -1,3 +1,6 @@
+console.log("AUDIT JS LOADED");
+console.log("auditSaveBtn:", document.getElementById("auditSaveBtn"));
+
 document.addEventListener("DOMContentLoaded", () => {
 
   console.log("TOP OF AUDIT.JS REACHED");
@@ -251,5 +254,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   auditListDate.addEventListener("change", loadAuditList);
 
-});
 });
