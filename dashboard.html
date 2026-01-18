@@ -151,7 +151,10 @@
 
   <!-- QR Scanner -->
   <script src="/js_new/qr-scanner.js"></script>
-  <script src="https://unpkg.com/qr-scanner/qr-scanner.min.js"></script>
+  <script type="module">
+    import QrScanner from "https://unpkg.com/qr-scanner/qr-scanner.min.js";
+    window.QrScanner = QrScanner;
+  </script>
 
   <!-- Audit Logic -->
   <script src="/js_new/audit.js"></script>
