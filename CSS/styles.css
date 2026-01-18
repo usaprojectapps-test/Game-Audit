@@ -373,17 +373,29 @@ select option {
 /* AUDIT CONTAINER */
 /* -------------------------------------------------*/
 .audit-container {
-  display: flex;
-  gap: 16px;
-  width: 100%;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  padding: 20px;
 }
 
-.audit-left,
-.audit-right {
-  width: 50%;
-  background: #ffffff10;
-  padding: 16px;
-  border-radius: 8px;
+.audit-left, .audit-right {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.row-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
 }
 
 /* Summary Card */
@@ -415,33 +427,11 @@ select option {
   text-align: left;
 }
 
-/* Two-column rows */
-.row {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.col {
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Three-column totals row */
-
 /* QR Scan Icon */
 .input-with-icon {
   position: relative;
 }
 
-.scan-icon {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-}
 .three-col-row {
   display: flex;
   gap: 12px;
@@ -484,4 +474,87 @@ select option {
   border: 1px solid #ccc;
   background: #ffffff10;
   color: #fff;
+}
+
+/* QR Scanner Overlay */
+.qr-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.qr-modal {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  width: 320px;
+  animation: popIn 0.25s ease-out;
+}
+
+.qr-video {
+  width: 280px;
+  height: 280px;
+  border-radius: 10px;
+  background: #000;
+}
+
+.qr-close-btn {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: #d9534f;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes popIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.scan-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.scan-icon {
+  cursor: pointer;
+  font-size: 22px;
+}
+
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.audit-table th, .audit-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.audit-status {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.summary-box {
+  margin-top: 20px;
+  display: grid;
+  gap: 10px;
 }

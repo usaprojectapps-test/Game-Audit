@@ -27,7 +27,7 @@ async function validateSession() {
 }
 
 // -------------------------------------------------------------
-// LOAD USER PROFILE (FROM users TABLE)
+// LOAD USER PROFILE
 // -------------------------------------------------------------
 async function loadUserProfile() {
   const { data, error } = await supabase
@@ -45,25 +45,20 @@ async function loadUserProfile() {
   currentRole = data.role.trim();
   currentLocation = data.location_id;
 
-  const nameEl = document.getElementById("headerUserName");
-  if (nameEl) nameEl.textContent = data.name;
-
-  const roleEl = document.getElementById("headerUserDept");
-  if (roleEl) roleEl.textContent = currentRole;
+  document.getElementById("headerUserName").textContent = data.name;
+  document.getElementById("headerUserDept").textContent = currentRole;
 
   const locationEl = document.getElementById("headerLocationName");
-  if (locationEl) {
-    if (currentRole === "SuperAdmin") {
-      locationEl.textContent = "All Locations";
-    } else {
-      const { data: locData } = await supabase
-        .from("locations")
-        .select("name")
-        .eq("id", currentLocation)
-        .single();
+  if (currentRole === "SuperAdmin") {
+    locationEl.textContent = "All Locations";
+  } else {
+    const { data: locData } = await supabase
+      .from("locations")
+      .select("name")
+      .eq("id", currentLocation)
+      .single();
 
-      locationEl.textContent = locData?.name || "Unknown Location";
-    }
+    locationEl.textContent = locData?.name || "Unknown Location";
   }
 
   sessionStorage.setItem("name", data.name);
@@ -109,6 +104,7 @@ async function loadModule(moduleName) {
     script.type = "module";
     script.src = `/js_new/${moduleName}.js?v=${Date.now()}`;
     document.body.appendChild(script);
+
   } catch (err) {
     console.error("Module load error:", err);
     container.innerHTML = `<div class="error">Failed to load module.</div>`;
@@ -116,7 +112,7 @@ async function loadModule(moduleName) {
 }
 
 // -------------------------------------------------------------
-// TILE NAVIGATION
+// TILE NAVIGATION (DIRECT OPEN)
 // -------------------------------------------------------------
 function setupTileNavigation() {
   const tiles = document.querySelectorAll(".dashboard-tile");
@@ -126,33 +122,9 @@ function setupTileNavigation() {
 
     tile.addEventListener("click", () => {
       const moduleName = tile.getAttribute("data-module");
-
-      if (tile.classList.contains("expandable")) {
-        toggleSubTiles(tile.id.replace("tile-", ""));
-        return;
-      }
-
       if (moduleName) loadModule(moduleName);
     });
   });
-
-  const subTiles = document.querySelectorAll(".sub-tile");
-  subTiles.forEach(sub => {
-    sub.style.cursor = "pointer";
-    sub.addEventListener("click", () => {
-      const moduleName = sub.getAttribute("data-module");
-      if (moduleName) loadModule(moduleName);
-    });
-  });
-}
-
-// -------------------------------------------------------------
-// EXPAND / COLLAPSE SUB‑TILES
-// -------------------------------------------------------------
-function toggleSubTiles(parent) {
-  const container = document.querySelector(`.sub-tile-container[data-parent="${parent}"]`);
-  if (!container) return;
-  container.classList.toggle("open");
 }
 
 // -------------------------------------------------------------
@@ -177,7 +149,6 @@ function setupChangePassword() {
   if (!btn) return;
 
   btn.addEventListener("click", async () => {
-    console.log("Change Password clicked");
     await loadChangePasswordModal();
   });
 }
@@ -193,28 +164,20 @@ async function loadChangePasswordModal() {
   const html = await response.text();
   container.innerHTML = html;
 
-  // ⭐ Wait for DOM to update
   setTimeout(() => {
     const modal = container.querySelector(".modal");
-    if (!modal) {
-      console.error("Modal not found");
-      return;
-    }
+    if (!modal) return;
 
     const closeBtn = modal.querySelector(".close");
     const cancelBtn = modal.querySelector("#cancelChangePassword");
     const saveBtn = modal.querySelector("#saveChangePassword");
     const status = modal.querySelector("#changePasswordStatus");
 
-    console.log("Modal elements:", { closeBtn, cancelBtn, saveBtn });
-
     if (closeBtn) closeBtn.onclick = () => modal.remove();
     if (cancelBtn) cancelBtn.onclick = () => modal.remove();
 
     if (saveBtn) {
       saveBtn.onclick = async () => {
-        console.log("Save clicked");
-
         const oldPass = modal.querySelector("#oldPassword").value.trim();
         const newPass = modal.querySelector("#newPassword").value.trim();
         const confirmPass = modal.querySelector("#confirmPassword").value.trim();
@@ -243,7 +206,7 @@ async function loadChangePasswordModal() {
         }
       };
     }
-  }, 50); // ⭐ This delay fixes everything
+  }, 50);
 }
 
 // -------------------------------------------------------------

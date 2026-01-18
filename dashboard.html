@@ -5,22 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
 
+  <!-- CSS -->
   <link rel="stylesheet" href="/CSS/dashboard.css">
   <link rel="stylesheet" href="/CSS/styles.css">
-  
+
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&family=Sora:wght@500;600&family=Inter:wght@400;500&family=Poppins:wght@500&display=swap" rel="stylesheet">
 </head>
 
 <body>
   <div id="toastContainer" class="toast-container"></div>
 
-   <!-- MODAL CONTAINER FOR DYNAMIC MODALS (like Change Password) -->
+  <!-- MODAL CONTAINER -->
   <div id="modalContainer"></div>
 
   <!-- HEADER -->
   <header class="glass-card dashboard-header" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px;">
 
-    <!-- LEFT SIDE -->
+    <!-- LEFT -->
     <div class="header-left">
       <div class="card-header">Dashboard</div>
       <div class="card-subtitle">
@@ -33,16 +34,15 @@
       <div id="headerLocationName" class="location-banner"></div>
     </div>
 
-
-    <!-- RIGHT SIDE -->
+    <!-- RIGHT -->
     <div class="header-right">
-  <div id="headerDateTime" class="header-clock"></div>
+      <div id="headerDateTime" class="header-clock"></div>
 
-    <div class="header-actions">
-      <button id="btnChangePassword" class="btn btn-secondary">Change Password</button>
-      <button id="btnLogout" class="btn btn-danger">Logout</button>
+      <div class="header-actions">
+        <button id="btnChangePassword" class="btn btn-secondary">Change Password</button>
+        <button id="btnLogout" class="btn btn-danger">Logout</button>
+      </div>
     </div>
-  </div>
 
   </header>
 
@@ -68,20 +68,23 @@
       <div class="tile-title">Users</div>
     </div>
 
-    <div class="dashboard-tile expandable" id="tile-audit" data-module="audit" data-dept="Audit,SuperAdmin,LocationAdmin,Manager">
+    <!-- AUDIT (direct open) -->
+    <div class="dashboard-tile" id="tile-audit" data-module="auditEntry" data-dept="Audit,SuperAdmin,LocationAdmin,Manager">
       <div class="tile-icon">📊</div>
-      <div class="tile-title">Audit <span class="tile-arrow">▶</span></div>
+      <div class="tile-title">Audit</div>
     </div>
 
-    <div class="dashboard-tile expandable" id="tile-msp" data-module="msp" data-dept="MSP,SuperAdmin,LocationAdmin,Manager">
+    <!-- MSP (direct open) -->
+    <div class="dashboard-tile" id="tile-msp" data-module="mspEntry" data-dept="MSP,SuperAdmin,LocationAdmin,Manager">
       <div class="tile-icon">💰</div>
-      <div class="tile-title">MSP <span class="tile-arrow">▶</span></div>
+      <div class="tile-title">MSP</div>
     </div>
 
     <!-- ROW 2 -->
-    <div class="dashboard-tile expandable" id="tile-silver" data-module="silver" data-dept="Silver,SuperAdmin,LocationAdmin,Manager">
+    <!-- SILVER (direct open) -->
+    <div class="dashboard-tile" id="tile-silver" data-module="silverEntry" data-dept="Silver,SuperAdmin,LocationAdmin,Manager">
       <div class="tile-icon">🥈</div>
-      <div class="tile-title">Silver <span class="tile-arrow">▶</span></div>
+      <div class="tile-title">Silver</div>
     </div>
 
     <div class="dashboard-tile" id="tile-silverAgent" data-module="agentSilver" data-dept="SilverAgent,SuperAdmin,LocationAdmin,Manager">
@@ -94,10 +97,7 @@
       <div class="tile-title">Silver Purchase</div>
     </div>
 
-    <div class="dashboard-tile" id="tile-reports" data-module="reports" data-dept="SuperAdmin,LocationAdmin,Manager">
-      <div class="tile-icon">📑</div>
-      <div class="tile-title">Reports</div>
-    </div>
+    <!-- REPORTS REMOVED -->
 
     <div class="dashboard-tile" id="tile-general" data-module="general" data-dept="SuperAdmin,LocationAdmin,Manager,Audit,MSP,Silver,SilverAgent">
       <div class="tile-icon">⚙️</div>
@@ -118,25 +118,9 @@
       <div class="count" id="pendingRequestsCount">0</div>
     </div>
 
-    <!-- SUB‑TILES -->
-    <div class="sub-tile-container" data-parent="audit">
-      <div class="sub-tile" data-module="auditEntry">Audit Entry</div>
-      <div class="sub-tile" data-module="auditDaily">Daily Report</div>
-    </div>
-
-    <div class="sub-tile-container" data-parent="msp">
-      <div class="sub-tile" data-module="mspEntry">MSP Entry</div>
-      <div class="sub-tile" data-module="mspDaily">Daily Report</div>
-    </div>
-
-    <div class="sub-tile-container" data-parent="silver">
-      <div class="sub-tile" data-module="silverEntry">Silver Entry</div>
-      <div class="sub-tile" data-module="silverDaily">Daily Report</div>
-    </div>
-
   </div>
 
-  <!-- RESET PASSWORD MODAL (for admin reset in Users module) -->
+  <!-- RESET PASSWORD MODAL -->
   <div id="resetModal" class="modal">
     <div class="modal-content">
       <h2><i class="fa fa-lock"></i> Reset Password</h2>
@@ -158,20 +142,22 @@
     </div>
   </div>
 
- 
-    
-    <!-- Supabase JS v2 -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- SCRIPTS -->
+  <!-- Supabase JS v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- QR Code Library -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
-    
-    <script src="/js_new/qr-scanner.js"></script>
+  <!-- QR Code Generator -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
 
-    <script src="/js_new/audit.js"></script>
+  <!-- QR Scanner -->
+  <script src="/js_new/qr-scanner.js"></script>
+  <script src="https://unpkg.com/qr-scanner/qr-scanner.min.js"></script>
 
-    <script type="module" src="/js_new/dashboard.js?v=12"></script>
-  
+  <!-- Audit Logic -->
+  <script src="/js_new/audit.js"></script>
+
+  <!-- Dashboard Logic -->
+  <script type="module" src="/js_new/dashboard.js?v=12"></script>
 
 </body>
 </html>

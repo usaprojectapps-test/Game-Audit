@@ -1,141 +1,111 @@
-<div class="module-wrapper">
+<div class="audit-container">
 
-  <div class="module-content">
+  <!-- LEFT SIDE -->
+  <div class="audit-left">
 
-    <div class="audit-container">
-
-      <!-- LEFT SIDE -->
-      <div class="audit-left">
-
-        <!-- Row 1: Date + Machines Entered -->
-        <div class="row">
-          <div class="col">
-            <label>Select Date</label>
-            <input id="auditListDate" type="date">
-          </div>
-          <div class="col">
-            <label>Machines Entered Today</label>
-            <input id="machinesEnteredCount" type="text" readonly>
-          </div>
-        </div>
-
-        <!-- Row 2: Totals -->
-        <div class="three-col-row">
-          <div class="col">
-            <label>Total IN</label>
-            <input id="sumTotalIn" type="number" readonly>
-          </div>
-          <div class="col">
-            <label>Total OUT</label>
-            <input id="sumTotalOut" type="number" readonly>
-          </div>
-          <div class="col">
-            <label>NET</label>
-            <input id="sumNet" type="number" readonly>
-          </div>
-        </div>
-
-        <!-- Row 3: Table -->
-        <table id="auditTable">
-          <thead>
-            <tr>
-              <th>Machine</th>
-              <th>IN</th>
-              <th>OUT</th>
-              <th>Jackpot</th>
-              <th>Total IN</th>
-              <th>Total OUT</th>
-              <th>NET</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-
+    <div class="row-2col">
+      <div>
+        <label>Date</label>
+        <input type="date" id="auditListDate">
       </div>
 
-      <!-- RIGHT SIDE -->
-      <div class="audit-right">
+      <div>
+        <label>Machines Entered</label>
+        <input type="text" id="machinesEnteredCount" readonly>
+      </div>
+    </div>
 
-          <!-- Row 1 -->
-        <div class="row">
-          <div class="col">
-            <label>Date</label>
-            <input id="auditDate" type="date">
-          </div>
-          <div class="col">
-            <label>Machine No</label>
-            <div class="input-with-icon">
-              <input id="auditMachineNo" type="text">
-              <span class="scan-icon" onclick="openQRScanner('auditMachineNo')">📷</span>
-            </div>
-          </div>
-        </div>
+    <table id="auditTable" class="audit-table">
+      <thead>
+        <tr>
+          <th>Machine</th>
+          <th>Cur IN</th>
+          <th>Cur OUT</th>
+          <th>Jackpot</th>
+          <th>Total IN</th>
+          <th>Total OUT</th>
+          <th>NET</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-        <!-- Row 2 -->
-        <div class="row">
-          <div class="col">
-            <label>Previous IN</label>
-            <input id="auditPrevIn" type="number" readonly>
-          </div>
-          <div class="col">
-            <label>Previous OUT</label>
-            <input id="auditPrevOut" type="number" readonly>
-          </div>
-        </div>
-
-        <!-- Row 3 -->
-        <div class="row">
-          <div class="col">
-            <label>Current IN</label>
-            <input id="auditCurIn" type="number">
-          </div>
-          <div class="col">
-            <label>Current OUT</label>
-            <input id="auditCurOut" type="number">
-          </div>
-        </div>
-
-        <!-- Row 4 -->
-        <div class="row">
-          <div class="col">
-            <label>Machine Health</label>
-            <select id="auditHealth">
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-              <option value="Shutdown">Shutdown</option>
-            </select>
-          </div>
-          <div class="col">
-            <label>Jackpot</label>
-            <input id="auditJackpot" type="number">
-          </div>
-        </div>
-
-        <div id="auditStatus" style="margin-top:6px;"></div>
-
-      <!-- Save Button -->
-        <div style="display:flex; justify-content:flex-end; margin-top:12px;">
-          <button id="auditSaveBtn" class="btn btn-primary">Save</button>
-        </div>
-
-        <!-- Stacked Summary -->
-        <div class="three-col-row">
-          <div>
-            <label>Total IN</label>
-            <input id="calcTotalIn" type="number" readonly>
-          </div>
-          <div>
-            <label>Total OUT</label>
-            <input id="calcTotalOut" type="number" readonly>
-          </div>
-          <div>
-            <label>NET</label>
-            <input id="calcNet" type="number" readonly>
-          </div>
-        </div>
-      
+    <div class="row-3col totals-row">
+      <div>
+        <label>Total IN</label>
+        <input type="text" id="sumTotalIn" readonly>
       </div>
 
+      <div>
+        <label>Total OUT</label>
+        <input type="text" id="sumTotalOut" readonly>
+      </div>
+
+      <div>
+        <label>NET</label>
+        <input type="text" id="sumNet" readonly>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT SIDE -->
+  <div class="audit-right">
+
+    <label>Date</label>
+    <input type="date" id="auditDate">
+
+    <label>Machine No</label>
+    <div class="scan-row">
+      <input type="text" id="auditMachineNo">
+      <span class="scan-icon" onclick="openQRScanner('auditMachineNo')">📷</span>
+    </div>
+
+    <div class="row-2col">
+      <div>
+        <label>Prev IN</label>
+        <input type="number" id="auditPrevIn" readonly>
+      </div>
+      <div>
+        <label>Prev OUT</label>
+        <input type="number" id="auditPrevOut" readonly>
+      </div>
+    </div>
+
+    <div class="row-2col">
+      <div>
+        <label>Cur IN</label>
+        <input type="number" id="auditCurIn">
+      </div>
+      <div>
+        <label>Cur OUT</label>
+        <input type="number" id="auditCurOut">
+      </div>
+    </div>
+
+    <label>Jackpot</label>
+    <input type="number" id="auditJackpot">
+
+    <label>Health</label>
+    <select id="auditHealth">
+      <option value="Good">Good</option>
+      <option value="Warning">Warning</option>
+      <option value="Critical">Critical</option>
+    </select>
+
+    <button id="auditSaveBtn" class="btn-primary">Save Entry</button>
+
+    <div id="auditStatus" class="audit-status"></div>
+
+    <div class="row-3col totals-row">
+      <label>Total IN</label>
+      <input type="text" id="calcTotalIn" readonly>
+
+      <label>Total OUT</label>
+      <input type="text" id="calcTotalOut" readonly>
+
+      <label>NET</label>
+      <input type="text" id="calcNet" readonly>
     </div>
 
   </div>
