@@ -429,15 +429,6 @@ select option {
 }
 
 /* Three-column totals row */
-.three-col-row {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.three-col-row .col {
-  width: 33%;
-}
 
 /* QR Scan Icon */
 .input-with-icon {
@@ -450,4 +441,27 @@ select option {
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
+}
+.three-col-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.three-col-row .col {
+  width: 33%;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.col {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
 }

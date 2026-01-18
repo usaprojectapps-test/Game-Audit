@@ -109,32 +109,36 @@ async function loadAuditList() {
   tbody.innerHTML = "";
 
   let totalIn = 0;
-  let totalOut = 0;
-  let totalNet = 0;
+let totalOut = 0;
+let totalNet = 0;
 
-  data.forEach(row => {
-    const tIn = row.cur_in - row.prev_in;
-    const tOut = row.cur_out - row.prev_out;
-    const net = tIn - tOut;
+data.forEach(row => {
+  const tIn = row.cur_in - row.prev_in;
+  const tOut = row.cur_out - row.prev_out;
+  const net = tIn - tOut;
 
-    totalIn += tIn;
-    totalOut += tOut;
-    totalNet += net;
+  totalIn += tIn;
+  totalOut += tOut;
+  totalNet += net;
 
-    tbody.innerHTML += `
-      <tr>
-        <td>${row.machine_no}</td>
-        <td>${row.cur_in}</td>
-        <td>${row.cur_out}</td>
-        <td>${row.jackpot}</td>
-        <td>${tIn}</td>
-        <td>${tOut}</td>
-        <td>${net}</td>
-      </tr>
-    `;
-  });
+  tbody.innerHTML += `
+    <tr>
+      <td>${row.machine_no}</td>
+      <td>${row.cur_in}</td>
+      <td>${row.cur_out}</td>
+      <td>${row.jackpot}</td>
+      <td>${tIn}</td>
+      <td>${tOut}</td>
+      <td>${net}</td>
+    </tr>
+  `;
+});
+
 
   machinesEnteredCount.textContent = data.length;
 }
 
-document.getElementById("auditListDate").addEventListener("change", loadAuditList);
+document.getElementById("machinesEnteredCount").value = data.length;
+document.getElementById("sumTotalIn").value = totalIn;
+document.getElementById("sumTotalOut").value = totalOut;
+document.getElementById("sumNet").value = totalNet;

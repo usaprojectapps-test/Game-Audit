@@ -11,17 +11,35 @@
       <!-- LEFT SIDE -->
       <div class="audit-left">
 
-        <!-- Machines Entered Card -->
-        <div class="summary-card">
-          <h4>Machines Entered Today</h4>
-          <div id="machinesEnteredCount" class="summary-value">0</div>
+        <!-- Row 1: Date + Machines Entered -->
+        <div class="row">
+          <div class="col">
+            <label>Select Date</label>
+            <input id="auditListDate" type="date">
+          </div>
+          <div class="col">
+            <label>Machines Entered Today</label>
+            <input id="machinesEnteredCount" type="text" readonly>
+          </div>
         </div>
 
-        <div class="form-row">
-          <label>Select Date</label>
-          <input id="auditListDate" type="date">
+        <!-- Row 2: Totals -->
+        <div class="three-col-row">
+          <div class="col">
+            <label>Total IN</label>
+            <input id="sumTotalIn" type="number" readonly>
+          </div>
+          <div class="col">
+            <label>Total OUT</label>
+            <input id="sumTotalOut" type="number" readonly>
+          </div>
+          <div class="col">
+            <label>NET</label>
+            <input id="sumNet" type="number" readonly>
+          </div>
         </div>
 
+        <!-- Row 3: Table -->
         <table id="auditTable">
           <thead>
             <tr>
