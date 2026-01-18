@@ -60,23 +60,7 @@
       <!-- RIGHT SIDE -->
       <div class="audit-right">
 
-        <!-- 3-Column Totals Row -->
-        <div class="three-col-row">
-          <div class="col">
-            <label>Total IN</label>
-            <input id="calcTotalIn" type="number" readonly>
-          </div>
-          <div class="col">
-            <label>Total OUT</label>
-            <input id="calcTotalOut" type="number" readonly>
-          </div>
-          <div class="col">
-            <label>NET</label>
-            <input id="calcNet" type="number" readonly>
-          </div>
-        </div>
-
-        <!-- Row 1 -->
+          <!-- Row 1 -->
         <div class="row">
           <div class="col">
             <label>Date</label>
@@ -133,10 +117,27 @@
 
         <div id="auditStatus" style="margin-top:6px;"></div>
 
+      <!-- Save Button -->
         <div style="display:flex; justify-content:flex-end; margin-top:12px;">
           <button id="auditSaveBtn" class="btn btn-primary">Save</button>
         </div>
 
+        <!-- Stacked Summary -->
+        <div class="stacked-summary">
+          <div>
+            <label>Total IN</label>
+            <input id="calcTotalIn" type="number" readonly>
+          </div>
+          <div>
+            <label>Total OUT</label>
+            <input id="calcTotalOut" type="number" readonly>
+          </div>
+          <div>
+            <label>NET</label>
+            <input id="calcNet" type="number" readonly>
+          </div>
+        </div>
+      
       </div>
 
     </div>
