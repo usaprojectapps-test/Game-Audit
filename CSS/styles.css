@@ -379,12 +379,6 @@ select option {
   padding: 20px;
 }
 
-.audit-left, .audit-right {
-  background: #fff;
-  padding: 20px;
-  border-radius: 12px;
-}
-
 .row-3col {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -587,14 +581,6 @@ select option {
   background-color: rgba(30, 30, 30, 0.9);
   color: #f0f0f0;
 }
-
-.audit-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
-  padding: 24px;
-}
-
 .audit-left, .audit-right {
   padding: 20px;
   border-radius: 12px;
