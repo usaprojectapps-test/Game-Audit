@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
   console.log("TOP OF AUDIT.JS REACHED");
-  
+
   // -------------------------------------------------------------
   // REAL QR SCANNER (GLOBAL)
   // -------------------------------------------------------------
@@ -151,6 +151,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // SAVE ENTRY
   // -------------------------------------------------------------
   auditSaveBtn.addEventListener("click", async () => {
+    console.log("SAVE BUTTON LISTENER ATTACHED");
+
     if (!currentUser || !userLocationId) {
     auditStatus.textContent = "User not loaded yet. Please wait.";
     auditStatus.style.color = "red";
