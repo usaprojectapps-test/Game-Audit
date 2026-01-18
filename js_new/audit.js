@@ -1,7 +1,7 @@
-console.log("TOP OF AUDIT.JS REACHED");
-
 document.addEventListener("DOMContentLoaded", () => {
 
+  console.log("TOP OF AUDIT.JS REACHED");
+  
   // -------------------------------------------------------------
   // REAL QR SCANNER (GLOBAL)
   // -------------------------------------------------------------
