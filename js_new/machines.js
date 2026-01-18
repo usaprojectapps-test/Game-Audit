@@ -410,6 +410,61 @@ downloadQRBtn.onclick = () => {
 };
 
 // -------------------------------------------------------------
+// QR SCANNER (Used by Machines & Audit modules)
+// -------------------------------------------------------------
+function openQRScanner(targetInputId) {
+  // Create scanner container
+  const scannerOverlay = document.createElement("div");
+  scannerOverlay.style.position = "fixed";
+  scannerOverlay.style.top = "0";
+  scannerOverlay.style.left = "0";
+  scannerOverlay.style.width = "100%";
+  scannerOverlay.style.height = "100%";
+  scannerOverlay.style.background = "rgba(0,0,0,0.8)";
+  scannerOverlay.style.display = "flex";
+  scannerOverlay.style.justifyContent = "center";
+  scannerOverlay.style.alignItems = "center";
+  scannerOverlay.style.zIndex = "9999";
+
+  scannerOverlay.innerHTML = `
+    <div style="background:#fff; padding:20px; border-radius:10px; text-align:center;">
+      <h3>Scan Machine QR</h3>
+      <video id="qr-video" style="width:300px; height:300px;"></video>
+      <br>
+      <button id="closeScannerBtn" style="margin-top:10px;">Close</button>
+    </div>
+  `;
+
+  document.body.appendChild(scannerOverlay);
+
+  const video = document.getElementById("qr-video");
+
+  // Start camera
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+    .then(stream => {
+      video.srcObject = stream;
+      video.setAttribute("playsinline", true);
+      video.play();
+
+      const qrScanner = new QrScanner(video, result => {
+        document.getElementById(targetInputId).value = result.data.replace("MACHINE:", "");
+        qrScanner.stop();
+        stream.getTracks().forEach(t => t.stop());
+        scannerOverlay.remove();
+      });
+
+      qrScanner.start();
+    });
+
+  // Close button
+  document.getElementById("closeScannerBtn").onclick = () => {
+    const stream = video.srcObject;
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    scannerOverlay.remove();
+  };
+}
+
+// -------------------------------------------------------------
 // EVENTS
 // -------------------------------------------------------------
 searchInput.addEventListener("input", () => loadMachines(true));
