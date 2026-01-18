@@ -1,3 +1,5 @@
+console.log("TOP OF AUDIT.JS REACHED");
+
 document.addEventListener("DOMContentLoaded", () => {
 
   // -------------------------------------------------------------
