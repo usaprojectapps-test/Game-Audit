@@ -386,6 +386,22 @@ select option {
   border-radius: 8px;
 }
 
+/* Summary Card */
+.summary-card {
+  background: #ffffff15;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.summary-value {
+  font-size: 28px;
+  font-weight: bold;
+  margin-top: 6px;
+}
+
+/* Table */
 #auditTable {
   width: 100%;
   border-collapse: collapse;
@@ -397,4 +413,41 @@ select option {
   padding: 8px;
   border-bottom: 1px solid #ccc;
   text-align: left;
+}
+
+/* Two-column rows */
+.row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.col {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Three-column totals row */
+.three-col-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.three-col-row .col {
+  width: 33%;
+}
+
+/* QR Scan Icon */
+.input-with-icon {
+  position: relative;
+}
+
+.scan-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
 }

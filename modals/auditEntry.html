@@ -8,9 +8,14 @@
 
     <div class="audit-container">
 
-      <!-- LEFT SIDE: TABLE -->
+      <!-- LEFT SIDE -->
       <div class="audit-left">
-        <h3>Audit Entries</h3>
+
+        <!-- Machines Entered Card -->
+        <div class="summary-card">
+          <h4>Machines Entered Today</h4>
+          <div id="machinesEnteredCount" class="summary-value">0</div>
+        </div>
 
         <div class="form-row">
           <label>Select Date</label>
@@ -24,56 +29,96 @@
               <th>IN</th>
               <th>OUT</th>
               <th>Jackpot</th>
+              <th>Total IN</th>
+              <th>Total OUT</th>
+              <th>NET</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
+
       </div>
 
-      <!-- RIGHT SIDE: FORM -->
+      <!-- RIGHT SIDE -->
       <div class="audit-right">
-        <h3>New Audit</h3>
 
-        <div class="form-row">
-          <label>Machine No</label>
-          <input id="auditMachineNo" type="text" placeholder="Enter Machine Number">
+        <!-- 3-Column Totals Row -->
+        <div class="three-col-row">
+          <div class="col">
+            <label>Total IN</label>
+            <input id="calcTotalIn" type="number" readonly>
+          </div>
+          <div class="col">
+            <label>Total OUT</label>
+            <input id="calcTotalOut" type="number" readonly>
+          </div>
+          <div class="col">
+            <label>NET</label>
+            <input id="calcNet" type="number" readonly>
+          </div>
         </div>
 
-        <div class="form-row">
-          <label>Date</label>
-          <input id="auditDate" type="date">
+        <!-- Row 1 -->
+        <div class="row">
+          <div class="col">
+            <label>Date</label>
+            <input id="auditDate" type="date">
+          </div>
+          <div class="col">
+            <label>Machine No</label>
+            <div class="input-with-icon">
+              <input id="auditMachineNo" type="text">
+              <span class="scan-icon" onclick="openQRScanner('auditMachineNo')">📷</span>
+            </div>
+          </div>
         </div>
 
-        <div class="form-row">
-          <label>Previous Meter IN</label>
-          <input id="auditPrevIn" type="number" readonly>
+        <!-- Row 2 -->
+        <div class="row">
+          <div class="col">
+            <label>Previous IN</label>
+            <input id="auditPrevIn" type="number" readonly>
+          </div>
+          <div class="col">
+            <label>Previous OUT</label>
+            <input id="auditPrevOut" type="number" readonly>
+          </div>
         </div>
 
-        <div class="form-row">
-          <label>Previous Meter OUT</label>
-          <input id="auditPrevOut" type="number" readonly>
+        <!-- Row 3 -->
+        <div class="row">
+          <div class="col">
+            <label>Current IN</label>
+            <input id="auditCurIn" type="number">
+          </div>
+          <div class="col">
+            <label>Current OUT</label>
+            <input id="auditCurOut" type="number">
+          </div>
         </div>
 
-        <div class="form-row">
-          <label>Current Meter IN</label>
-          <input id="auditCurIn" type="number">
-        </div>
-
-        <div class="form-row">
-          <label>Current Meter OUT</label>
-          <input id="auditCurOut" type="number">
-        </div>
-
-        <div class="form-row">
-          <label>JACKPOT</label>
-          <input id="auditJackpot" type="number">
+        <!-- Row 4 -->
+        <div class="row">
+          <div class="col">
+            <label>Machine Health</label>
+            <select id="auditHealth">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Shutdown">Shutdown</option>
+            </select>
+          </div>
+          <div class="col">
+            <label>Jackpot</label>
+            <input id="auditJackpot" type="number">
+          </div>
         </div>
 
         <div id="auditStatus" style="margin-top:6px;"></div>
 
-        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+        <div style="display:flex; justify-content:flex-end; margin-top:12px;">
           <button id="auditSaveBtn" class="btn btn-primary">Save</button>
         </div>
+
       </div>
 
     </div>
