@@ -81,9 +81,8 @@ document.addEventListener("DOMContentLoaded", () => {
     userLocationId = currentUser.user_metadata?.location_id;
   }
 
-  document.addEventListener("DOMContentLoaded", async () => {
-    await loadUser();
-  });
+  await loadUser();
+
 
   // -------------------------------------------------------------
   // LOAD PREVIOUS METERS
