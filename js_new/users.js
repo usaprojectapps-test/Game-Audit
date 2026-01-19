@@ -6,6 +6,11 @@ import { showToast } from "./toast.js";
 import { applyModuleAccess } from "./moduleAccess.js";
 import { callEdgeFunction } from "./edgeClient.js";
 
+console.log("USERS JS LOADED");
+
+window.addEventListener("usersModuleLoaded", () => {
+  console.log("USERS MODULE FULLY LOADED");
+
 // -------------------------------------------------------------
 // VARIABLES
 // -------------------------------------------------------------
@@ -458,3 +463,4 @@ function setupFormAccess() {
   // Hide reset button by default
   btnResetPassword.style.display = "none";
 }
+});
