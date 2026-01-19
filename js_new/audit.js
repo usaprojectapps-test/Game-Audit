@@ -215,68 +215,106 @@ window.addEventListener("auditModuleLoaded", async() => {
   // -------------------------------------------------------------
   // FORM HANDLERS
   // -------------------------------------------------------------
-  function selectAudit(audit) {
-    selectedAuditId = audit.id;
-    if (auditIdInput) auditIdInput.value = audit.id || "";
-    if (machineIdInput) machineIdInput.value = audit.machine_no || "";
-    if (inspectorInput) inspectorInput.value = audit.inspector || "";
-    if (notesInput) notesInput.value = audit.notes || "";
-    if (locationSelect) locationSelect.value = audit.location_id || "";
-  }
+ function selectAudit(audit) {
+  selectedAuditId = audit.id;
+  if (auditIdInput) auditIdInput.value = audit.id || "";
+  if (machineIdInput) machineIdInput.value = audit.machine_no || "";
+  if (inspectorInput) inspectorInput.value = audit.inspector || "";
+  if (notesInput) notesInput.value = audit.notes || "";
+  if (locationSelect) locationSelect.value = audit.location_id || "";
+}
 
-  function resetForm() {
-    selectedAuditId = null;
-    if (auditIdInput) auditIdInput.value = "";
-    if (machineIdInput) machineIdInput.value = "";
-    if (inspectorInput) inspectorInput.value = "";
-    if (notesInput) notesInput.value = "";
-    if (locationSelect) locationSelect.value = "";
-  }
+function resetForm() {
+  selectedAuditId = null;
+  if (auditIdInput) auditIdInput.value = "";
+  if (machineIdInput) machineIdInput.value = "";
+  if (inspectorInput) inspectorInput.value = "";
+  if (notesInput) notesInput.value = "";
+  if (locationSelect) locationSelect.value = "";
+}
 
-  // -------------------------------------------------------------
-  // SAVE / DELETE
-  // -------------------------------------------------------------
-  // Put this at the top of saveAudit before any supabase call
-    console.log(">>> saveAudit start, selectedAuditId:", selectedAuditId);
-    console.log("Session:", await supabase.auth.getSession());
-
-  async function saveAudit() {
+// -------------------------------------------------------------
+// SAVE / DELETE
+// -------------------------------------------------------------
+async function saveAudit() {
   try {
-    const machine_no = (machineIdInput?.value || "").trim();
-    const inspector = (inspectorInput?.value || "").trim();
+    console.log(">>> saveAudit start, selectedAuditId:", selectedAuditId);
 
-    if (!machine_no || !inspector) {
-      return showToast("Machine No and Inspector are required", "error");
+    // Get session and current user id
+    const { data: sessionData } = await supabase.auth.getSession();
+    const currentUserId = sessionData?.session?.user?.id || null;
+    console.log("Session user id:", currentUserId);
+
+    // Read values from the form (adjust IDs if your inputs differ)
+    const dateInput = document.getElementById("audit-date-input")?.value;
+    const date = dateInput ? dateInput : new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+    const machine_no = (machineIdInput?.value || "").trim();
+    const prev_in_raw = document.getElementById("prev-in-input")?.value ?? "";
+    const prev_out_raw = document.getElementById("prev-out-input")?.value ?? "";
+    const cur_in_raw = document.getElementById("cur-in-input")?.value ?? "";
+    const cur_out_raw = document.getElementById("cur-out-input")?.value ?? "";
+    const jackpot_raw = document.getElementById("jackpot-input")?.value ?? "";
+    const location_id = locationSelect?.value || null;
+
+    if (!machine_no) {
+      return showToast("Machine No is required", "error");
     }
 
-    const payload = {
-      // do not set id for inserts; leave undefined for DB to generate
-      machine_no,
-      inspector,
-      notes: (notesInput?.value || "").trim(),
-      location_id: locationSelect?.value || null,
-      created_at: new Date().toISOString()
+    // Convert numeric fields to numbers or null
+    const toNumberOrNull = v => {
+      if (v === null || v === undefined) return null;
+      const s = String(v).trim();
+      if (s === "") return null;
+      const n = Number(s);
+      return Number.isFinite(n) ? n : null;
     };
+
+    const payload = {
+      machine_no,
+      date,
+      prev_in: toNumberOrNull(prev_in_raw),
+      prev_out: toNumberOrNull(prev_out_raw),
+      cur_in: toNumberOrNull(cur_in_raw),
+      cur_out: toNumberOrNull(cur_out_raw),
+      jackpot: toNumberOrNull(jackpot_raw),
+      location_id,
+      user_id: currentUserId // include user_id so RLS policies can check auth.uid()
+      // created_at will default to now() in DB
+    };
+
+    // Remove undefined keys so DB defaults apply
+    Object.keys(payload).forEach(k => {
+      if (payload[k] === undefined) delete payload[k];
+    });
 
     console.log("Audit save payload:", payload);
 
     let result;
     if (selectedAuditId) {
+      // Update existing row (do not overwrite created_at or id)
       const updatePayload = {
-        machine_no,
-        inspector,
-        notes: (notesInput?.value || "").trim(),
-        location_id: locationSelect?.value || null
+        machine_no: payload.machine_no,
+        date: payload.date,
+        prev_in: payload.prev_in,
+        prev_out: payload.prev_out,
+        cur_in: payload.cur_in,
+        cur_out: payload.cur_out,
+        jackpot: payload.jackpot,
+        location_id: payload.location_id
       };
+
       result = await supabase
         .from("audit")
         .update(updatePayload)
-        .eq("id", selectedAuditId);
+        .eq("id", selectedAuditId)
+        .select();
     } else {
+      // Insert new row and return it
       result = await supabase
         .from("audit")
         .insert(payload)
-        .select(); // return inserted row(s)
+        .select();
     }
 
     console.log("Supabase result:", result);
@@ -287,7 +325,6 @@ window.addEventListener("auditModuleLoaded", async() => {
       return;
     }
 
-    // If using .select() above, result.data should contain the inserted row
     console.log("Inserted/updated rows:", result.data);
     showToast(selectedAuditId ? "Audit updated" : "Audit added", "success");
 
