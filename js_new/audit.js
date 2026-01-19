@@ -175,59 +175,58 @@ window.addEventListener("auditModuleLoaded", () => {
   }
 
   async function loadAudits(reset = false) {
-    try {
-      if (reset) currentPage = 1;
-      const from = (currentPage - 1) * pageSize;
-      const to = from + pageSize - 1;
+  try {
+    if (reset) currentPage = 1;
+    const from = (currentPage - 1) * pageSize;
+    const to = from + pageSize - 1;
 
-      let query = supabase
-        .from("audits")
-        .select("*")
-        .order("createdat", { ascending: false })
-        .range(from, to);
+    let query = supabase
+      .from("audit")                      // <- updated table name
+      .select("*")
+      .order("createdat", { ascending: false })
+      .range(from, to);
 
-      const search = searchInput?.value?.trim();
-      const location = locationFilter?.value;
+    const search = searchInput?.value?.trim();
+    const location = locationFilter?.value;
 
-      if (search) query = query.ilike("machineid", `%${search}%`);
-      if (location) query = query.eq("location_id", location);
+    if (search) query = query.ilike("machineid", `%${search}%`);
+    if (location) query = query.eq("location_id", location);
 
-      const { data, error } = await query;
+    const { data, error } = await query;
 
-      if (error) {
-        console.error("Audit load error:", error);
-        return showToast("Failed to load audits", "error");
-      }
-
-      if (!tableBody) {
-        console.warn("No table body found to render audits.");
-        return;
-      }
-
-      tableBody.innerHTML = "";
-
-      (data || []).forEach(row => {
-        const tr = document.createElement("tr");
-        tr.onclick = () => selectAudit(row);
-        tr.innerHTML = `
-          <td>${row.machineid || "—"}</td>
-          <td>${row.cur_in ?? "—"}</td>
-          <td>${row.cur_out ?? "—"}</td>
-          <td>${row.jackpot ?? "—"}</td>
-          <td>${row.total_in ?? "—"}</td>
-          <td>${row.total_out ?? "—"}</td>
-          <td>${(row.total_in != null && row.total_out != null) ? (row.total_in - row.total_out) : "—"}</td>
-        `;
-        tableBody.appendChild(tr);
-      });
-
-      if (currentPageSpan) currentPageSpan.textContent = String(currentPage);
-      if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
-      if (nextPageBtn) nextPageBtn.disabled = (data || []).length < pageSize;
-    } catch (err) {
-      console.error("Unexpected error in loadAudits:", err);
+    if (error) {
+      console.error("Audit load error:", error);
+      return showToast("Failed to load audits", "error");
     }
+
+    if (!tableBody) {
+      console.warn("No table body found to render audits.");
+      return;
+    }
+
+    tableBody.innerHTML = "";
+    (data || []).forEach(row => {
+      const tr = document.createElement("tr");
+      tr.onclick = () => selectAudit(row);
+      tr.innerHTML = `
+        <td>${row.machineid || "—"}</td>
+        <td>${row.cur_in ?? "—"}</td>
+        <td>${row.cur_out ?? "—"}</td>
+        <td>${row.jackpot ?? "—"}</td>
+        <td>${row.total_in ?? "—"}</td>
+        <td>${row.total_out ?? "—"}</td>
+        <td>${(row.total_in != null && row.total_out != null) ? (row.total_in - row.total_out) : "—"}</td>
+      `;
+      tableBody.appendChild(tr);
+    });
+
+    if (currentPageSpan) currentPageSpan.textContent = String(currentPage);
+    if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
+    if (nextPageBtn) nextPageBtn.disabled = (data || []).length < pageSize;
+  } catch (err) {
+    console.error("Unexpected error in loadAudits:", err);
   }
+}
 
   // -------------------------------------------------------------
   // FORM HANDLERS
@@ -259,32 +258,32 @@ window.addEventListener("auditModuleLoaded", () => {
       const inspector = (inspectorInput?.value || "").trim();
 
       if (!machineid || !inspector) {
-        return showToast("Machine ID and Inspector are required", "error");
-      }
+      return showToast("Machine ID and Inspector are required", "error");
+     } 
 
       const payload = {
-        auditid: (auditIdInput?.value || "").trim() || undefined,
-        machineid,
-        inspector,
-        notes: (notesInput?.value || "").trim(),
-        location_id: locationSelect?.value || null,
-        updatedat: Date.now(),
+      auditid: (auditIdInput?.value || "").trim() || undefined,
+      machineid,
+      inspector,
+      notes: (notesInput?.value || "").trim(),
+      location_id: locationSelect?.value || null,
+      updatedat: Date.now(),
       };
 
       if (selectedAuditId) {
-        const { error } = await supabase
-          .from("audits")
-          .update(payload)
-          .eq("auditid", selectedAuditId);
+      const { error } = await supabase
+        .from("audit")                      // <- updated table name
+        .update(payload)
+        .eq("auditid", selectedAuditId);
 
-        if (error) {
-          console.error("Audit update error:", error);
-          return showToast("Update failed", "error");
+      if (error) {
+        console.error("Audit update error:", error);
+        return showToast("Update failed", "error");
         }
         showToast("Audit updated", "success");
       } else {
-        payload.createdat = Date.now();
-        const { error } = await supabase.from("audits").insert(payload);
+      payload.createdat = Date.now();
+      const { error } = await supabase.from("audit").insert(payload); // <- updated
         if (error) {
           console.error("Audit insert error:", error);
           return showToast("Insert failed", "error");
@@ -294,30 +293,32 @@ window.addEventListener("auditModuleLoaded", () => {
 
       await loadAudits(true);
       resetForm();
-    } catch (err) {
-      console.error("Unexpected error in saveAudit:", err);
-      showToast("Save failed", "error");
-    }
+    } 
+        catch (err) {
+        console.error("Unexpected error in saveAudit:", err);
+        showToast("Save failed", "error");
+      }
   }
 
   async function deleteAudit() {
-    try {
-      if (!selectedAuditId) return showToast("No audit selected", "error");
+  try {
+    if (!selectedAuditId) return showToast("No audit selected", "error");
 
-      const { error } = await supabase
-        .from("audits")
-        .delete()
-        .eq("auditid", selectedAuditId);
+    const { error } = await supabase
+      .from("audit")                      // <- updated table name
+      .delete()
+      .eq("auditid", selectedAuditId);
 
-      if (error) {
-        console.error("Audit delete error:", error);
-        return showToast("Delete failed", "error");
-      }
+    if (error) {
+      console.error("Audit delete error:", error);
+      return showToast("Delete failed", "error");
+    }
 
-      showToast("Audit deleted", "success");
-      await loadAudits(true);
-      resetForm();
-    } catch (err) {
+    showToast("Audit deleted", "success");
+    await loadAudits(true);
+    resetForm();
+  } 
+    catch (err) {
       console.error("Unexpected error in deleteAudit:", err);
       showToast("Delete failed", "error");
     }
