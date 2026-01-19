@@ -3,501 +3,427 @@
 // -------------------------------------------------------------
 import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
+
 console.log("MACHINES JS LOADED");
 
+// -------------------------------------------------------------
+// MODULE LOADED WRAPPER
+// -------------------------------------------------------------
 window.addEventListener("machinesModuleLoaded", () => {
   console.log("Machines module fully loaded");
 
-  loadMachines(true);   // or whatever your initial load call is
+  // -------------------------------------------------------------
+  // DOM ELEMENTS
+  // -------------------------------------------------------------
+  const idInput = document.getElementById("machines-machineid-input");
+  const nameInput = document.getElementById("machines-machinename-input");
+  const vendorSelect = document.getElementById("machines-vendor-select");
+  const locationSelect = document.getElementById("machines-location-select");
+  const healthSelect = document.getElementById("machines-health-select");
+  const lastServiceInput = document.getElementById("machines-lastservice-input");
+  const notesInput = document.getElementById("machines-notes-input");
 
-// -------------------------------------------------------------
-// DOM ELEMENTS
-// -------------------------------------------------------------
-const idInput = document.getElementById("machines-machineid-input");
-const nameInput = document.getElementById("machines-machinename-input");
-const vendorSelect = document.getElementById("machines-vendor-select");
-const locationSelect = document.getElementById("machines-location-select");
-const healthSelect = document.getElementById("machines-health-select");
-const lastServiceInput = document.getElementById("machines-lastservice-input");
-const notesInput = document.getElementById("machines-notes-input");
+  const searchInput = document.getElementById("machines-search-input");
+  const healthFilter = document.getElementById("machines-health-filter");
+  const locationFilter = document.getElementById("machines-location-filter");
 
-const searchInput = document.getElementById("machines-search-input");
-const healthFilter = document.getElementById("machines-health-filter");
-const locationFilter = document.getElementById("machines-location-filter");
+  const tableBody = document.getElementById("machines-table-body");
+  const paginationText = document.getElementById("machines-pagination-text");
+  const currentPageSpan = document.getElementById("machines-current-page");
+  const prevPageBtn = document.getElementById("machines-prev-page");
+  const nextPageBtn = document.getElementById("machines-next-page");
 
-const tableBody = document.getElementById("machines-table-body");
-const paginationText = document.getElementById("machines-pagination-text");
-const currentPageSpan = document.getElementById("machines-current-page");
-const prevPageBtn = document.getElementById("machines-prev-page");
-const nextPageBtn = document.getElementById("machines-next-page");
+  const saveBtn = document.getElementById("machines-save-btn");
+  const deleteBtn = document.getElementById("machines-delete-btn");
+  const resetBtn = document.getElementById("machines-reset-btn");
+  const refreshBtn = document.getElementById("machines-refresh-btn");
 
-const saveBtn = document.getElementById("machines-save-btn");
-const deleteBtn = document.getElementById("machines-delete-btn");
-const resetBtn = document.getElementById("machines-reset-btn");
-const refreshBtn = document.getElementById("machines-refresh-btn");
+  const generateQRBtn = document.getElementById("machines-generate-qr-btn");
+  const printQRBtn = document.getElementById("machines-print-qr-btn");
+  const downloadQRBtn = document.getElementById("machines-download-qr-btn");
+  const qrPreview = document.getElementById("machines-qr-preview");
 
-const generateQRBtn = document.getElementById("machines-generate-qr-btn");
-const printQRBtn = document.getElementById("machines-print-qr-btn");
-const downloadQRBtn = document.getElementById("machines-download-qr-btn");
-const qrPreview = document.getElementById("machines-qr-preview");
+  // -------------------------------------------------------------
+  // STATE
+  // -------------------------------------------------------------
+  let currentPage = 1;
+  const pageSize = 20;
+  let selectedMachineId = null;
 
-const summaryHealth = document.getElementById("machines-summary-health");
-const summaryLastService = document.getElementById("machines-summary-lastservice");
-const summaryVendor = document.getElementById("machines-summary-vendor");
-const summaryLocation = document.getElementById("machines-summary-location");
-
-const timelineContent = document.getElementById("machines-timeline-content");
-
-// -------------------------------------------------------------
-// STATE
-// -------------------------------------------------------------
-let currentPage = 1;
-const pageSize = 20;
-let selectedMachineId = null;
-
-// -------------------------------------------------------------
-// HELPERS
-// -------------------------------------------------------------
-function formatDate(ms) {
-  if (!ms) return "—";
-  return new Date(ms).toLocaleDateString();
-}
-
-function formatDateInput(ms) {
-  if (!ms) return "";
-  return new Date(ms).toISOString().split("T")[0];
-}
-
-function getHealthIcon(status) {
-  return status === "Good"
-    ? "🟢"
-    : status === "Warning"
-    ? "🟡"
-    : status === "Critical"
-    ? "🔴"
-    : "—";
-}
-
-// -------------------------------------------------------------
-// GLOBAL MAPS
-// -------------------------------------------------------------
-const locationMap = {};
-const vendorMap = {};
-
-// -------------------------------------------------------------
-// LOADERS
-// -------------------------------------------------------------
-async function loadVendors() {
-  const { data, error } = await supabase
-    .from("Vendors")
-    .select("VendorId, VendorName")
-    .order("VendorName", { ascending: true });
-
-  if (error) {
-    console.error("Vendor load error:", error);
-    return showToast("Failed to load vendors", "error");
+  // -------------------------------------------------------------
+  // HELPERS
+  // -------------------------------------------------------------
+  function formatDate(ms) {
+    if (!ms) return "—";
+    return new Date(ms).toLocaleDateString();
   }
 
-  vendorSelect.innerHTML = `<option value="">Select vendor</option>`;
-  vendorMap.clear?.(); // if Map object, otherwise reset manually
-  (data || []).forEach(v => {
-    vendorMap[v.VendorId] = v.VendorName;
-
-    const opt = document.createElement("option");
-    opt.value = v.VendorId;
-    opt.textContent = v.VendorName;
-    vendorSelect.appendChild(opt);
-  });
-}
-
-async function loadLocations() {
-  const { data, error } = await supabase
-    .from("locations")
-    .select("id, name")
-    .order("name", { ascending: true });
-
-  if (error) {
-    console.error("Location load error:", error);
-    return showToast("Failed to load locations", "error");
+  function formatDateInput(ms) {
+    if (!ms) return "";
+    return new Date(ms).toISOString().split("T")[0];
   }
 
-  locationSelect.innerHTML = `<option value="">Select location</option>`;
-  locationFilter.innerHTML = `<option value="">All locations</option>`;
-  locationMap.clear?.(); // if Map object, otherwise reset manually
-
-  (data || []).forEach(loc => {
-    locationMap[loc.id] = loc.name;
-
-    const opt1 = document.createElement("option");
-    opt1.value = loc.id;
-    opt1.textContent = loc.name;
-    locationSelect.appendChild(opt1);
-
-    const opt2 = document.createElement("option");
-    opt2.value = loc.id;
-    opt2.textContent = loc.name;
-    locationFilter.appendChild(opt2);
-  });
-}
-
-async function loadMachines(reset = false) {
-  if (reset) currentPage = 1;
-
-  const from = (currentPage - 1) * pageSize;
-  const to = from + pageSize - 1;
-
-  let query = supabase
-    .from("machines")
-    .select("*")
-    .order("createdat", { ascending: false })
-    .range(from, to);
-
-  const search = searchInput.value.trim();
-  const health = healthFilter.value;
-  const location = locationFilter.value;
-
-  if (search) query = query.ilike("machinename", `%${search}%`);
-  if (health) query = query.eq("healthstatus", health);
-  if (location) query = query.eq("location_id", location);
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error("Machine load error:", error);
-    return showToast("Failed to load machines", "error");
+  function getHealthIcon(status) {
+    return status === "Good"
+      ? "🟢"
+      : status === "Warning"
+      ? "🟡"
+      : status === "Critical"
+      ? "🔴"
+      : "—";
   }
 
-  const rows = data || [];
-  tableBody.innerHTML = "";
+  // -------------------------------------------------------------
+  // GLOBAL MAPS
+  // -------------------------------------------------------------
+  const locationMap = {};
+  const vendorMap = {};
 
-  rows.forEach(machine => {
-    const tr = document.createElement("tr");
-    tr.onclick = () => selectMachine(machine);
+  // -------------------------------------------------------------
+  // LOADERS
+  // -------------------------------------------------------------
+  async function loadVendors() {
+    const { data, error } = await supabase
+      .from("Vendors")
+      .select("VendorId, VendorName")
+      .order("VendorName", { ascending: true });
 
-    const locationName = locationMap[machine.location_id] || "Unknown";
-    const vendorName = vendorMap[machine.vendorid] || "—";
+    if (error) {
+      console.error("Vendor load error:", error);
+      return showToast("Failed to load vendors", "error");
+    }
 
-    tr.innerHTML = `
-      <td>${machine.machineid}</td>
-      <td>${machine.machinename}</td>
-      <td>${vendorName}</td>
-      <td>${getHealthIcon(machine.healthstatus)}</td>
-      <td>${formatDate(machine.lastservicedate)}</td>
-      <td>${locationName}</td>
-    `;
-    tableBody.appendChild(tr);
-  });
+    vendorSelect.innerHTML = `<option value="">Select vendor</option>`;
+    (data || []).forEach(v => {
+      vendorMap[v.VendorId] = v.VendorName;
 
-  paginationText.textContent = `Showing ${rows.length} of ${rows.length}`;
-  currentPageSpan.textContent = String(currentPage);
-
-  prevPageBtn.disabled = currentPage === 1;
-  nextPageBtn.disabled = rows.length < pageSize;
-}
-
-// -------------------------------------------------------------
-// FORM
-// -------------------------------------------------------------
-function selectMachine(machine) {
-  selectedMachineId = machine.machineid;
-  idInput.value = machine.machineid || "";
-  nameInput.value = machine.machinename || "";
-  vendorSelect.value = machine.vendorid || "";
-  locationSelect.value = machine.location_id || "";
-  healthSelect.value = machine.healthstatus || "Good";
-  lastServiceInput.value = formatDateInput(machine.lastservicedate);
-  notesInput.value = machine.notes || "";
-
-  summaryHealth.textContent = getHealthIcon(machine.healthstatus);
-  summaryLastService.textContent = formatDate(machine.lastservicedate);
-  summaryVendor.textContent = machine.vendorname || "—";
-  summaryLocation.textContent = machine.location_id || "—";
-
-  timelineContent.innerHTML = `<div class="timeline-empty">No events yet</div>`;
-}
-
-function resetForm() {
-  selectedMachineId = null;
-  idInput.value = "";
-  nameInput.value = "";
-  vendorSelect.value = "";
-  locationSelect.value = "";
-  healthSelect.value = "Good";
-  lastServiceInput.value = "";
-  notesInput.value = "";
-  
-}
-
-// -------------------------------------------------------------
-// SAVE / DELETE
-// -------------------------------------------------------------
-async function saveMachine() {
-  const machineId = idInput.value.trim();
-  const machineName = nameInput.value.trim();
-
-  if (!machineId || !machineName) {
-    return showToast("Machine ID and Name are required", "error");
+      const opt = document.createElement("option");
+      opt.value = v.VendorId;
+      opt.textContent = v.VendorName;
+      vendorSelect.appendChild(opt);
+    });
   }
 
-  const selectedVendorOption = vendorSelect.selectedOptions[0];
-  const payload = {
-    machineid: machineId,
-    machinename: machineName,
-    vendorid: vendorSelect.value || null,
-    vendorname: selectedVendorOption ? selectedVendorOption.textContent : null,
-    location_id: locationSelect.value || null,
-    healthstatus: healthSelect.value,
-    lastservicedate: lastServiceInput.value
-      ? new Date(lastServiceInput.value).getTime()
-      : null,
-    notes: notesInput.value.trim(),
-    updatedat: Date.now(),
-  };
+  async function loadLocations() {
+    const { data, error } = await supabase
+      .from("locations")
+      .select("id, name")
+      .order("name", { ascending: true });
 
-  if (selectedMachineId) {
+    if (error) {
+      console.error("Location load error:", error);
+      return showToast("Failed to load locations", "error");
+    }
+
+    locationSelect.innerHTML = `<option value="">Select location</option>`;
+    locationFilter.innerHTML = `<option value="">All locations</option>`;
+
+    (data || []).forEach(loc => {
+      locationMap[loc.id] = loc.name;
+
+      const opt1 = document.createElement("option");
+      opt1.value = loc.id;
+      opt1.textContent = loc.name;
+      locationSelect.appendChild(opt1);
+
+      const opt2 = document.createElement("option");
+      opt2.value = loc.id;
+      opt2.textContent = loc.name;
+      locationFilter.appendChild(opt2);
+    });
+  }
+
+  async function loadMachines(reset = false) {
+    if (reset) currentPage = 1;
+
+    const from = (currentPage - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    let query = supabase
+      .from("machines")
+      .select("*")
+      .order("createdat", { ascending: false })
+      .range(from, to);
+
+    const search = searchInput.value.trim();
+    const health = healthFilter.value;
+    const location = locationFilter.value;
+
+    if (search) query = query.ilike("machinename", `%${search}%`);
+    if (health) query = query.eq("healthstatus", health);
+    if (location) query = query.eq("location_id", location);
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Machine load error:", error);
+      return showToast("Failed to load machines", "error");
+    }
+
+    const rows = data || [];
+    tableBody.innerHTML = "";
+
+    rows.forEach(machine => {
+      const tr = document.createElement("tr");
+      tr.onclick = () => selectMachine(machine);
+
+      const locationName = locationMap[machine.location_id] || "Unknown";
+      const vendorName = vendorMap[machine.vendorid] || "—";
+
+      tr.innerHTML = `
+        <td>${machine.machineid}</td>
+        <td>${machine.machinename}</td>
+        <td>${vendorName}</td>
+        <td>${getHealthIcon(machine.healthstatus)}</td>
+        <td>${formatDate(machine.lastservicedate)}</td>
+        <td>${locationName}</td>
+      `;
+      tableBody.appendChild(tr);
+    });
+
+    paginationText.textContent = `Showing ${rows.length} of ${rows.length}`;
+    currentPageSpan.textContent = String(currentPage);
+
+    prevPageBtn.disabled = currentPage === 1;
+    nextPageBtn.disabled = rows.length < pageSize;
+  }
+
+  // -------------------------------------------------------------
+  // FORM
+  // -------------------------------------------------------------
+  function selectMachine(machine) {
+    selectedMachineId = machine.machineid;
+    idInput.value = machine.machineid || "";
+    nameInput.value = machine.machinename || "";
+    vendorSelect.value = machine.vendorid || "";
+    locationSelect.value = machine.location_id || "";
+    healthSelect.value = machine.healthstatus || "Good";
+    lastServiceInput.value = formatDateInput(machine.lastservicedate);
+    notesInput.value = machine.notes || "";
+  }
+
+  function resetForm() {
+    selectedMachineId = null;
+    idInput.value = "";
+    nameInput.value = "";
+    vendorSelect.value = "";
+    locationSelect.value = "";
+    healthSelect.value = "Good";
+    lastServiceInput.value = "";
+    notesInput.value = "";
+  }
+
+  // -------------------------------------------------------------
+  // SAVE / DELETE
+  // -------------------------------------------------------------
+  async function saveMachine() {
+    const machineId = idInput.value.trim();
+    const machineName = nameInput.value.trim();
+
+    if (!machineId || !machineName) {
+      return showToast("Machine ID and Name are required", "error");
+    }
+
+    const selectedVendorOption = vendorSelect.selectedOptions[0];
+    const payload = {
+      machineid: machineId,
+      machinename: machineName,
+      vendorid: vendorSelect.value || null,
+      vendorname: selectedVendorOption ? selectedVendorOption.textContent : null,
+      location_id: locationSelect.value || null,
+      healthstatus: healthSelect.value,
+      lastservicedate: lastServiceInput.value
+        ? new Date(lastServiceInput.value).getTime()
+        : null,
+      notes: notesInput.value.trim(),
+      updatedat: Date.now(),
+    };
+
+    if (selectedMachineId) {
+      const { error } = await supabase
+        .from("machines")
+        .update(payload)
+        .eq("machineid", selectedMachineId);
+
+      if (error) {
+        console.error("Machine update error:", error);
+        return showToast("Update failed", "error");
+      }
+
+      showToast("Machine updated", "success");
+    } else {
+      payload.createdat = Date.now();
+
+      const { error } = await supabase
+        .from("machines")
+        .insert(payload);
+
+      if (error) {
+        console.error("Machine insert error:", error);
+        return showToast("Insert failed", "error");
+      }
+
+      showToast("Machine added", "success");
+    }
+
+    await loadMachines(true);
+    resetForm();
+  }
+
+  async function deleteMachine() {
+    if (!selectedMachineId) {
+      return showToast("No machine selected", "error");
+    }
+
     const { error } = await supabase
       .from("machines")
-      .update(payload)
+      .delete()
       .eq("machineid", selectedMachineId);
 
     if (error) {
-      console.error("Machine update error:", error);
-      return showToast("Update failed", "error");
+      console.error("Machine delete error:", error);
+      return showToast("Delete failed", "error");
     }
 
-    showToast("Machine updated", "success");
-  } else {
-    payload.createdat = Date.now();
+    showToast("Machine deleted", "success");
+    await loadMachines(true);
+    resetForm();
+  }
 
-    const { error } = await supabase
-      .from("machines")
-      .insert(payload);
+  // -------------------------------------------------------------
+  // QR
+  // -------------------------------------------------------------
+  generateQRBtn.onclick = () => {
+    const machineId = idInput.value.trim();
+    const machineName = nameInput.value.trim();
 
-    if (error) {
-      console.error("Machine insert error:", error);
-      return showToast("Insert failed", "error");
+    if (!machineId) {
+      return showToast("Enter Machine ID before generating QR", "warning");
     }
 
-    showToast("Machine added", "success");
-  }
+    const qrCanvas = document.getElementById("machines-qr-canvas");
+    qrCanvas.innerHTML = "";
 
-  await loadMachines(true);
-  resetForm();
-}
-
-async function deleteMachine() {
-  if (!selectedMachineId) {
-    return showToast("No machine selected", "error");
-  }
-
-  const { error } = await supabase
-    .from("machines")
-    .delete()
-    .eq("machineid", selectedMachineId);
-
-  if (error) {
-    console.error("Machine delete error:", error);
-    return showToast("Delete failed", "error");
-  }
-
-  showToast("Machine deleted", "success");
-  await loadMachines(true);
-  resetForm();
-}
-
-// -------------------------------------------------------------
-// QR
-// -------------------------------------------------------------
-generateQRBtn.onclick = () => {
-  const machineId = idInput.value.trim();
-  const machineName = nameInput.value.trim();
-
-  if (!machineId) {
-    return showToast("Enter Machine ID before generating QR", "warning");
-  }
-
-  // Clear only QR canvas
-  const qrCanvas = document.getElementById("machines-qr-canvas");
-  qrCanvas.innerHTML = "";
-
-  // Generate QR
-  new QRCode(qrCanvas, {
-    text: `MACHINE:${machineId}`,
-    width: 120,
-    height: 120,
-  });
-
-  // Update label
-  document.getElementById("machines-qr-label").innerHTML = `
-    <div>Machine ID: ${machineId}</div>
-    <div style="font-size:12px; opacity:0.8;">${machineName || ""}</div>
-  `;
-};
-
-
-// -------------------------------------------------------------
-// QR PRINT
-// -------------------------------------------------------------
-document.getElementById("machines-print-qr-btn").addEventListener("click", () => {
-  const machineId = idInput.value.trim();
-  const machineName = nameInput.value.trim();
-  const vendorName = vendorSelect.options[vendorSelect.selectedIndex]?.text || "";
-  const locationName = locationSelect.options[locationSelect.selectedIndex]?.text || "";
-
-  const qrCanvas = document.getElementById("machines-qr-canvas");
-  const qrImage = qrCanvas.querySelector("img") || qrCanvas.querySelector("canvas");
-
-  if (!qrImage) {
-    return showToast("Generate QR before printing", "warning");
-  }
-
-  const qrSrc = qrImage.src || qrImage.toDataURL();
-
-  const printWindow = window.open("", "_blank");
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Machine QR Ticket</title>
-      </head>
-      <body style="
-        margin:0;
-        font-family:Arial, sans-serif;
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        height:100vh;
-        background:#fff;
-      ">
-        <div style="
-          width:300px;
-          padding:20px;
-          border:2px solid #000;
-          border-radius:10px;
-          text-align:center;
-        ">
-          <h2 style="margin:0 0 10px 0;">MACHINE QR TICKET</h2>
-
-          <div style="text-align:left; margin-bottom:15px; font-size:14px;">
-            <strong>Machine ID:</strong> ${machineId}<br>
-            <strong>Machine Name:</strong> ${machineName}<br>
-            <strong>Vendor:</strong> ${vendorName}<br>
-            <strong>Location:</strong> ${locationName}<br>
-          </div>
-
-          <img src="${qrSrc}" style="width:150px; height:150px; margin-bottom:10px;" />
-
-          <div style="font-size:12px; opacity:0.7;">
-            Generated on ${new Date().toLocaleString()}
-          </div>
-        </div>
-      </body>
-    </html>
-  `);
-
-  printWindow.document.close();
-  printWindow.focus();
-  printWindow.print();
-});
-
-
-downloadQRBtn.onclick = () => {
-  const img = qrPreview.querySelector("img");
-  if (!img) return;
-  const a = document.createElement("a");
-  a.href = img.src;
-  a.download = `${idInput.value.trim() || "machine"}_qr.png`;
-  a.click();
-};
-
-// -------------------------------------------------------------
-// QR SCANNER (Used by Machines & Audit modules)
-// -------------------------------------------------------------
-function openQRScanner(targetInputId) {
-  // Create scanner container
-  const scannerOverlay = document.createElement("div");
-  scannerOverlay.style.position = "fixed";
-  scannerOverlay.style.top = "0";
-  scannerOverlay.style.left = "0";
-  scannerOverlay.style.width = "100%";
-  scannerOverlay.style.height = "100%";
-  scannerOverlay.style.background = "rgba(0,0,0,0.8)";
-  scannerOverlay.style.display = "flex";
-  scannerOverlay.style.justifyContent = "center";
-  scannerOverlay.style.alignItems = "center";
-  scannerOverlay.style.zIndex = "9999";
-
-  scannerOverlay.innerHTML = `
-    <div style="background:#fff; padding:20px; border-radius:10px; text-align:center;">
-      <h3>Scan Machine QR</h3>
-      <video id="qr-video" style="width:300px; height:300px;"></video>
-      <br>
-      <button id="closeScannerBtn" style="margin-top:10px;">Close</button>
-    </div>
-  `;
-
-  document.body.appendChild(scannerOverlay);
-
-  const video = document.getElementById("qr-video");
-
-  // Start camera
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-    .then(stream => {
-      video.srcObject = stream;
-      video.setAttribute("playsinline", true);
-      video.play();
-
-      const qrScanner = new QrScanner(video, result => {
-        document.getElementById(targetInputId).value = result.data.replace("MACHINE:", "");
-        qrScanner.stop();
-        stream.getTracks().forEach(t => t.stop());
-        scannerOverlay.remove();
-      });
-
-      qrScanner.start();
+    new QRCode(qrCanvas, {
+      text: `MACHINE:${machineId}`,
+      width: 120,
+      height: 120,
     });
 
-  // Close button
-  document.getElementById("closeScannerBtn").onclick = () => {
-    const stream = video.srcObject;
-    if (stream) stream.getTracks().forEach(t => t.stop());
-    scannerOverlay.remove();
+    document.getElementById("machines-qr-label").innerHTML = `
+      <div>Machine ID: ${machineId}</div>
+      <div style="font-size:12px; opacity:0.8;">${machineName || ""}</div>
+    `;
   };
-}
 
-// -------------------------------------------------------------
-// EVENTS
-// -------------------------------------------------------------
-searchInput.addEventListener("input", () => loadMachines(true));
-healthFilter.addEventListener("change", () => loadMachines(true));
-locationFilter.addEventListener("change", () => loadMachines(true));
+  // -------------------------------------------------------------
+  // QR PRINT
+  // -------------------------------------------------------------
+  printQRBtn.addEventListener("click", () => {
+    const machineId = idInput.value.trim();
+    const machineName = nameInput.value.trim();
+    const vendorName = vendorSelect.options[vendorSelect.selectedIndex]?.text || "";
+    const locationName = locationSelect.options[locationSelect.selectedIndex]?.text || "";
 
-refreshBtn.addEventListener("click", () => loadMachines(true));
+    const qrCanvas = document.getElementById("machines-qr-canvas");
+    const qrImage = qrCanvas.querySelector("img") || qrCanvas.querySelector("canvas");
 
-prevPageBtn.addEventListener("click", () => {
-  if (currentPage > 1) {
-    currentPage--;
+    if (!qrImage) {
+      return showToast("Generate QR before printing", "warning");
+    }
+
+    const qrSrc = qrImage.src || qrImage.toDataURL();
+
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Machine QR Ticket</title>
+        </head>
+        <body style="
+          margin:0;
+          font-family:Arial, sans-serif;
+          display:flex;
+          justify-content:center;
+          align-items:center;
+          height:100vh;
+          background:#fff;
+        ">
+          <div style="
+            width:300px;
+            padding:20px;
+            border:2px solid #000;
+            border-radius:10px;
+            text-align:center;
+          ">
+            <h2 style="margin:0 0 10px 0;">MACHINE QR TICKET</h2>
+
+            <div style="text-align:left; margin-bottom:15px; font-size:14px;">
+              <strong>Machine ID:</strong> ${machineId}<br>
+              <strong>Machine Name:</strong> ${machineName}<br>
+              <strong>Vendor:</strong> ${vendorName}<br>
+              <strong>Location:</strong> ${locationName}<br>
+            </div>
+
+            <img src="${qrSrc}" style="width:150px; height:150px; margin-bottom:10px;" />
+
+            <div style="font-size:12px; opacity:0.7;">
+              Generated on ${new Date().toLocaleString()}
+            </div>
+          </div>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  });
+
+  // -------------------------------------------------------------
+  // QR DOWNLOAD
+  // -------------------------------------------------------------
+  downloadQRBtn.onclick = () => {
+    const img = qrPreview.querySelector("img");
+    if (!img) return;
+    const a = document.createElement("a");
+    a.href = img.src;
+    a.download = `${idInput.value.trim() || "machine"}_qr.png`;
+    a.click();
+  };
+
+  // -------------------------------------------------------------
+  // EVENTS
+  // -------------------------------------------------------------
+  searchInput.addEventListener("input", () => loadMachines(true));
+  healthFilter.addEventListener("change", () => loadMachines(true));
+  locationFilter.addEventListener("change", () => loadMachines(true));
+
+  refreshBtn.addEventListener("click", () => loadMachines(true));
+
+  prevPageBtn.addEventListener("click", () => {
+    if (currentPage > 1) {
+      currentPage--;
+      loadMachines();
+    }
+  });
+
+  nextPageBtn.addEventListener("click", () => {
+    currentPage++;
     loadMachines();
-  }
-});
+  });
 
-nextPageBtn.addEventListener("click", () => {
-  currentPage++;
-  loadMachines();
-});
+  saveBtn.addEventListener("click", saveMachine);
+  deleteBtn.addEventListener("click", deleteMachine);
+  resetBtn.addEventListener("click", resetForm);
 
-saveBtn.addEventListener("click", saveMachine);
-deleteBtn.addEventListener("click", deleteMachine);
-resetBtn.addEventListener("click", resetForm);
+  // -------------------------------------------------------------
+  // INITIAL LOAD
+  // -------------------------------------------------------------
+  (async () => {
+    await loadVendors();
+    await loadLocations();
+    await loadMachines(true);
+  })();
 
-
-
-
-// -------------------------------------------------------------
-// INITIAL LOAD
-// -------------------------------------------------------------
-(async () => {
-  await loadVendors();
-  await loadLocations();
-  await loadMachines(true);
-})();
-});
+}); // END WRAPPER
