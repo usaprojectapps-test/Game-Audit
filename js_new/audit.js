@@ -237,59 +237,63 @@ window.addEventListener("auditModuleLoaded", () => {
   // SAVE / DELETE
   // -------------------------------------------------------------
   async function saveAudit() {
-    try {
-      const machine_no = (machineIdInput?.value || "").trim();
-      const inspector = (inspectorInput?.value || "").trim();
+  try {
+    const machine_no = (machineIdInput?.value || "").trim();
+    const inspector = (inspectorInput?.value || "").trim();
 
-      if (!machine_no || !inspector) {
-        return showToast("Machine No and Inspector are required", "error");
-      }
+    if (!machine_no || !inspector) {
+      return showToast("Machine No and Inspector are required", "error");
+    }
 
-      const payload = {
-        id: (auditIdInput?.value || "").trim() || undefined,
+    const payload = {
+      // do not set id for inserts; leave undefined for DB to generate
+      machine_no,
+      inspector,
+      notes: (notesInput?.value || "").trim(),
+      location_id: locationSelect?.value || null,
+      created_at: new Date().toISOString()
+    };
+
+    console.log("Audit save payload:", payload);
+
+    let result;
+    if (selectedAuditId) {
+      const updatePayload = {
         machine_no,
         inspector,
         notes: (notesInput?.value || "").trim(),
-        location_id: locationSelect?.value || null,
-        created_at: new Date().toISOString()
+        location_id: locationSelect?.value || null
       };
-
-      if (selectedAuditId) {
-        // For updates, do not overwrite created_at; only update fields that exist
-        const updatePayload = {
-          machine_no,
-          inspector,
-          notes: (notesInput?.value || "").trim(),
-          location_id: locationSelect?.value || null
-        };
-
-        const { error } = await supabase
-          .from("audit")
-          .update(updatePayload)
-          .eq("id", selectedAuditId);
-
-        if (error) {
-          console.error("Audit update error:", error);
-          return showToast("Update failed", "error");
-        }
-        showToast("Audit updated", "success");
-      } else {
-        // Insert: created_at set above
-        const { error } = await supabase.from("audit").insert(payload);
-        if (error) {
-          console.error("Audit insert error:", error);
-          return showToast("Insert failed", "error");
-        }
-        showToast("Audit added", "success");
-      }
-
-      await loadAudits(true);
-      resetForm();
-    } catch (err) {
-      console.error("Unexpected error in saveAudit:", err);
-      showToast("Save failed", "error");
+      result = await supabase
+        .from("audit")
+        .update(updatePayload)
+        .eq("id", selectedAuditId);
+    } else {
+      result = await supabase
+        .from("audit")
+        .insert(payload)
+        .select(); // return inserted row(s)
     }
+
+    console.log("Supabase result:", result);
+
+    if (result.error) {
+      console.error("Supabase returned error:", result.error);
+      showToast("Save failed: " + (result.error.message || "unknown"), "error");
+      return;
+    }
+
+    // If using .select() above, result.data should contain the inserted row
+    console.log("Inserted/updated rows:", result.data);
+    showToast(selectedAuditId ? "Audit updated" : "Audit added", "success");
+
+    await loadAudits(true);
+    resetForm();
+  } catch (err) {
+    console.error("Unexpected error in saveAudit:", err);
+    showToast("Save failed", "error");
   }
+}
 
   async function deleteAudit() {
     try {
