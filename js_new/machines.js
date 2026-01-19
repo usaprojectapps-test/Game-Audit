@@ -224,7 +224,6 @@ function resetForm() {
   lastServiceInput.value = "";
   notesInput.value = "";
   
-    timelineContent.innerHTML = `<div class="timeline-empty">No events yet</div>`;
 }
 
 // -------------------------------------------------------------
