@@ -5,6 +5,8 @@ import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 
 console.log("MACHINES JS LOADED");
+console.log("✅ machines.js file is executing");
+
 
 // MAIN WRAPPER STARTS HERE
 window.addEventListener("machinesModuleLoaded", () => {
