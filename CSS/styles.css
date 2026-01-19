@@ -481,7 +481,7 @@ select option {
 .audit-module .form-item input,
 .audit-module .form-item select,
 .audit-module .summary-value {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.06));
   border: 1px solid rgba(255,255,255,0.06);
   color: #e6eef8;
   padding: 10px;
@@ -496,7 +496,7 @@ select option {
 
 /* Summary value style */
 .audit-module .summary-value {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.06));
   color: #dbeeff;
   font-size: 1.05rem;
   font-weight: 700;
