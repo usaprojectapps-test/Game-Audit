@@ -6,7 +6,9 @@ import { showToast } from "./toast.js";
 console.log("MACHINES JS LOADED");
 
 window.addEventListener("machinesModuleLoaded", () => {
-  console.log("MACHINES MODULE FULLY LOADED"); 
+  console.log("Machines module fully loaded");
+
+  loadMachines(true);   // or whatever your initial load call is
 
 // -------------------------------------------------------------
 // DOM ELEMENTS
