@@ -5,8 +5,8 @@ import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 console.log("MACHINES JS LOADED");
 
-/*window.addEventListener("machinesModuleLoaded", () => {
-  console.log("MACHINES MODULE FULLY LOADED"); */
+window.addEventListener("machinesModuleLoaded", () => {
+  console.log("MACHINES MODULE FULLY LOADED"); 
 
 // -------------------------------------------------------------
 // DOM ELEMENTS
@@ -498,4 +498,4 @@ resetBtn.addEventListener("click", resetForm);
   await loadLocations();
   await loadMachines(true);
 })();
-/*});
+});
