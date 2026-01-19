@@ -82,6 +82,20 @@ async function loadUser() {
   // LOADERS
   // ------------------------------------------------------------- 
   async function loadLocations() {
+  try {
+    const selectEl = document.getElementById("audit-location-select");
+    const filterEl = document.getElementById("audit-location-filter");
+
+    // Diagnostic logs
+    if (!selectEl || !filterEl) {
+      console.error("loadLocations: missing DOM elements", {
+        selectElExists: !!selectEl,
+        filterElExists: !!filterEl
+      });
+      // Avoid throwing; return early so rest of module can continue
+      return;
+    }
+
     const { data, error } = await supabase
       .from("locations")
       .select("id, name")
@@ -92,64 +106,24 @@ async function loadUser() {
       return showToast("Failed to load locations", "error");
     }
 
-    locationSelect.innerHTML = `<option value="">Select location</option>`;
-    locationFilter.innerHTML = `<option value="">All locations</option>`;
+    selectEl.innerHTML = `<option value="">Select location</option>`;
+    filterEl.innerHTML = `<option value="">All locations</option>`;
 
     (data || []).forEach(loc => {
-      const opt = document.createElement("option");
-      opt.value = loc.id;
-      opt.textContent = loc.name;
-      locationSelect.appendChild(opt);
+      const opt1 = document.createElement("option");
+      opt1.value = loc.id;
+      opt1.textContent = loc.name;
+      selectEl.appendChild(opt1);
 
       const opt2 = document.createElement("option");
       opt2.value = loc.id;
       opt2.textContent = loc.name;
-      locationFilter.appendChild(opt2);
+      filterEl.appendChild(opt2);
     });
+  } catch (err) {
+    console.error("Unexpected error in loadLocations:", err);
   }
-
-  async function loadAudits(reset = false) {
-    if (reset) currentPage = 1;
-    const from = (currentPage - 1) * pageSize;
-    const to = from + pageSize - 1;
-
-    let query = supabase
-      .from("audits")
-      .select("*")
-      .order("createdat", { ascending: false })
-      .range(from, to);
-
-    const search = searchInput?.value?.trim();
-    const location = locationFilter?.value;
-
-    if (search) query = query.ilike("machineid", `%${search}%`);
-    if (location) query = query.eq("location_id", location);
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error("Audit load error:", error);
-      return showToast("Failed to load audits", "error");
-    }
-
-    tableBody.innerHTML = "";
-    (data || []).forEach(row => {
-      const tr = document.createElement("tr");
-      tr.onclick = () => selectAudit(row);
-      tr.innerHTML = `
-        <td>${row.auditid || "—"}</td>
-        <td>${row.machineid || "—"}</td>
-        <td>${row.inspector || "—"}</td>
-        <td>${formatDate(row.createdat)}</td>
-        <td>${(row.notes || "").slice(0, 80)}</td>
-      `;
-      tableBody.appendChild(tr);
-    });
-
-    currentPageSpan.textContent = String(currentPage);
-    prevPageBtn.disabled = currentPage === 1;
-    nextPageBtn.disabled = (data || []).length < pageSize;
-  }
+}
 
   // -------------------------------------------------------------
   // FORM HANDLERS
