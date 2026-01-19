@@ -465,11 +465,12 @@ select option {
 /* Panel backgrounds */
 .audit-module .module-left,
 .audit-module .module-right {
-  background: linear-gradient(180deg, #0f1724 0%, #0b1220 100%);
+  background: linear-gradient(180deg, #1c2636 0%, #1a2432 100%);
   color: #e6eef8;
   border: 1px solid rgba(255,255,255,0.04);
   box-shadow: 0 6px 18px rgba(2,6,23,0.6);
 }
+
 
 /* Labels */
 .audit-module .form-item label {
