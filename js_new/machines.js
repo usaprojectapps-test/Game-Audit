@@ -223,13 +223,8 @@ function resetForm() {
   healthSelect.value = "Good";
   lastServiceInput.value = "";
   notesInput.value = "";
-
-  summaryHealth.textContent = "—";
-  summaryLastService.textContent = "—";
-  summaryVendor.textContent = "—";
-  summaryLocation.textContent = "—";
-
-  timelineContent.innerHTML = `<div class="timeline-empty">No events yet</div>`;
+  
+    timelineContent.innerHTML = `<div class="timeline-empty">No events yet</div>`;
 }
 
 // -------------------------------------------------------------
