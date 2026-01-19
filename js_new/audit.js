@@ -7,7 +7,7 @@ import { showToast } from "./toast.js";
 console.log("AUDIT JS LOADED");
 
 // MAIN WRAPPER
-window.addEventListener("auditModuleLoaded", () => {
+window.addEventListener("auditModuleLoaded", async() => {
   console.log("Audit module fully loaded");
 
   // -------------------------------------------------------------
