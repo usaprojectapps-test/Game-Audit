@@ -10,9 +10,6 @@ console.log("AUDIT JS LOADED");
 window.addEventListener("auditModuleLoaded", () => {
   console.log("Audit module fully loaded");
 
-  // Ensure supabase is available
-  console.log("supabase available:", !!supabase, "supabase.auth:", !!(supabase && supabase.auth));
-
   // -------------------------------------------------------------
   // HELPERS
   // -------------------------------------------------------------
@@ -21,30 +18,25 @@ window.addEventListener("auditModuleLoaded", () => {
     return new Date(ms).toLocaleString();
   }
 
-  // Safe DOM getter that returns null if not found
   function $id(id) {
     return document.getElementById(id) || null;
   }
 
-  // Ensure expected DOM elements exist or create fallbacks
   function ensureDomElements() {
-    // Table body: prefer explicit id, otherwise use #auditTable tbody
     let tableBody = $id("audit-table-body");
     if (!tableBody) {
       const table = $id("auditTable");
       if (table) {
         tableBody = table.querySelector("tbody");
-        if (tableBody) tableBody.id = "audit-table-body"; // set id for future queries
+        if (tableBody) tableBody.id = "audit-table-body";
       }
     }
 
-    // Location selects: create if missing (hidden by default)
     let locationSelect = $id("audit-location-select");
     if (!locationSelect) {
       locationSelect = document.createElement("select");
       locationSelect.id = "audit-location-select";
-      locationSelect.style.display = "none"; // keep UI unchanged if you don't want visible select
-      // append to right-side form if exists, otherwise to module wrapper
+      locationSelect.style.display = "none";
       const right = document.querySelector(".module-right") || document.body;
       right.appendChild(locationSelect);
     }
@@ -66,7 +58,7 @@ window.addEventListener("auditModuleLoaded", () => {
   }
 
   // -------------------------------------------------------------
-  // DOM ELEMENTS (use safe getters)
+  // DOM ELEMENTS
   // -------------------------------------------------------------
   const searchInput = $id("audit-search-input");
   const prevPageBtn = $id("audit-prev-page");
@@ -78,16 +70,13 @@ window.addEventListener("auditModuleLoaded", () => {
   const deleteBtn = $id("audit-delete-btn");
   const resetBtn = $id("audit-reset-btn");
 
-  // form fields (example) - use fallbacks if IDs differ
   const auditIdInput = $id("audit-id-input");
   const machineIdInput = $id("auditMachineNo") || $id("audit-machineid-input") || $id("auditMachineNo");
   const inspectorInput = $id("audit-inspector-input");
   const notesInput = $id("audit-notes-input");
 
-  // Ensure and retrieve dynamic elements
   const { tableBody: dynamicTableBody, locationSelect: dynamicLocationSelect, locationFilter: dynamicLocationFilter } = ensureDomElements();
 
-  // Use the dynamic elements (they are guaranteed to exist after ensureDomElements)
   const tableBody = dynamicTableBody;
   const locationSelect = dynamicLocationSelect;
   const locationFilter = dynamicLocationFilter;
@@ -108,19 +97,16 @@ window.addEventListener("auditModuleLoaded", () => {
         console.error("Supabase client or auth is not available:", supabase);
         return null;
       }
-
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) {
         console.error("Error getting session:", sessionError);
         return null;
       }
-
       const user = sessionData?.session?.user || null;
       if (!user) {
         console.warn("No active user session found.");
         return null;
       }
-
       console.log("Audit: current user id:", user.id);
       return user;
     } catch (err) {
@@ -166,75 +152,73 @@ window.addEventListener("auditModuleLoaded", () => {
         opt2.textContent = loc.name;
         locationFilter.appendChild(opt2);
       });
-
-      // If selects were hidden (created dynamically), show them only if you want visible UI:
-      // locationSelect.style.display = ""; locationFilter.style.display = "";
     } catch (err) {
       console.error("Unexpected error in loadLocations:", err);
     }
   }
 
   async function loadAudits(reset = false) {
-  try {
-    if (reset) currentPage = 1;
-    const from = (currentPage - 1) * pageSize;
-    const to = from + pageSize - 1;
+    try {
+      if (reset) currentPage = 1;
+      const from = (currentPage - 1) * pageSize;
+      const to = from + pageSize - 1;
 
-    let query = supabase
-      .from("audit")                      // <- updated table name
-      .select("*")
-      .order("createdat", { ascending: false })
-      .range(from, to);
+      let query = supabase
+        .from("audit")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .range(from, to);
 
-    const search = searchInput?.value?.trim();
-    const location = locationFilter?.value;
+      const search = searchInput?.value?.trim();
+      const location = locationFilter?.value;
 
-    if (search) query = query.ilike("machineid", `%${search}%`);
-    if (location) query = query.eq("location_id", location);
+      if (search) query = query.ilike("machine_no", `%${search}%`);
+      if (location) query = query.eq("location_id", location);
 
-    const { data, error } = await query;
+      const { data, error } = await query;
 
-    if (error) {
-      console.error("Audit load error:", error);
-      return showToast("Failed to load audits", "error");
+      if (error) {
+        console.error("Audit load error:", error);
+        return showToast("Failed to load audits", "error");
+      }
+
+      if (!tableBody) {
+        console.warn("No table body found to render audits.");
+        return;
+      }
+
+      tableBody.innerHTML = "";
+
+      (data || []).forEach(row => {
+        const tr = document.createElement("tr");
+        tr.onclick = () => selectAudit(row);
+        tr.innerHTML = `
+          <td>${row.machine_no || "—"}</td>
+          <td>${row.cur_in ?? "—"}</td>
+          <td>${row.cur_out ?? "—"}</td>
+          <td>${row.jackpot ?? "—"}</td>
+          <td>${row.total_in ?? "—"}</td>
+          <td>${row.total_out ?? "—"}</td>
+          <td>${(row.total_in != null && row.total_out != null) ? (row.total_in - row.total_out) : "—"}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      if (currentPageSpan) currentPageSpan.textContent = String(currentPage);
+      if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
+      if (nextPageBtn) nextPageBtn.disabled = (data || []).length < pageSize;
+    } catch (err) {
+      console.error("Unexpected error in loadAudits:", err);
     }
-
-    if (!tableBody) {
-      console.warn("No table body found to render audits.");
-      return;
-    }
-
-    tableBody.innerHTML = "";
-    (data || []).forEach(row => {
-      const tr = document.createElement("tr");
-      tr.onclick = () => selectAudit(row);
-      tr.innerHTML = `
-        <td>${row.machineid || "—"}</td>
-        <td>${row.cur_in ?? "—"}</td>
-        <td>${row.cur_out ?? "—"}</td>
-        <td>${row.jackpot ?? "—"}</td>
-        <td>${row.total_in ?? "—"}</td>
-        <td>${row.total_out ?? "—"}</td>
-        <td>${(row.total_in != null && row.total_out != null) ? (row.total_in - row.total_out) : "—"}</td>
-      `;
-      tableBody.appendChild(tr);
-    });
-
-    if (currentPageSpan) currentPageSpan.textContent = String(currentPage);
-    if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
-    if (nextPageBtn) nextPageBtn.disabled = (data || []).length < pageSize;
-  } catch (err) {
-    console.error("Unexpected error in loadAudits:", err);
   }
-}
 
   // -------------------------------------------------------------
   // FORM HANDLERS
   // -------------------------------------------------------------
   function selectAudit(audit) {
-    selectedAuditId = audit.auditid;
-    if (auditIdInput) auditIdInput.value = audit.auditid || "";
-    if (machineIdInput) machineIdInput.value = audit.machineid || "";
+    selectedAuditId = audit.id;
+    if (auditIdInput) auditIdInput.value = audit.id || "";
+    if (machineIdInput) machineIdInput.value = audit.machine_no || "";
     if (inspectorInput) inspectorInput.value = audit.inspector || "";
     if (notesInput) notesInput.value = audit.notes || "";
     if (locationSelect) locationSelect.value = audit.location_id || "";
@@ -254,36 +238,44 @@ window.addEventListener("auditModuleLoaded", () => {
   // -------------------------------------------------------------
   async function saveAudit() {
     try {
-      const machineid = (machineIdInput?.value || "").trim();
+      const machine_no = (machineIdInput?.value || "").trim();
       const inspector = (inspectorInput?.value || "").trim();
 
-      if (!machineid || !inspector) {
-      return showToast("Machine ID and Inspector are required", "error");
-     } 
+      if (!machine_no || !inspector) {
+        return showToast("Machine No and Inspector are required", "error");
+      }
 
       const payload = {
-      auditid: (auditIdInput?.value || "").trim() || undefined,
-      machineid,
-      inspector,
-      notes: (notesInput?.value || "").trim(),
-      location_id: locationSelect?.value || null,
-      updatedat: Date.now(),
+        id: (auditIdInput?.value || "").trim() || undefined,
+        machine_no,
+        inspector,
+        notes: (notesInput?.value || "").trim(),
+        location_id: locationSelect?.value || null,
+        created_at: new Date().toISOString()
       };
 
       if (selectedAuditId) {
-      const { error } = await supabase
-        .from("audit")                      // <- updated table name
-        .update(payload)
-        .eq("auditid", selectedAuditId);
+        // For updates, do not overwrite created_at; only update fields that exist
+        const updatePayload = {
+          machine_no,
+          inspector,
+          notes: (notesInput?.value || "").trim(),
+          location_id: locationSelect?.value || null
+        };
 
-      if (error) {
-        console.error("Audit update error:", error);
-        return showToast("Update failed", "error");
+        const { error } = await supabase
+          .from("audit")
+          .update(updatePayload)
+          .eq("id", selectedAuditId);
+
+        if (error) {
+          console.error("Audit update error:", error);
+          return showToast("Update failed", "error");
         }
         showToast("Audit updated", "success");
       } else {
-      payload.createdat = Date.now();
-      const { error } = await supabase.from("audit").insert(payload); // <- updated
+        // Insert: created_at set above
+        const { error } = await supabase.from("audit").insert(payload);
         if (error) {
           console.error("Audit insert error:", error);
           return showToast("Insert failed", "error");
@@ -293,38 +285,35 @@ window.addEventListener("auditModuleLoaded", () => {
 
       await loadAudits(true);
       resetForm();
-    } 
-        catch (err) {
-        console.error("Unexpected error in saveAudit:", err);
-        showToast("Save failed", "error");
-      }
+    } catch (err) {
+      console.error("Unexpected error in saveAudit:", err);
+      showToast("Save failed", "error");
+    }
   }
 
   async function deleteAudit() {
-  try {
-    if (!selectedAuditId) return showToast("No audit selected", "error");
+    try {
+      if (!selectedAuditId) return showToast("No audit selected", "error");
 
-    const { error } = await supabase
-      .from("audit")                      // <- updated table name
-      .delete()
-      .eq("auditid", selectedAuditId);
+      const { error } = await supabase
+        .from("audit")
+        .delete()
+        .eq("id", selectedAuditId);
 
-    if (error) {
-      console.error("Audit delete error:", error);
-      return showToast("Delete failed", "error");
-    }
+      if (error) {
+        console.error("Audit delete error:", error);
+        return showToast("Delete failed", "error");
+      }
 
-    showToast("Audit deleted", "success");
-    await loadAudits(true);
-    resetForm();
-  } 
-    catch (err) {
+      showToast("Audit deleted", "success");
+      await loadAudits(true);
+      resetForm();
+    } catch (err) {
       console.error("Unexpected error in deleteAudit:", err);
       showToast("Delete failed", "error");
     }
   }
 
-  
   // -------------------------------------------------------------
   // EVENTS
   // -------------------------------------------------------------
@@ -349,7 +338,7 @@ window.addEventListener("auditModuleLoaded", () => {
   if (resetBtn) resetBtn.addEventListener("click", resetForm);
 
   // -------------------------------------------------------------
-  // INITIAL LOAD (call after all functions are defined)
+  // INITIAL LOAD
   // -------------------------------------------------------------
   (async () => {
     await loadLocations();
