@@ -551,9 +551,86 @@ select option {
 /* actions */
 .form-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:8px; }
 
+
+
+/* Scoped audit module styles */
+.audit-module-container { width:100%; box-sizing:border-box; }
+
+/* outer split */
+.audit-module .module-wrapper { display:flex; gap:20px; align-items:flex-start; }
+.audit-module .module-left,
+.audit-module .module-right {
+  flex: 1 1 50%;
+  min-width: 300px;
+  box-sizing: border-box;
+  background: #fff;
+  padding: 14px;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+
+/* row helpers */
+.audit-module .row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: start;
+}
+
+.audit-module .row-3col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: start;
+}
+
+/* full width block (table, buttons) */
+.audit-module .full-width { grid-column: 1 / -1; margin-top: 8px; }
+
+/* form item */
+.audit-module .form-item { display:flex; flex-direction:column; }
+.audit-module .form-item label { font-size:0.85rem; color:#333; margin-bottom:6px; }
+.audit-module .form-item input,
+.audit-module .form-item select,
+.audit-module .summary-value {
+  padding:8px 10px;
+  border-radius:6px;
+  border:1px solid #e6e9ec;
+  background:#fff;
+  font-size:0.95rem;
+  box-sizing:border-box;
+}
+
+/* summary value style */
+.audit-module .summary-value {
+  background:#f6f8fa;
+  text-align:center;
+  font-weight:700;
+  padding:10px;
+  border-radius:6px;
+}
+
+/* table */
+.audit-module .audit-table-wrapper { margin-top:12px; overflow:auto; }
+.audit-module table.striped { width:100%; border-collapse:collapse; }
+.audit-module table.striped th,
+.audit-module table.striped td {
+  padding:8px 10px;
+  border-bottom:1px solid #eef1f4;
+  font-size:0.95rem;
+  text-align:left;
+}
+
+/* actions */
+.audit-module .form-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
+.audit-module .btn { padding:8px 14px; border-radius:6px; border:1px solid #d0d7de; background:#fff; cursor:pointer; }
+.audit-module .btn.primary { background:linear-gradient(180deg,#0b69ff,#0053d6); color:#fff; border:none; }
+
 /* responsive: collapse to single column under 720px */
-@media (max-width: 720px) {
-  .module-wrapper { flex-direction:column; }
-  .row-2col, .row-3col { grid-template-columns: 1fr; }
-  .form-actions { justify-content: stretch; }
+@media (max-width:720px) {
+  .audit-module .module-wrapper { flex-direction:column; }
+  .audit-module .row-2col, .audit-module .row-3col { grid-template-columns: 1fr; }
+  .audit-module .form-actions { justify-content:stretch; }
 }
