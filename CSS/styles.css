@@ -509,3 +509,51 @@ select option {
 .three-col-row {
   grid-template-columns: repeat(3, 1fr);
 }
+
+/* container split (keep your existing module-left/module-right rules) */
+.module-wrapper { display:flex; gap:20px; align-items:flex-start; }
+.module-left, .module-right { flex:1 1 50%; min-width:300px; }
+
+/* row helpers */
+.row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: start;
+}
+
+.row-3col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: start;
+}
+
+/* full width block (table, buttons) */
+.full-width { grid-column: 1 / -1; margin-top: 8px; }
+
+/* form item */
+.form-item { display:flex; flex-direction:column; }
+.form-item label { font-size:0.85rem; color:#333; margin-bottom:6px; }
+.form-item input, .form-item select, .summary-value {
+  padding:8px 10px;
+  border-radius:6px;
+  border:1px solid #e3e7ea;
+  background:#fff;
+  font-size:0.95rem;
+}
+
+/* summary value style */
+.summary-value { background:#f6f8fa; text-align:center; font-weight:600; }
+
+/* actions */
+.form-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:8px; }
+
+/* responsive: collapse to single column under 720px */
+@media (max-width: 720px) {
+  .module-wrapper { flex-direction:column; }
+  .row-2col, .row-3col { grid-template-columns: 1fr; }
+  .form-actions { justify-content: stretch; }
+}
