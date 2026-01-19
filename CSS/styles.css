@@ -442,193 +442,93 @@ select option {
   color: #fff;
 }
 
-/* Audit Table */
-#auditTable {
-  width: 100%;
-  border-collapse: collapse;
-}
+/* Dark theme for audit module */
+.audit-module-container { color: #e6eef8; }
 
-#auditTable th,
-#auditTable td {
-  padding: 10px 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  background-color: rgba(30,30,30,0.8);
-  color: #eee;
-  white-space: nowrap;
-}
-
-#auditTable th {
-  background-color: rgba(255,255,255,0.12);
-  color: #cbd5e1;
-  font-weight: 600;
-  text-transform: uppercase;
-  position: sticky;
-  top: 0;
-}
-
-/* Summary Row */
-.audit-summary-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.audit-summary-row input {
-  background-color: rgba(40,40,40,0.9);
-  color: #f0f0f0;
-  border: 1px solid #555;
-  padding: 8px;
-  border-radius: 6px;
-  width: 100%;
-}
-
-/* Status Message */
-.audit-status {
-  margin-top: 10px;
-  font-weight: 600;
-  color: #f0f0f0;
-}
-
-/* Entry Summary Box */
-.audit-entry-summary {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-top: 20px;
-}
-
-.audit-entry-summary input {
-  background-color: rgba(40,40,40,0.9);
-  color: #f0f0f0;
-  border: 1px solid #555;
-  padding: 8px;
-  border-radius: 6px;
-  width: 100%;
-}
-.three-col-row {
-  grid-template-columns: repeat(3, 1fr);
-}
-
-/* container split (keep your existing module-left/module-right rules) */
-.module-wrapper { display:flex; gap:20px; align-items:flex-start; }
-.module-left, .module-right { flex:1 1 50%; min-width:300px; }
-
-/* row helpers */
-.row-2col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 12px;
-  align-items: start;
-}
-
-.row-3col {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 12px;
-  align-items: start;
-}
-
-/* full width block (table, buttons) */
-.full-width { grid-column: 1 / -1; margin-top: 8px; }
-
-/* form item */
-.form-item { display:flex; flex-direction:column; }
-.form-item label { font-size:0.85rem; color:#333; margin-bottom:6px; }
-.form-item input, .form-item select, .summary-value {
-  padding:8px 10px;
-  border-radius:6px;
-  border:1px solid #e3e7ea;
-  background:#fff;
-  font-size:0.95rem;
-}
-
-/* summary value style */
-.summary-value { background:#f6f8fa; text-align:center; font-weight:600; }
-
-/* actions */
-.form-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:8px; }
-
-
-
-/* Scoped audit module styles */
-.audit-module-container { width:100%; box-sizing:border-box; }
-
-/* outer split */
-.audit-module .module-wrapper { display:flex; gap:20px; align-items:flex-start; }
+/* Panel backgrounds */
 .audit-module .module-left,
 .audit-module .module-right {
-  flex: 1 1 50%;
-  min-width: 300px;
-  box-sizing: border-box;
-  background: #fff;
-  padding: 14px;
-  border-radius: 8px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+  background: linear-gradient(180deg, #0f1724 0%, #0b1220 100%);
+  color: #e6eef8;
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.6);
 }
 
-/* row helpers */
-.audit-module .row-2col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 12px;
-  align-items: start;
+/* Labels */
+.audit-module .form-item label {
+  color: #bcd3f7;
+  font-weight: 600;
 }
 
-.audit-module .row-3col {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 12px;
-  align-items: start;
-}
-
-/* full width block (table, buttons) */
-.audit-module .full-width { grid-column: 1 / -1; margin-top: 8px; }
-
-/* form item */
-.audit-module .form-item { display:flex; flex-direction:column; }
-.audit-module .form-item label { font-size:0.85rem; color:#333; margin-bottom:6px; }
+/* Inputs and selects */
 .audit-module .form-item input,
 .audit-module .form-item select,
 .audit-module .summary-value {
-  padding:8px 10px;
-  border-radius:6px;
-  border:1px solid #e6e9ec;
-  background:#fff;
-  font-size:0.95rem;
-  box-sizing:border-box;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #e6eef8;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.01);
 }
 
-/* summary value style */
+/* Placeholder color */
+.audit-module .form-item input::placeholder {
+  color: rgba(230,238,248,0.45);
+}
+
+/* Summary value style */
 .audit-module .summary-value {
-  background:#f6f8fa;
-  text-align:center;
-  font-weight:700;
-  padding:10px;
-  border-radius:6px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  color: #dbeeff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.04);
 }
 
-/* table */
-.audit-module .audit-table-wrapper { margin-top:12px; overflow:auto; }
-.audit-module table.striped { width:100%; border-collapse:collapse; }
-.audit-module table.striped th,
+/* Table */
+.audit-module table.striped {
+  background: transparent;
+  color: #dbeeff;
+}
+.audit-module table.striped th {
+  color: #9fbbe8;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+}
 .audit-module table.striped td {
-  padding:8px 10px;
-  border-bottom:1px solid #eef1f4;
-  font-size:0.95rem;
-  text-align:left;
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+  color: #dbeeff;
 }
 
-/* actions */
-.audit-module .form-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
-.audit-module .btn { padding:8px 14px; border-radius:6px; border:1px solid #d0d7de; background:#fff; cursor:pointer; }
-.audit-module .btn.primary { background:linear-gradient(180deg,#0b69ff,#0053d6); color:#fff; border:none; }
+/* Buttons */
+.audit-module .btn {
+  background: transparent;
+  color: #dbeeff;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: none;
+}
+.audit-module .btn.primary {
+  background: linear-gradient(180deg,#1f6fff,#0b4fd6);
+  color: #fff;
+  border: none;
+  box-shadow: 0 6px 14px rgba(11,79,214,0.28);
+}
 
-/* responsive: collapse to single column under 720px */
+/* Focus states */
+.audit-module .form-item input:focus,
+.audit-module .form-item select:focus {
+  outline: none;
+  border-color: rgba(31,111,255,0.9);
+  box-shadow: 0 6px 18px rgba(11,79,214,0.12);
+}
+
+/* Small visual tweaks */
+.audit-module .form-item { gap: 6px; }
+.audit-module .row-2col, .audit-module .row-3col { gap: 14px; }
+
+/* Responsive adjustments remain the same */
 @media (max-width:720px) {
   .audit-module .module-wrapper { flex-direction:column; }
   .audit-module .row-2col, .audit-module .row-3col { grid-template-columns: 1fr; }
