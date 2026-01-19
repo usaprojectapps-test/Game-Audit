@@ -1,71 +1,26 @@
-<div class="module-wrapper">
+<!-- audit.html -->
+<div class="audit-module">
 
-  <!-- LEFT SIDE -->
-  <div class="module-left">
-
+  <!-- Filters / header -->
+  <div class="audit-header">
     <div class="form-grid">
       <div class="form-group">
-        <label for="auditListDate">Select Date</label>
-        <input type="date" id="auditListDate">
+        <label>Location</label>
+        <select id="auditLocationSelect"></select>
       </div>
       <div class="form-group">
-        <label>Machines Entered</label>
-        <input type="text" id="machinesEnteredCount" readonly>
+        <label>Machine</label>
+        <select id="auditMachineSelect"></select>
       </div>
-    </div>
-    
-    <div class="form-grid three-col-row" style="margin-top: 16px;">
-      <div class="form-group">
-        <label>Total IN</label>
-        <input type="text" id="sumTotalIn" readonly>
-      </div>
-      <div class="form-group">
-        <label>Total OUT</label>
-        <input type="text" id="sumTotalOut" readonly>
-      </div>
-      <div class="form-group">
-        <label>NET</label>
-        <input type="text" id="sumNet" readonly>
-      </div>
-    </div>
-
-    <div class="table-wrapper" style="margin-top: 16px;">
-      <table id="auditTable">
-        <thead>
-          <tr>
-            <th>Machine</th>
-            <th>Cur IN</th>
-            <th>Cur OUT</th>
-            <th>Jackpot</th>
-            <th>Total IN</th>
-            <th>Total OUT</th>
-            <th>NET</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    
-  </div>
-
-  <!-- RIGHT SIDE -->
-  <div class="module-right">
-
-    <div class="form-grid">
       <div class="form-group">
         <label>Date</label>
         <input type="date" id="auditDate">
       </div>
-      <div class="form-group">
-        <label>Machine No</label>
-        <div class="scan-row">
-          <input type="text" id="auditMachineNo">
-          <span class="scan-icon" onclick="openQRScanner('auditMachineNo')">📷</span>
-        </div>
-      </div>
     </div>
+  </div>
 
+  <!-- Entry form -->
+  <div class="audit-form">
     <div class="form-grid">
       <div class="form-group">
         <label>Prev IN</label>
@@ -90,41 +45,46 @@
 
     <div class="form-grid">
       <div class="form-group">
-        <label>Jackpot</label>
-        <input type="number" id="auditJackpot">
-      </div>
-      <div class="form-group">
-        <label>Health</label>
-        <select id="auditHealth">
-          <option value="Good">Good</option>
-          <option value="Warning">Warning</option>
-          <option value="Critical">Critical</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="form-actions">
-      <button id="auditSaveBtn" class="btn btn-primary">Save Entry</button>
-    </div>
-
-    <div id="auditStatus" class="audit-status"></div>
-
-    <div class="form-grid three-col-row" style="margin-top: 16px;">
-      <div class="form-group">
         <label>Total IN</label>
-        <input type="text" id="calcTotalIn" readonly>
+        <input type="number" id="auditTotalIn" readonly>
       </div>
       <div class="form-group">
         <label>Total OUT</label>
-        <input type="text" id="calcTotalOut" readonly>
+        <input type="number" id="auditTotalOut" readonly>
       </div>
       <div class="form-group">
         <label>NET</label>
-        <input type="text" id="calcNet" readonly>
+        <input type="number" id="auditNet" readonly>
       </div>
     </div>
 
+    <div class="audit-actions">
+      <button id="auditSaveBtn">Save</button>
+      <button id="auditResetBtn" type="button">Reset</button>
+    </div>
   </div>
 
-
+  <!-- Table -->
+  <div class="audit-table-wrapper">
+    <table id="auditTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Machine</th>
+          <th>Prev IN</th>
+          <th>Prev OUT</th>
+          <th>Cur IN</th>
+          <th>Cur OUT</th>
+          <th>Total IN</th>
+          <th>Total OUT</th>
+          <th>NET</th>
+          <th>User</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- rows populated by audit.js -->
+      </tbody>
+    </table>
+  </div>
 </div>
