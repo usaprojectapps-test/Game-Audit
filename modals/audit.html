@@ -1,152 +1,119 @@
-<!-- audit.html -->
-<div class="module-wrapper audit-module">
-
-  <!-- LEFT: Filters + Summary + Table -->
-  <div class="module-left">
-
-    <!-- Summary Row 1: Location | Date | Total Machines Entered Today -->
-    <div class="summary-row">
-      <div class="summary-col">
-        <label>Location</label>
-        <select id="auditLocationSelect" class="full"></select>
-      </div>
-
-      <div class="summary-col">
-        <label>Date</label>
-        <input type="date" id="auditDate" class="full">
-      </div>
-
-      <div class="summary-col">
-        <label>Total Machines Entered Today</label>
-        <div id="summaryTotalMachines" class="summary-value">0</div>
-      </div>
+<!-- LEFT (summary + table) -->
+<div class="module-left">
+  <!-- Row 1: 3 columns -->
+  <div class="row-3col">
+    <div class="form-item">
+      <label>Location</label>
+      <select id="auditLocationSelect"></select>
     </div>
-
-    <!-- Summary Row 2: Total IN | Total OUT | NET (for selected date) -->
-    <div class="summary-row">
-      <div class="summary-col">
-        <label>Total IN</label>
-        <div id="summaryTotalIn" class="summary-value">0</div>
-      </div>
-
-      <div class="summary-col">
-        <label>Total OUT</label>
-        <div id="summaryTotalOut" class="summary-value">0</div>
-      </div>
-
-      <div class="summary-col">
-        <label>NET</label>
-        <div id="summaryNet" class="summary-value">0</div>
-      </div>
+    <div class="form-item">
+      <label>Date</label>
+      <input type="date" id="auditDate">
     </div>
-
-    <!-- Table -->
-    <div class="audit-table-wrapper">
-      <table id="auditTable" class="striped">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Machine</th>
-            <th>Prev IN</th>
-            <th>Prev OUT</th>
-            <th>Cur IN</th>
-            <th>Cur OUT</th>
-            <th>Total IN</th>
-            <th>Total OUT</th>
-            <th>NET</th>
-            <th>User</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+    <div class="form-item">
+      <label>Total Machines Entered Today</label>
+      <div id="summaryTotalMachines" class="summary-value">0</div>
     </div>
-
   </div>
 
-  <!-- RIGHT: Form (professional layout) -->
-  <div class="module-right">
-
-    <!-- Row 1: Date (display) and Machine No -->
-    <div class="form-row">
-      <div class="form-col">
-        <label>Data</label>
-        <input type="text" id="auditData" placeholder="Data" class="full">
-      </div>
-
-      <div class="form-col">
-        <label>Machine No</label>
-        <select id="auditMachineSelect" class="full"></select>
-      </div>
+  <!-- Row 2: 3 columns -->
+  <div class="row-3col">
+    <div class="form-item">
+      <label>Total IN</label>
+      <div id="summaryTotalIn" class="summary-value">0</div>
     </div>
-
-    <!-- Row 2: Prev IN / Prev OUT -->
-    <div class="form-row">
-      <div class="form-col">
-        <label>Prev IN</label>
-        <input type="number" id="auditPrevIn" readonly class="full">
-      </div>
-
-      <div class="form-col">
-        <label>Prev OUT</label>
-        <input type="number" id="auditPrevOut" readonly class="full">
-      </div>
+    <div class="form-item">
+      <label>Total OUT</label>
+      <div id="summaryTotalOut" class="summary-value">0</div>
     </div>
-
-    <!-- Row 3: Cur IN / Cur OUT -->
-    <div class="form-row">
-      <div class="form-col">
-        <label>Cur IN</label>
-        <input type="number" id="auditCurIn" class="full">
-      </div>
-
-      <div class="form-col">
-        <label>Cur OUT</label>
-        <input type="number" id="auditCurOut" class="full">
-      </div>
+    <div class="form-item">
+      <label>NET</label>
+      <div id="summaryNet" class="summary-value">0</div>
     </div>
+  </div>
 
-    <!-- Row 4: Jackpot / Machine Health / (spacer) -->
-    <div class="form-row">
-      <div class="form-col">
-        <label>Jackpot</label>
-        <input type="text" id="auditJackpot" class="full">
-      </div>
+  <!-- Table (full width) -->
+  <div class="full-width">
+    <table id="auditTable" class="striped">
+      <!-- table head/body -->
+    </table>
+  </div>
+</div>
 
-      <div class="form-col">
-        <label>Machine Health</label>
-        <select id="auditMachineHealth" class="full">
-          <option value="">Select</option>
-          <option value="Good">Good</option>
-          <option value="Warning">Warning</option>
-          <option value="Critical">Critical</option>
-        </select>
-      </div>
+<!-- RIGHT (form) -->
+<div class="module-right">
+  <!-- Row 1: 2 columns -->
+  <div class="row-2col">
+    <div class="form-item">
+      <label>Data</label>
+      <input type="text" id="auditData">
     </div>
-
-    <!-- Buttons -->
-    <div class="form-actions">
-      <button id="auditSaveBtn" class="btn primary">Save</button>
-      <button id="auditResetBtn" class="btn">Reset</button>
+    <div class="form-item">
+      <label>Machine No</label>
+      <select id="auditMachineSelect"></select>
     </div>
+  </div>
 
-    <!-- Row 5: Totals (calculated) -->
-    <div class="form-row totals-row">
-      <div class="form-col">
-        <label>Total IN</label>
-        <input type="number" id="auditTotalIn" readonly class="full">
-      </div>
-
-      <div class="form-col">
-        <label>Total OUT</label>
-        <input type="number" id="auditTotalOut" readonly class="full">
-      </div>
-
-      <div class="form-col">
-        <label>NET</label>
-        <input type="number" id="auditNet" readonly class="full">
-      </div>
+  <!-- Row 2: 2 columns -->
+  <div class="row-2col">
+    <div class="form-item">
+      <label>Prev IN</label>
+      <input type="number" id="auditPrevIn" readonly>
     </div>
+    <div class="form-item">
+      <label>Prev OUT</label>
+      <input type="number" id="auditPrevOut" readonly>
+    </div>
+  </div>
 
+  <!-- Row 3: 2 columns -->
+  <div class="row-2col">
+    <div class="form-item">
+      <label>Cur IN</label>
+      <input type="number" id="auditCurIn">
+    </div>
+    <div class="form-item">
+      <label>Cur OUT</label>
+      <input type="number" id="auditCurOut">
+    </div>
+  </div>
+
+  <!-- Row 4: 2 columns -->
+  <div class="row-2col">
+    <div class="form-item">
+      <label>Jackpot</label>
+      <input type="text" id="auditJackpot">
+    </div>
+    <div class="form-item">
+      <label>Machine Health</label>
+      <select id="auditMachineHealth">
+        <option value="">Select</option>
+        <option value="Good">Good</option>
+        <option value="Warning">Warning</option>
+        <option value="Critical">Critical</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Buttons (full width) -->
+  <div class="full-width form-actions">
+    <button id="auditSaveBtn" class="btn primary">Save</button>
+    <button id="auditResetBtn" class="btn">Reset</button>
+  </div>
+
+  <!-- Row 5: 3 columns (totals) -->
+  <div class="row-3col">
+    <div class="form-item">
+      <label>Total IN</label>
+      <input type="number" id="auditTotalIn" readonly>
+    </div>
+    <div class="form-item">
+      <label>Total OUT</label>
+      <input type="number" id="auditTotalOut" readonly>
+    </div>
+    <div class="form-item">
+      <label>NET</label>
+      <input type="number" id="auditNet" readonly>
+    </div>
   </div>
 </div>
