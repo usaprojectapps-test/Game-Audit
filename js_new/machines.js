@@ -4,7 +4,8 @@
 import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 
-console.log("MACHINES JS LOADED");
+console.log("TEST: machines.js loaded");
+
 
 // -------------------------------------------------------------
 // MODULE LOADED WRAPPER
