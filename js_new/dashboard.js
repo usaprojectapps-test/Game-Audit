@@ -100,13 +100,21 @@ async function loadModule(moduleName) {
     const html = await response.text();
     container.innerHTML = html;
 
-    // Dispatch module-loaded event BEFORE loading JS
-    window.dispatchEvent(new Event(moduleName + "ModuleLoaded"));
-
-    // Load module JS
+    // Load module JS and dispatch event only after it finishes loading
     const script = document.createElement("script");
     script.type = "module";
     script.src = `/js_new/${moduleName}.js?v=${Date.now()}`;
+
+    script.onload = () => {
+      // Now the module script has executed and its listener is attached
+      window.dispatchEvent(new Event(moduleName + "ModuleLoaded"));
+    };
+
+    script.onerror = () => {
+      console.error("Failed to load module script:", script.src);
+      container.innerHTML = `<div class="error">Failed to load module script.</div>`;
+    };
+
     document.body.appendChild(script);
 
   } catch (err) {
