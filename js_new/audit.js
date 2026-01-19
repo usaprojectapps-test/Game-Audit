@@ -1,8 +1,8 @@
-console.log("AUDIT JS LOADED");
-console.log("auditSaveBtn:", document.getElementById("auditSaveBtn"));
+window.addEventListener("auditModuleLoaded", async () => {
+    console.log("Audit module fully loaded");
 
-document.addEventListener("DOMContentLoaded", async () => {
-  console.log("TOP OF AUDIT.JS REACHED");
+    await loadUser();
+    // entire audit.js code here
 
   // -------------------------------------------------------------
   // REAL QR SCANNER (GLOBAL)
