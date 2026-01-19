@@ -264,6 +264,7 @@ async function loadUser() {
   (async () => {
     await loadLocations();
     await loadAudits(true);
+    await loadUser();
   })();
 
 }); // end wrapper
