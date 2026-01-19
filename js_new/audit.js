@@ -240,28 +240,21 @@ async function saveAudit() {
   try {
     console.log(">>> saveAudit start, selectedAuditId:", selectedAuditId);
 
-    // Get session and current user id
+    // session / user id
     const { data: sessionData } = await supabase.auth.getSession();
     const currentUserId = sessionData?.session?.user?.id || null;
     console.log("Session user id:", currentUserId);
 
-    // Read values from the form (adjust IDs if your inputs differ)
-    const dateInput = document.getElementById("audit-date-input")?.value;
-    const date = dateInput ? dateInput : new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-
+    // read form values (adjust IDs if needed)
+    const date = document.getElementById("audit-date-input")?.value || new Date().toISOString().slice(0,10);
     const machine_no = (machineIdInput?.value || "").trim();
-    const prev_in_raw = document.getElementById("prev-in-input")?.value ?? "";
-    const prev_out_raw = document.getElementById("prev-out-input")?.value ?? "";
     const cur_in_raw = document.getElementById("cur-in-input")?.value ?? "";
     const cur_out_raw = document.getElementById("cur-out-input")?.value ?? "";
-    const jackpot_raw = document.getElementById("jackpot-input")?.value ?? "";
     const location_id = locationSelect?.value || null;
 
-    if (!machine_no) {
-      return showToast("Machine No is required", "error");
-    }
+    if (!machine_no) return showToast("Machine No is required", "error");
 
-    // Convert numeric fields to numbers or null
+    // helpers
     const toNumberOrNull = v => {
       if (v === null || v === undefined) return null;
       const s = String(v).trim();
@@ -270,17 +263,44 @@ async function saveAudit() {
       return Number.isFinite(n) ? n : null;
     };
 
+    const cur_in = toNumberOrNull(cur_in_raw);
+    const cur_out = toNumberOrNull(cur_out_raw);
+
+    // Fetch last row for this machine to use its cur_in/cur_out as prev_in/prev_out
+    let prev_in = null;
+    let prev_out = null;
+    try {
+      const last = await supabase
+        .from("audit")
+        .select("cur_in,cur_out,date")
+        .eq("machine_no", machine_no)
+        .order("date", { ascending: false })
+        .limit(1)
+        .maybeSingle(); // returns { data, error } shape
+
+      if (last?.data) {
+        prev_in = toNumberOrNull(last.data.cur_in);
+        prev_out = toNumberOrNull(last.data.cur_out);
+        console.log("Found last row:", last.data);
+      } else {
+        console.log("No previous row found for machine:", machine_no);
+      }
+    } catch (err) {
+      console.error("Error fetching last row:", err);
+      // If SELECT is blocked by RLS, last.data will be null; continue so insert still attempts
+    }
+
+    // Build payload: include prev_in/out from last row, and cur_in/out from inputs
     const payload = {
       machine_no,
       date,
-      prev_in: toNumberOrNull(prev_in_raw),
-      prev_out: toNumberOrNull(prev_out_raw),
-      cur_in: toNumberOrNull(cur_in_raw),
-      cur_out: toNumberOrNull(cur_out_raw),
-      jackpot: toNumberOrNull(jackpot_raw),
+      prev_in,
+      prev_out,
+      cur_in,
+      cur_out,
+      jackpot: null,
       location_id,
-      user_id: currentUserId // include user_id so RLS policies can check auth.uid()
-      // created_at will default to now() in DB
+      user_id: currentUserId
     };
 
     // Remove undefined keys so DB defaults apply
@@ -290,32 +310,11 @@ async function saveAudit() {
 
     console.log("Audit save payload:", payload);
 
-    let result;
-    if (selectedAuditId) {
-      // Update existing row (do not overwrite created_at or id)
-      const updatePayload = {
-        machine_no: payload.machine_no,
-        date: payload.date,
-        prev_in: payload.prev_in,
-        prev_out: payload.prev_out,
-        cur_in: payload.cur_in,
-        cur_out: payload.cur_out,
-        jackpot: payload.jackpot,
-        location_id: payload.location_id
-      };
-
-      result = await supabase
-        .from("audit")
-        .update(updatePayload)
-        .eq("id", selectedAuditId)
-        .select();
-    } else {
-      // Insert new row and return it
-      result = await supabase
-        .from("audit")
-        .insert(payload)
-        .select();
-    }
+    // Insert
+    const result = await supabase
+      .from("audit")
+      .insert(payload)
+      .select();
 
     console.log("Supabase result:", result);
 
@@ -325,9 +324,7 @@ async function saveAudit() {
       return;
     }
 
-    console.log("Inserted/updated rows:", result.data);
-    showToast(selectedAuditId ? "Audit updated" : "Audit added", "success");
-
+    showToast("Audit added", "success");
     await loadAudits(true);
     resetForm();
   } catch (err) {
