@@ -442,6 +442,23 @@ select option {
   color: #fff;
 }
 
+.row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: start;
+}
+
+.row-3col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: start;
+}
+
+
 /* Dark theme for audit module */
 .audit-module-container { color: #e6eef8; }
 
