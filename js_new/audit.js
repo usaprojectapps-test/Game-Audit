@@ -236,6 +236,10 @@ window.addEventListener("auditModuleLoaded", () => {
   // -------------------------------------------------------------
   // SAVE / DELETE
   // -------------------------------------------------------------
+  // Put this at the top of saveAudit before any supabase call
+    console.log(">>> saveAudit start, selectedAuditId:", selectedAuditId);
+    console.log("Session:", await supabase.auth.getSession());
+
   async function saveAudit() {
   try {
     const machine_no = (machineIdInput?.value || "").trim();
