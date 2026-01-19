@@ -9,6 +9,7 @@ console.log("AUDIT JS LOADED");
 // MAIN WRAPPER
 window.addEventListener("auditModuleLoaded", () => {
   console.log("Audit module fully loaded");
+  console.log("supabase:", !!supabase, "supabase.auth:", !!(supabase && supabase.auth));
 
   // -------------------------------------------------------------
   // DOM ELEMENTS
