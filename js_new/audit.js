@@ -246,7 +246,7 @@ async function saveAudit() {
     console.log("Session user id:", currentUserId);
 
     // read form values (adjust IDs if needed)
-    const date = document.getElementById("audit-date-input")?.value || new Date().toISOString().slice(0,10);
+    const date = document.getElementById("auditDate")?.value || new Date().toISOString().slice(0,10);
     const machine_no = (machineIdInput?.value || "").trim();
     const cur_in_raw = document.getElementById("auditCurIn")?.value ?? "";
     const cur_out_raw = document.getElementById("auditCurOut")?.value ?? "";
