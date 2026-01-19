@@ -512,7 +512,7 @@ select option {
   color: #9fbbe8;
   font-weight: 700;
   border-bottom: 1px solid rgba(255,255,255,0.04);
-  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.06));
 }
 .audit-module table.striped td {
   border-bottom: 1px solid rgba(255,255,255,0.02);
