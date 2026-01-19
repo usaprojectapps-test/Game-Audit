@@ -4,16 +4,17 @@
 import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 
-console.log("TEST: machines.js loaded");
+console.log("MACHINES JS LOADED");
 
+// TEST WRAPPER — PLACE IT HERE ONLY
+window.addEventListener("machinesModuleLoaded", () => {
+  console.log("TEST: machinesModuleLoaded event fired");
+});
 
-// -------------------------------------------------------------
-// MODULE LOADED WRAPPER
-// -------------------------------------------------------------
-    window.addEventListener("machinesModuleLoaded", () => {
-      console.log("TEST: machinesModuleLoaded event fired");
+// MAIN WRAPPER STARTS HERE
+window.addEventListener("machinesModuleLoaded", () => {
+  console.log("Machines module fully loaded");
   
-
   // -------------------------------------------------------------
   // DOM ELEMENTS
   // -------------------------------------------------------------
