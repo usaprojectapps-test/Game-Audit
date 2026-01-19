@@ -12,7 +12,7 @@ console.log("TEST: machines.js loaded");
 // -------------------------------------------------------------
     window.addEventListener("machinesModuleLoaded", () => {
       console.log("TEST: machinesModuleLoaded event fired");
-  });
+  
 
   // -------------------------------------------------------------
   // DOM ELEMENTS
