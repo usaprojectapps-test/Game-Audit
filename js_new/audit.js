@@ -1,8 +1,7 @@
 console.log("AUDIT JS LOADED");
 console.log("auditSaveBtn:", document.getElementById("auditSaveBtn"));
 
-document.addEventListener("DOMContentLoaded", () => {
-
+document.addEventListener("DOMContentLoaded", async () => {
   console.log("TOP OF AUDIT.JS REACHED");
 
   // -------------------------------------------------------------

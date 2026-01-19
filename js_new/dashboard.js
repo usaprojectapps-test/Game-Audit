@@ -82,7 +82,7 @@ function applyDashboardTileAccess() {
 }
 
 // -------------------------------------------------------------
-// MODULE LOADER
+// MODULE LOADER (FINAL FIXED VERSION)
 // -------------------------------------------------------------
 async function loadModule(moduleName) {
   const container = document.getElementById("moduleContainer");
@@ -100,6 +100,10 @@ async function loadModule(moduleName) {
     const html = await response.text();
     container.innerHTML = html;
 
+    // Dispatch module-loaded event BEFORE loading JS
+    window.dispatchEvent(new Event(moduleName + "ModuleLoaded"));
+
+    // Load module JS
     const script = document.createElement("script");
     script.type = "module";
     script.src = `/js_new/${moduleName}.js?v=${Date.now()}`;
