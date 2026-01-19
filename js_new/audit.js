@@ -248,8 +248,8 @@ async function saveAudit() {
     // read form values (adjust IDs if needed)
     const date = document.getElementById("audit-date-input")?.value || new Date().toISOString().slice(0,10);
     const machine_no = (machineIdInput?.value || "").trim();
-    const cur_in_raw = document.getElementById("cur-in-input")?.value ?? "";
-    const cur_out_raw = document.getElementById("cur-out-input")?.value ?? "";
+    const cur_in_raw = document.getElementById("auditCurIn")?.value ?? "";
+    const cur_out_raw = document.getElementById("auditCurOut")?.value ?? "";
     const location_id = locationSelect?.value || null;
 
     if (!machine_no) return showToast("Machine No is required", "error");
