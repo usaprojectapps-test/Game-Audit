@@ -9,7 +9,37 @@ console.log("AUDIT JS LOADED");
 // MAIN WRAPPER
 window.addEventListener("auditModuleLoaded", () => {
   console.log("Audit module fully loaded");
-  console.log("supabase:", !!supabase, "supabase.auth:", !!(supabase && supabase.auth));
+
+  // Ensure supabase is available
+console.log("supabase available:", !!supabase, "supabase.auth:", !!(supabase && supabase.auth));
+
+async function loadUser() {
+  try {
+    if (!supabase || !supabase.auth) {
+      console.error("Supabase client or auth is not available:", supabase);
+      return null;
+    }
+
+    // Use getSession for broad compatibility
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) {
+      console.error("Error getting session:", sessionError);
+      return null;
+    }
+
+    const user = sessionData?.session?.user || null;
+    if (!user) {
+      console.warn("No active user session found.");
+      return null;
+    }
+
+    // Return the user object for callers
+    return user;
+  } catch (err) {
+    console.error("Unexpected error in loadUser:", err);
+    return null;
+  }
+}
 
   // -------------------------------------------------------------
   // DOM ELEMENTS
@@ -50,7 +80,7 @@ window.addEventListener("auditModuleLoaded", () => {
 
   // -------------------------------------------------------------
   // LOADERS
-  // -------------------------------------------------------------
+  // ------------------------------------------------------------- 
   async function loadLocations() {
     const { data, error } = await supabase
       .from("locations")
