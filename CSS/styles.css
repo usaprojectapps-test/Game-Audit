@@ -494,11 +494,24 @@ select option {
 
 /* Summary value style */
 .audit-module .summary-value {
-  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.06));
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.12);
+  color: white;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: 0.2s ease;
+  width: 95%;
+  max-width: 95%;
+  box-sizing: border-box;
+  
+  /*background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.06));
   color: #dbeeff;
   font-size: 1.05rem;
   font-weight: 700;
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.06); */
 }
 
 /* Table */
