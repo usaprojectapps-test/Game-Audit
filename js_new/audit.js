@@ -250,8 +250,8 @@ async function saveAudit() {
     const locationSelect = document.getElementById("auditLocationSelect");
     const prevInInput = document.getElementById("auditPrevIn");
     const prevOutInput = document.getElementById("auditPrevOut");
-    const curInInput = document.getElementById("auditCurIn");
-    const curOutInput = document.getElementById("auditCurOut");
+    const cur_InInput = document.getElementById("auditCurIn");
+    const cur_OutInput = document.getElementById("auditCurOut");
 
     const date = dateInput?.value || todayISO();
     const machine_no = (machineSelect?.value || "").trim();
