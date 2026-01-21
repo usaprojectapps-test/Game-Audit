@@ -45,35 +45,6 @@ async function loadSessionInfo() {
 }
 
 // -------------------------------------------------------------
-// LOAD MACHINE NUMBERS
-// -------------------------------------------------------------
-async function loadMachineNumbers() {
-  const select = document.getElementById("auditMachineNo");
-  if (!select) return;
-
-  let query = supabase.from("machines").select("machineid, location_id");
-
-  if (currentRole !== "SuperAdmin") {
-    query = query.eq("location_id", currentLocationId);
-  }
-
-  const { data, error } = await query.order("machineid");
-
-  if (error) {
-    console.error("loadMachineNumbers error:", error);
-    return;
-  }
-
-  select.innerHTML = `<option value="">Select Machine</option>`;
-  (data || []).forEach((m) => {
-    const opt = document.createElement("option");
-    opt.value = m.machineid;
-    opt.textContent = m.machineid;
-    select.appendChild(opt);
-  });
-}
-
-// -------------------------------------------------------------
 // UI BINDINGS
 // -------------------------------------------------------------
 function bindUI() {
@@ -98,7 +69,10 @@ function bindUI() {
   if (machineNo) {
     machineNo.addEventListener("change", async () => {
       await fetchAndSetPrevValues();
-      await loadAuditEntryForEdit();
+      recalcTotals();
+    });
+    machineNo.addEventListener("blur", async () => {
+      await fetchAndSetPrevValues();
       recalcTotals();
     });
   }
@@ -188,7 +162,9 @@ async function loadAudits() {
 
     let query = supabase
       .from("audit")
-      .select("id, machine_no, prev_in, prev_out, cur_in, cur_out")
+      .select(
+        "id, date, machine_no, prev_in, prev_out, cur_in, cur_out, jackpot, location_id, user_id, created_at"
+      )
       .eq("date", filterDate)
       .order("machine_no", { ascending: true });
 
@@ -212,6 +188,7 @@ async function loadAudits() {
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
+        <td>${row.date ?? ""}</td>
         <td>${row.machine_no ?? ""}</td>
         <td>${row.prev_in ?? ""}</td>
         <td>${row.prev_out ?? ""}</td>
@@ -220,35 +197,10 @@ async function loadAudits() {
         <td>${Number.isFinite(totalIn) ? totalIn : ""}</td>
         <td>${Number.isFinite(totalOut) ? totalOut : ""}</td>
         <td>${Number.isFinite(net) ? net : ""}</td>
-        <td>
-          ${
-            currentRole === "SuperAdmin"
-              ? `<button class="btn btn-danger auditDeleteBtn" data-id="${row.id}">Delete</button>`
-              : ""
-          }
-        </td>
+        <td>${row.user_id ?? ""}</td>
+        <td></td>
       `;
       tbody.appendChild(tr);
-    });
-
-    document.querySelectorAll(".auditDeleteBtn").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const id = btn.dataset.id;
-
-        const { error } = await supabase
-          .from("audit")
-          .delete()
-          .eq("id", id);
-
-        if (error) {
-          showToast("Delete failed", "error");
-          return;
-        }
-
-        showToast("Deleted successfully", "success");
-        await loadAudits();
-        await refreshSummary();
-      });
     });
   } catch (err) {
     console.error("loadAudits unexpected error:", err);
@@ -307,40 +259,6 @@ async function refreshSummary() {
   } catch (err) {
     console.error("refreshSummary unexpected error:", err);
   }
-}
-
-// -------------------------------------------------------------
-// LOAD AUDIT ENTRY FOR EDIT
-// -------------------------------------------------------------
-async function loadAuditEntryForEdit() {
-  const machineNo = document.getElementById("auditMachineNo")?.value?.trim();
-  const date = document.getElementById("auditEntryDate")?.value || todayISO();
-  if (!machineNo || !date) return;
-
-  const { data, error } = await supabase
-    .from("audit")
-    .select("*")
-    .eq("machine_no", machineNo)
-    .eq("date", date)
-    .maybeSingle();
-
-  if (error || !data) return;
-
-  const prevInEl = document.getElementById("auditPrevIn");
-  const prevOutEl = document.getElementById("auditPrevOut");
-  const curInEl = document.getElementById("auditCurIn");
-  const curOutEl = document.getElementById("auditCurOut");
-  const jackpotEl = document.getElementById("auditJackpot");
-  const healthEl = document.getElementById("auditMachineHealth");
-
-  if (prevInEl) prevInEl.value = data.prev_in ?? "";
-  if (prevOutEl) prevOutEl.value = data.prev_out ?? "";
-  if (curInEl) curInEl.value = data.cur_in ?? "";
-  if (curOutEl) curOutEl.value = data.cur_out ?? "";
-  if (jackpotEl) jackpotEl.value = data.jackpot ?? "";
-  if (healthEl) healthEl.value = data.machine_health ?? "";
-
-  recalcTotals();
 }
 
 // -------------------------------------------------------------
@@ -462,6 +380,7 @@ async function saveAudit() {
     let machineNo =
       document.getElementById("auditMachineNo")?.value.trim() || "";
 
+    // Prefer patterns like 102-00; if not found, keep as typed
     let match = machineNo.match(/(\d{1,5}-\d{1,5})/);
     if (match) {
       machineNo = match[1];
@@ -487,20 +406,7 @@ async function saveAudit() {
       return;
     }
 
-    const entryDateObj = new Date(date);
-    const today = new Date(todayISO());
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-
-    const isTodayOrYesterday =
-      entryDateObj.toISOString().slice(0, 10) === todayISO() ||
-      entryDateObj.toISOString().slice(0, 10) === yesterday.toISOString().slice(0, 10);
-
-    if (currentRole === "Audit" && !isTodayOrYesterday) {
-      showToast("Audit role can only update today or yesterday", "error");
-      return;
-    }
-
+    // Duplicate check
     const { data: dupData, error: dupErr } = await supabase
       .from("audit")
       .select("id")
@@ -521,6 +427,7 @@ async function saveAudit() {
       return;
     }
 
+    // Ensure prev values present
     if (prevInRaw === "" || prevOutRaw === "") {
       await fetchAndSetPrevValues();
     }
@@ -553,6 +460,9 @@ async function saveAudit() {
 
     const { error } = await supabase.from("audit").insert(payload);
 
+    // -------------------------------------------------------------
+    // UPDATE MACHINE HEALTH IN MACHINES TABLE
+    // -------------------------------------------------------------
     if (!error && machineHealth) {
       const { error: machineErr } = await supabase
         .from("machines")
@@ -598,14 +508,14 @@ async function saveAudit() {
 // -------------------------------------------------------------
 async function initAuditModule() {
   await loadSessionInfo();
+  bindUI();
   setDefaultDates();
   await loadLocations();
-  await loadMachineNumbers();
-  bindUI();
   await loadAudits();
   await refreshSummary();
 }
 
+// IMPORTANT: this is how your dashboard loader triggers the module
 console.log("AUDIT LISTENER ATTACHED");
 window.addEventListener("auditModuleLoaded", () => {
   console.log("AUDIT MODULE LOADED EVENT FIRED");
