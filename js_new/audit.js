@@ -436,6 +436,8 @@ async function saveAudit() {
   const machineHealth =
     document.getElementById("auditMachineHealth")?.value || null;
 
+            console.log("INSERT PAYLOAD:", payload);
+
   const payload = {
     date,
     machine_no: machineNo,
