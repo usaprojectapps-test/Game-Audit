@@ -1,12 +1,11 @@
 // qr-scanner.js
 // Global reusable QR scanner module
-// Requires: jsQR library loaded globally
+// Requires: jsQR loaded globally (window.jsQR)
 
 (function () {
   let stream = null;
   let animationId = null;
 
-  // Create modal once
   function ensureModal() {
     if (document.getElementById("globalQRModal")) return;
 
@@ -24,12 +23,10 @@
 
     document.body.appendChild(modal);
 
-    // Close on background click
     modal.addEventListener("click", (ev) => {
       if (ev.target === modal) closeModal();
     });
 
-    // Close button
     document.getElementById("globalQRCloseBtn").addEventListener("click", (e) => {
       e.preventDefault();
       closeModal();
@@ -96,15 +93,17 @@
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
         try {
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: "attemptBoth"
-          });
+          // ⭐ FIX: use window.jsQR instead of jsQR
+          const code = window.jsQR(
+            ctx.getImageData(0, 0, canvas.width, canvas.height).data,
+            canvas.width,
+            canvas.height,
+            { inversionAttempts: "attemptBoth" }
+          );
 
           if (code && code.data) {
             const value = code.data.trim();
 
-            // Write to input
             if (targetInputId) {
               const input = document.getElementById(targetInputId);
               if (input) {
@@ -113,7 +112,6 @@
               }
             }
 
-            // Callback
             if (typeof onScan === "function") onScan(value);
 
             closeModal();
@@ -130,14 +128,12 @@
     animationId = requestAnimationFrame(loop);
   }
 
-  // Public API
   window.qrScanner = {
-    open({ targetInputId = null, onScan = null, context = "" } = {}) {
+    open({ targetInputId = null, onScan = null } = {}) {
       ensureModal();
       openModal();
       startCamera(onScan, targetInputId);
     },
-
     close() {
       closeModal();
     }
