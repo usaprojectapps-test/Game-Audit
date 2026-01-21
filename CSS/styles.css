@@ -463,7 +463,7 @@ select option {
 /* Panel backgrounds (image1 tone) */
 .audit-module .module-left,
 .audit-module .module-right {
-  background: linear-gradient(180deg, #1e2735 0%, #1a2432 100%);
+  background: linear-gradient(180deg, #1e2735 0%, rgb(255,255,255,0.06) 100%);
   color: #e6eef8;
   border: 1px solid rgba(255,255,255,0.15);
   box-shadow: 0 6px 18px rgba(2,6,23,0.6);
