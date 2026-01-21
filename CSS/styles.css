@@ -518,3 +518,19 @@ select option {
     grid-template-columns: 1fr;
   }
 }
+/* Force 65 / 35 split for audit module */
+.audit-module-container .audit-module {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.audit-module-container .audit-module .module-left {
+  flex: 0 0 65% !important;
+  max-width: 65% !important;
+}
+
+.audit-module-container .audit-module .module-right {
+  flex: 0 0 35% !important;
+  max-width: 35% !important;
+}
