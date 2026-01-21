@@ -324,126 +324,106 @@
   }
 
   // ---------- Save ----------
-  async function saveAudit() {
-    try {
-      if (!window.supabase) {
-        showToast("Database client not found", "error");
-        return;
-      }
-
-      if (!currentUser) {
-        // Try to refresh session
-        await loadSessionInfo();
-      }
-
-      const date = document.getElementById("auditEntryDate")?.value || todayISO();
-      const machineNo = (document.getElementById("auditMachineNo")?.value || "").trim();
-      const locationId = document.getElementById("auditLocationSelect")?.value || null;
-
-      const prevInRaw = document.getElementById("auditPrevIn")?.value;
-      const prevOutRaw = document.getElementById("auditPrevOut")?.value;
-      const curInRaw = document.getElementById("auditCurIn")?.value;
-      const curOutRaw = document.getElementById("auditCurOut")?.value;
-
-      const prevIn = toNumberOrNull(prevInRaw) ?? 0;
-      const prevOut = toNumberOrNull(prevOutRaw) ?? 0;
-      const curIn = toNumberOrNull(curInRaw) ?? 0;
-      const curOut = toNumberOrNull(curOutRaw) ?? 0;
-
-      const jackpot = document.getElementById("auditJackpot")?.value || null;
-      const machineHealth = document.getElementById("auditMachineHealth")?.value || null;
-
-      if (!machineNo) {
-        showToast("Machine No is required", "error");
-        return;
-      }
-
-      // Role-based date restriction (optional)
-      if (currentRole === "Audit") {
-        const selected = new Date(date);
-        const today = new Date();
-        const yesterday = new Date();
-        yesterday.setDate(today.getDate() - 1);
-
-        const selectedDay = new Date(selected.toISOString().slice(0, 10));
-        const todayDay = new Date(today.toISOString().slice(0, 10));
-        const yesterdayDay = new Date(yesterday.toISOString().slice(0, 10));
-
-        if (selectedDay < yesterdayDay || selectedDay > todayDay) {
-          showToast("Audit users can only enter today or yesterday", "error");
-          return;
-        }
-      }
-
-      // Duplicate check: same machine + same date
-      const { data: dupData, error: dupErr } = await supabase
-        .from("audit")
-        .select("id")
-        .eq("machine_no", machineNo)
-        .eq("date", date)
-        .maybeSingle();
-
-      if (dupErr) {
-        console.error("Duplicate check error:", dupErr);
-        showToast("Unable to validate duplicate entry", "error");
-        return;
-      }
-
-      if (dupData) {
-        showToast("Entry already exists for this machine and date", "error");
-        return;
-      }
-
-      // If prev values are empty, try to fetch last record
-      if (prevInRaw === "" || prevOutRaw === "") {
-        await fetchAndSetPrevValues();
-      }
-
-      const finalPrevIn = toNumberOrNull(document.getElementById("auditPrevIn")?.value) ?? 0;
-      const finalPrevOut = toNumberOrNull(document.getElementById("auditPrevOut")?.value) ?? 0;
-
-      const totalIn = (curIn ?? 0) - (finalPrevIn ?? 0);
-      const totalOut = (curOut ?? 0) - (finalPrevOut ?? 0);
-      const net = totalIn - totalOut;
-
-      const payload = {
-        date,
-        machine_no: machineNo,
-        location_id: locationId,
-        prev_in: finalPrevIn,
-        prev_out: finalPrevOut,
-        cur_in: curIn,
-        cur_out: curOut,
-        total_in: totalIn,
-        total_out: totalOut,
-        net_total: net,
-        jackpot,
-        machine_health: machineHealth,
-        user_id: currentUser?.id || null
-      };
-
-      // Remove undefined keys
-      Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
-
-      console.log("Saving audit payload:", payload);
-
-      const { data, error } = await supabase.from("audit").insert(payload).select();
-
-      if (error) {
-        console.error("Supabase insert error:", error);
-        showToast("Save failed: " + (error.message || "database error"), "error");
-        return;
-      }
-
-      showToast("Audit saved successfully", "success");
-      resetAuditForm();
-      await loadAudits();
-      await refreshSummary();
-    } catch (err) {
-      console.error("Unexpected save error:", err);
-      showToast("Unexpected error while saving", "error");
+  // saveAudit matching existing audit table schema (no total_in/total_out/net_total)
+async function saveAudit() {
+  try {
+    if (!window.supabase) {
+      showToast("Database client not found", "error");
+      return;
     }
+
+    // ensure session loaded
+    if (!currentUser) await loadSessionInfo();
+
+    const date = document.getElementById("auditEntryDate")?.value || new Date().toISOString().slice(0,10);
+    const machineNo = (document.getElementById("auditMachineNo")?.value || "").trim();
+    const locationId = document.getElementById("auditLocationSelect")?.value || null;
+
+    const prevIn = toNumberOrNull(document.getElementById("auditPrevIn")?.value) ?? 0;
+    const prevOut = toNumberOrNull(document.getElementById("auditPrevOut")?.value) ?? 0;
+    const curIn = toNumberOrNull(document.getElementById("auditCurIn")?.value) ?? 0;
+    const curOut = toNumberOrNull(document.getElementById("auditCurOut")?.value) ?? 0;
+    const jackpot = toNumberOrNull(document.getElementById("auditJackpot")?.value);
+    const machineHealth = document.getElementById("auditMachineHealth")?.value || null;
+
+    if (!machineNo) {
+      showToast("Machine No is required", "error");
+      return;
+    }
+
+    // Duplicate check (same machine + same date)
+    const { data: dupData, error: dupErr } = await supabase
+      .from("audit")
+      .select("id")
+      .eq("machine_no", machineNo)
+      .eq("date", date)
+      .maybeSingle();
+
+    if (dupErr) {
+      console.error("Duplicate check error:", dupErr);
+      showToast("Unable to validate duplicate entry", "error");
+      return;
+    }
+    if (dupData) {
+      showToast("Entry already exists for this machine and date", "error");
+      return;
+    }
+
+    // If prev values empty, try to fetch last record
+    if (document.getElementById("auditPrevIn")?.value === "" || document.getElementById("auditPrevOut")?.value === "") {
+      await fetchAndSetPrevValues();
+    }
+
+    const finalPrevIn = toNumberOrNull(document.getElementById("auditPrevIn")?.value) ?? 0;
+    const finalPrevOut = toNumberOrNull(document.getElementById("auditPrevOut")?.value) ?? 0;
+
+    // compute totals for UI only
+    const totalIn = curIn - finalPrevIn;
+    const totalOut = curOut - finalPrevOut;
+    const net = totalIn - totalOut;
+
+    // Build payload only with columns that exist in your table
+    const payload = {
+      date,
+      machine_no: machineNo,
+      prev_in: finalPrevIn,
+      prev_out: finalPrevOut,
+      cur_in: curIn,
+      cur_out: curOut,
+      jackpot: jackpot ?? null,
+      location_id: locationId,
+      user_id: currentUser?.id || null
+    };
+
+    // remove undefined keys
+    Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
+
+    console.log("Saving audit payload (schema match):", payload);
+
+    const { data, error } = await supabase.from("audit").insert(payload).select();
+
+    if (error) {
+      console.error("Supabase insert error:", error);
+      showToast("Save failed: " + (error.message || "database error"), "error");
+      return;
+    }
+
+    showToast("Audit saved successfully", "success");
+
+    // update UI totals (client-side)
+    document.getElementById("auditTotalIn").value = Number.isFinite(totalIn) ? totalIn : "";
+    document.getElementById("auditTotalOut").value = Number.isFinite(totalOut) ? totalOut : "";
+    document.getElementById("auditNet").value = Number.isFinite(net) ? net : "";
+
+    resetAuditForm();
+    await loadAudits();
+    await refreshSummary();
+  } catch (err) {
+    console.error("Unexpected save error:", err);
+    showToast("Unexpected error while saving", "error");
   }
+}
+
 
   // ---------- QR Scanner (jsQR) ----------
   function openQRModal() {
