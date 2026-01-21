@@ -1,11 +1,14 @@
-// audit.js
+// audit.js — final
 
-let selectedAuditId = null;
 let currentUser = null;
 let currentRole = null;
 let currentLocationId = null;
+let qrStream = null;
 
-// Utility
+// ---------- Helpers ----------
+
+const todayISO = () => new Date().toISOString().slice(0, 10);
+
 const toNumberOrNull = (v) => {
   if (v === null || v === undefined) return null;
   const s = String(v).trim();
@@ -14,9 +17,12 @@ const toNumberOrNull = (v) => {
   return Number.isFinite(n) ? n : null;
 };
 
-const todayISO = () => new Date().toISOString().slice(0, 10);
+function showToast(msg, type = "info") {
+  console.log(`[${type}] ${msg}`);
+}
 
-// Init
+// ---------- Init ----------
+
 document.addEventListener("DOMContentLoaded", () => {
   initAuditModule();
 });
@@ -24,48 +30,88 @@ document.addEventListener("DOMContentLoaded", () => {
 async function initAuditModule() {
   await loadSessionInfo();
   bindAuditEvents();
+  setDefaultDates();
   await loadLocations();
-  await loadMachines();
-  await loadAudits(true);
+  await loadAudits();
+  await refreshSummary();
 }
+
+// ---------- Session ----------
 
 async function loadSessionInfo() {
   const { data } = await supabase.auth.getSession();
   const session = data?.session;
   currentUser = session?.user || null;
 
-  const jwt = currentUser?.app_metadata || {};
-  // If you store role/location in JWT custom claims, adjust here
-  // For Supabase, often in user.user_metadata or in JWT directly
-  const tokenRole = currentUser?.user_metadata?.role || null;
-  const tokenLocationId = currentUser?.user_metadata?.location_id || null;
-
-  currentRole = tokenRole;
-  currentLocationId = tokenLocationId;
+  currentRole = currentUser?.user_metadata?.role || null;
+  currentLocationId = currentUser?.user_metadata?.location_id || null;
 }
+
+// ---------- Bindings ----------
 
 function bindAuditEvents() {
   const saveBtn = document.getElementById("auditSaveBtn");
   const resetBtn = document.getElementById("auditResetBtn");
+  const filterDate = document.getElementById("auditFilterDate");
+  const entryDate = document.getElementById("auditEntryDate");
+  const machineNoInput = document.getElementById("auditMachineNo");
   const curInInput = document.getElementById("auditCurIn");
   const curOutInput = document.getElementById("auditCurOut");
-  const dateInput = document.getElementById("auditDate");
-  const machineSelect = document.getElementById("auditMachineSelect");
+  const qrScanBtn = document.getElementById("qrScanBtn");
+  const qrCloseBtn = document.getElementById("qrCloseBtn");
 
   if (saveBtn) saveBtn.addEventListener("click", saveAudit);
   if (resetBtn) resetBtn.addEventListener("click", resetAuditForm);
 
-  if (curInInput) curInInput.addEventListener("input", recalcTotalsFromInputs);
-  if (curOutInput) curOutInput.addEventListener("input", recalcTotalsFromInputs);
-  if (dateInput) dateInput.addEventListener("change", handleDateChange);
-  if (machineSelect) machineSelect.addEventListener("change", handleMachineChange);
+  if (filterDate) filterDate.addEventListener("change", async () => {
+    await loadAudits();
+    await refreshSummary();
+  });
+
+  if (entryDate) entryDate.addEventListener("change", () => {
+    // nothing special now, but kept for future rules
+  });
+
+  if (machineNoInput) {
+    machineNoInput.addEventListener("change", async () => {
+      await fetchAndSetPrevValues();
+      recalcTotals();
+    });
+    machineNoInput.addEventListener("blur", async () => {
+      await fetchAndSetPrevValues();
+      recalcTotals();
+    });
+  }
+
+  if (curInInput) curInInput.addEventListener("input", recalcTotals);
+  if (curOutInput) curOutInput.addEventListener("input", recalcTotals);
+
+  if (qrScanBtn) qrScanBtn.addEventListener("click", openQRModal);
+  if (qrCloseBtn) qrCloseBtn.addEventListener("click", closeQRModal);
 }
+
+// ---------- Defaults ----------
+
+function setDefaultDates() {
+  const filterDate = document.getElementById("auditFilterDate");
+  const entryDate = document.getElementById("auditEntryDate");
+  const today = todayISO();
+
+  if (filterDate) filterDate.value = today;
+  if (entryDate) entryDate.value = today;
+}
+
+// ---------- Locations ----------
 
 async function loadLocations() {
   const select = document.getElementById("auditLocationSelect");
   if (!select) return;
 
-  const { data, error } = await supabase.from("locations").select("id, name").order("name");
+  const { data, error } = await supabase
+    .from("locations")
+    .select("id, name")
+    .order("name");
+
   if (error) {
     console.error("loadLocations error:", error);
     return;
@@ -84,33 +130,26 @@ async function loadLocations() {
   }
 }
 
-async function loadMachines() {
-  const select = document.getElementById("auditMachineSelect");
-  if (!select) return;
+// ---------- Audits table ----------
 
-  const { data, error } = await supabase.from("machines").select("id, machine_no").order("machine_no");
-  if (error) {
-    console.error("loadMachines error:", error);
-    return;
-  }
-
-  select.innerHTML = "";
-  data.forEach((m) => {
-    const opt = document.createElement("option");
-    opt.value = m.machine_no;
-    opt.textContent = m.machine_no;
-    select.appendChild(opt);
-  });
-}
-
-async function loadAudits(initial = false) {
+async function loadAudits() {
   const tbody = document.querySelector("#auditTable tbody");
   if (!tbody) return;
 
-  const { data, error } = await supabase
+  const filterDate = document.getElementById("auditFilterDate")?.value || todayISO();
+  const locationId = document.getElementById("auditLocationSelect")?.value || null;
+
+  let query = supabase
     .from("audit")
     .select("id, date, machine_no, prev_in, prev_out, cur_in, cur_out, total_in, total_out, net_total, user_id")
-    .order("date", { ascending: false });
+    .eq("date", filterDate)
+    .order("machine_no", { ascending: true });
+
+  if (locationId) {
+    query = query.eq("location_id", locationId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("loadAudits error:", error);
@@ -120,7 +159,6 @@ async function loadAudits(initial = false) {
   tbody.innerHTML = "";
   data.forEach((row) => {
     const tr = document.createElement("tr");
-
     tr.innerHTML = `
       <td>${row.date}</td>
       <td>${row.machine_no}</td>
@@ -132,137 +170,150 @@ async function loadAudits(initial = false) {
       <td>${row.total_out ?? ""}</td>
       <td>${row.net_total ?? ""}</td>
       <td>${row.user_id ?? ""}</td>
-      <td>
-        <button class="audit-edit-btn" data-id="${row.id}">Edit</button>
-        <button class="audit-delete-btn" data-id="${row.id}">Delete</button>
-      </td>
+      <td></td>
     `;
-
     tbody.appendChild(tr);
   });
-
-  tbody.querySelectorAll(".audit-edit-btn").forEach((btn) => {
-    btn.addEventListener("click", () => editAudit(btn.dataset.id));
-  });
-
-  tbody.querySelectorAll(".audit-delete-btn").forEach((btn) => {
-    btn.addEventListener("click", () => deleteAudit(btn.dataset.id));
-  });
 }
 
-function handleDateChange() {
-  // For now, just recalc prev values when date changes if needed
-  // Could be extended to refetch last row for that date context
+// ---------- Summary ----------
+
+async function refreshSummary() {
+  const filterDate = document.getElementById("auditFilterDate")?.value || todayISO();
+  const locationId = document.getElementById("auditLocationSelect")?.value || null;
+
+  let base = supabase.from("audit").select("machine_no, total_in, total_out").eq("date", filterDate);
+  if (locationId) base = base.eq("location_id", locationId);
+
+  const { data, error } = await base;
+
+  if (error) {
+    console.error("refreshSummary error:", error);
+    return;
+  }
+
+  const totalMachines = new Set(data.map((r) => r.machine_no)).size;
+  const totalIn = data.reduce((sum, r) => sum + (r.total_in || 0), 0);
+  const totalOut = data.reduce((sum, r) => sum + (r.total_out || 0), 0);
+  const net = totalIn - totalOut;
+
+  const elMachines = document.getElementById("summaryTotalMachines");
+  const elIn = document.getElementById("summaryTotalIn");
+  const elOut = document.getElementById("summaryTotalOut");
+  const elNet = document.getElementById("summaryNet");
+
+  if (elMachines) elMachines.textContent = totalMachines || 0;
+  if (elIn) elIn.textContent = totalIn || 0;
+  if (elOut) elOut.textContent = totalOut || 0;
+  if (elNet) elNet.textContent = net || 0;
 }
 
-async function handleMachineChange() {
-  // When machine changes, refetch last row to populate prev_in/out
-  await fetchAndSetPrevValues();
-  recalcTotalsFromInputs();
-}
+// ---------- Prev IN/OUT ----------
 
 async function fetchAndSetPrevValues() {
-  const machineSelect = document.getElementById("auditMachineSelect");
-  const prevInInput = document.getElementById("auditPrevIn");
-  const prevOutInput = document.getElementById("auditPrevOut");
+  const machineNo = document.getElementById("auditMachineNo")?.value.trim();
+  const prevIn = document.getElementById("auditPrevIn");
+  const prevOut = document.getElementById("auditPrevOut");
 
-  if (!machineSelect || !prevInInput || !prevOutInput) return;
-
-  const machine_no = (machineSelect.value || "").trim();
-  if (!machine_no) {
-    prevInInput.value = "";
-    prevOutInput.value = "";
+  if (!machineNo || !prevIn || !prevOut) {
+    if (prevIn) prevIn.value = "";
+    if (prevOut) prevOut.value = "";
     return;
   }
 
   const { data, error } = await supabase
     .from("audit")
     .select("cur_in, cur_out, date")
-    .eq("machine_no", machine_no)
-    .not("cur_in", "is", null)
-    .not("cur_out", "is", null)
+    .eq("machine_no", machineNo)
     .order("date", { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  if (error) {
-    console.error("fetchAndSetPrevValues error:", error);
-    prevInInput.value = "";
-    prevOutInput.value = "";
+  if (error || !data) {
+    prevIn.value = "";
+    prevOut.value = "";
     return;
   }
 
-  if (data) {
-    prevInInput.value = data.cur_in ?? "";
-    prevOutInput.value = data.cur_out ?? "";
-  } else {
-    prevInInput.value = "";
-    prevOutInput.value = "";
-  }
+  prevIn.value = data.cur_in ?? 0;
+  prevOut.value = data.cur_out ?? 0;
 }
 
-function recalcTotalsFromInputs() {
-  const prevInInput = document.getElementById("auditPrevIn");
-  const prevOutInput = document.getElementById("auditPrevOut");
-  const curInInput = document.getElementById("auditCurIn");
-  const curOutInput = document.getElementById("auditCurOut");
+// ---------- Totals ----------
+
+function recalcTotals() {
+  const prevIn = Number(document.getElementById("auditPrevIn")?.value || 0);
+  const prevOut = Number(document.getElementById("auditPrevOut")?.value || 0);
+  const curIn = Number(document.getElementById("auditCurIn")?.value || 0);
+  const curOut = Number(document.getElementById("auditCurOut")?.value || 0);
+
+  const totalIn = curIn - prevIn;
+  const totalOut = curOut - prevOut;
+  const net = totalIn - totalOut;
+
   const totalInInput = document.getElementById("auditTotalIn");
   const totalOutInput = document.getElementById("auditTotalOut");
   const netInput = document.getElementById("auditNet");
 
-  const prev_in = toNumberOrNull(prevInInput?.value ?? "");
-  const prev_out = toNumberOrNull(prevOutInput?.value ?? "");
-  const cur_in = toNumberOrNull(curInInput?.value ?? "");
-  const cur_out = toNumberOrNull(curOutInput?.value ?? "");
-
-  const totalIn = (cur_in ?? 0) - (prev_in ?? 0);
-  const totalOut = (cur_out ?? 0) - (prev_out ?? 0);
-  const net = totalIn - totalOut;
-
-  if (totalInInput) totalInInput.value = Number.isFinite(totalIn) ? totalIn : "";
-  if (totalOutInput) totalOutInput.value = Number.isFinite(totalOut) ? totalOut : "";
-  if (netInput) netInput.value = Number.isFinite(net) ? net : "";
+  if (totalInInput) totalInInput.value = totalIn;
+  if (totalOutInput) totalOutInput.value = totalOut;
+  if (netInput) netInput.value = net;
 }
+
+// ---------- Reset ----------
 
 function resetAuditForm() {
-  selectedAuditId = null;
-  document.getElementById("auditDate").value = todayISO();
-  document.getElementById("auditPrevIn").value = "";
-  document.getElementById("auditPrevOut").value = "";
-  document.getElementById("auditCurIn").value = "";
-  document.getElementById("auditCurOut").value = "";
-  document.getElementById("auditTotalIn").value = "";
-  document.getElementById("auditTotalOut").value = "";
-  document.getElementById("auditNet").value = "";
+  const entryDate = document.getElementById("auditEntryDate");
+  const machineNo = document.getElementById("auditMachineNo");
+  const prevIn = document.getElementById("auditPrevIn");
+  const prevOut = document.getElementById("auditPrevOut");
+  const curIn = document.getElementById("auditCurIn");
+  const curOut = document.getElementById("auditCurOut");
+  const jackpot = document.getElementById("auditJackpot");
+  const health = document.getElementById("auditMachineHealth");
+  const totalIn = document.getElementById("auditTotalIn");
+  const totalOut = document.getElementById("auditTotalOut");
+  const net = document.getElementById("auditNet");
+
+  if (entryDate) entryDate.value = todayISO();
+  if (machineNo) machineNo.value = "";
+  if (prevIn) prevIn.value = "";
+  if (prevOut) prevOut.value = "";
+  if (curIn) curIn.value = "";
+  if (curOut) curOut.value = "";
+  if (jackpot) jackpot.value = "";
+  if (health) health.value = "";
+  if (totalIn) totalIn.value = "";
+  if (totalOut) totalOut.value = "";
+  if (net) net.value = "";
 }
+
+// ---------- Save ----------
 
 async function saveAudit() {
   try {
-    console.log(">>> saveAudit start, selectedAuditId:", selectedAuditId);
-
     if (!currentUser) {
       showToast("Not authenticated", "error");
       return;
     }
 
-    const dateInput = document.getElementById("auditDate");
-    const machineSelect = document.getElementById("auditMachineSelect");
-    const locationSelect = document.getElementById("auditLocationSelect");
-    const prevInInput = document.getElementById("auditPrevIn");
-    const prevOutInput = document.getElementById("auditPrevOut");
-    const cur_InInput = document.getElementById("auditCurIn");
-    const cur_OutInput = document.getElementById("auditCurOut");
+    const date = document.getElementById("auditEntryDate")?.value || todayISO();
+    const machineNo = document.getElementById("auditMachineNo")?.value.trim();
+    const locationId = document.getElementById("auditLocationSelect")?.value || null;
 
-    const date = dateInput?.value || todayISO();
-    const machine_no = (machineSelect?.value || "").trim();
-    const location_id = locationSelect?.value || null;
+    const prevIn = Number(document.getElementById("auditPrevIn")?.value || 0);
+    const prevOut = Number(document.getElementById("auditPrevOut")?.value || 0);
+    const curIn = Number(document.getElementById("auditCurIn")?.value || 0);
+    const curOut = Number(document.getElementById("auditCurOut")?.value || 0);
+    const jackpot = document.getElementById("auditJackpot")?.value || null;
+    const machineHealth = document.getElementById("auditMachineHealth")?.value || null;
 
-    if (!machine_no) {
-      showToast("Machine is required", "error");
+    if (!machineNo) {
+      showToast("Machine No is required", "error");
       return;
     }
 
-    // Role-based date restriction (client-side)
+    // Role-based date restriction (optional, kept from your earlier logic)
     if (currentRole === "Audit") {
       const selected = new Date(date);
       const today = new Date();
@@ -279,133 +330,102 @@ async function saveAudit() {
       }
     }
 
-    const prev_in = toNumberOrNull(prevInInput?.value ?? "");
-    const prev_out = toNumberOrNull(prevOutInput?.value ?? "");
-    const cur_in = toNumberOrNull(curInInput?.value ?? "");
-    const cur_out = toNumberOrNull(curOutInput?.value ?? "");
+    // Duplicate check: same machine + same date
+    const { data: existing, error: dupError } = await supabase
+      .from("audit")
+      .select("id")
+      .eq("machine_no", machineNo)
+      .eq("date", date)
+      .maybeSingle();
 
-    // Duplicate check (machine + date)
-    if (!selectedAuditId) {
-      const existing = await supabase
-        .from("audit")
-        .select("id")
-        .eq("machine_no", machine_no)
-        .eq("date", date)
-        .maybeSingle();
-
-      if (existing.data) {
-        showToast("Entry already exists for this machine and date", "error");
-        return;
-      }
+    if (dupError) {
+      console.error("Duplicate check error:", dupError);
     }
 
-    // If prev_in/out not set yet, fetch them once more (in case machine changed)
-    if (prev_in === null && prev_out === null) {
-      await fetchAndSetPrevValues();
-    }
-
-    const finalPrevIn = toNumberOrNull(document.getElementById("auditPrevIn")?.value ?? "");
-    const finalPrevOut = toNumberOrNull(document.getElementById("auditPrevOut")?.value ?? "");
-
-    const totalIn = (cur_in ?? 0) - (finalPrevIn ?? 0);
-    const totalOut = (cur_out ?? 0) - (finalPrevOut ?? 0);
-    const net = totalIn - totalOut;
-
-    const payload = {
-      machine_no,
-      date,
-      location_id,
-      prev_in: finalPrevIn,
-      prev_out: finalPrevOut,
-      cur_in,
-      cur_out,
-      total_in: totalIn,
-      total_out: totalOut,
-      net_total: net,
-      user_id: currentUser.id,
-    };
-
-    Object.keys(payload).forEach((k) => {
-      if (payload[k] === undefined) delete payload[k];
-    });
-
-    console.log("Audit save payload:", payload);
-
-    let result;
-    if (selectedAuditId) {
-      result = await supabase
-        .from("audit")
-        .update(payload)
-        .eq("id", selectedAuditId)
-        .select();
-    } else {
-      result = await supabase.from("audit").insert(payload).select();
-    }
-
-    console.log("Supabase result:", result);
-
-    if (result.error) {
-      console.error("Supabase error:", result.error);
-      showToast(result.error.message || "Save failed", "error");
+    if (existing) {
+      showToast("This machine already has an entry for this date", "error");
       return;
     }
 
-    showToast(selectedAuditId ? "Audit updated" : "Audit added", "success");
+    // Calculate totals
+    const totalIn = curIn - prevIn;
+    const totalOut = curOut - prevOut;
+    const net = totalIn - totalOut;
+
+    const payload = {
+      date,
+      machine_no: machineNo,
+      location_id: locationId,
+      prev_in: prevIn,
+      prev_out: prevOut,
+      cur_in: curIn,
+      cur_out: curOut,
+      total_in: totalIn,
+      total_out: totalOut,
+      net_total: net,
+      jackpot,
+      machine_health: machineHealth,
+      user_id: currentUser.id
+    };
+
+    const { error } = await supabase.from("audit").insert(payload);
+
+    if (error) {
+      console.error("saveAudit error:", error);
+      showToast("Save failed: " + error.message, "error");
+      return;
+    }
+
+    showToast("Audit saved successfully", "success");
     resetAuditForm();
-    await loadAudits(true);
+    await loadAudits();
+    await refreshSummary();
   } catch (err) {
     console.error("Unexpected error in saveAudit:", err);
     showToast("Save failed", "error");
   }
 }
 
-async function editAudit(id) {
-  selectedAuditId = id;
+// ---------- QR Scanner ----------
 
-  const { data, error } = await supabase
-    .from("audit")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
-
-  if (error || !data) {
-    console.error("editAudit error:", error);
-    showToast("Unable to load audit", "error");
-    return;
-  }
-
-  document.getElementById("auditDate").value = data.date;
-  document.getElementById("auditMachineSelect").value = data.machine_no;
-  document.getElementById("auditLocationSelect").value = data.location_id || "";
-  document.getElementById("auditPrevIn").value = data.prev_in ?? "";
-  document.getElementById("auditPrevOut").value = data.prev_out ?? "";
-  document.getElementById("auditCurIn").value = data.cur_in ?? "";
-  document.getElementById("auditCurOut").value = data.cur_out ?? "";
-  document.getElementById("auditTotalIn").value = data.total_in ?? "";
-  document.getElementById("auditTotalOut").value = data.total_out ?? "";
-  document.getElementById("auditNet").value = data.net_total ?? "";
+function openQRModal() {
+  const modal = document.getElementById("qrModal");
+  if (!modal) return;
+  modal.style.display = "flex";
+  startQRScanner();
 }
 
-async function deleteAudit(id) {
-  if (currentRole !== "SuperAdmin" && currentRole !== "LocationAdmin") {
-    showToast("Only SuperAdmin or LocationAdmin can delete", "error");
-    return;
-  }
-
-  if (!confirm("Delete this audit entry?")) return;
-
-  const { error } = await supabase.from("audit").delete().eq("id", id);
-  if (error) {
-    console.error("deleteAudit error:", error);
-    showToast("Delete failed", "error");
-    return;
-  }
-
-  showToast("Audit deleted", "success");
-  await loadAudits(true);
+function closeQRModal() {
+  const modal = document.getElementById("qrModal");
+  if (!modal) return;
+  stopQRScanner();
+  modal.style.display = "none";
 }
 
-// You already have a global showToast in your system; if not, stub:
-function showToast(msg, type = "info") {
-  console.log(`[${type}] ${msg}`);
+async function startQRScanner() {
+  try {
+    const video = document.getElementById("qrVideo");
+    if (!video) return;
+
+    qrStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" }
+    });
+
+    video.srcObject = qrStream;
+    video.setAttribute("playsinline", true);
+    await video.play();
+
+    // NOTE: You still need a QR decoding library (like jsQR) to actually read the code
+    // and then set document.getElementById("auditMachineNo").value = decodedValue;
+  } catch (err) {
+    console.error("startQRScanner error:", err);
+    showToast("Unable to access camera", "error");
+  }
+}
+
+function stopQRScanner() {
+  if (qrStream) {
+    qrStream.getTracks().forEach((t) => t.stop());
+    qrStream = null;
+  }
 }
