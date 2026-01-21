@@ -105,7 +105,7 @@
             let value = code.data.trim();
 
             // Extract only the machine number (digits)
-            const match = value.match(/(\d+)/);
+            const match = value.match(/(\d{1,5}-\d{1,5})/);
             if (match) {
               value = match[1];
             }
