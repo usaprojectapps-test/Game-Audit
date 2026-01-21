@@ -36,6 +36,9 @@
     await refreshSummary();
   }
 
+   // IMPORTANT: dynamic module loader event 
+    window.addEventListener("auditModuleLoaded", init);
+
   // ---------- Session ----------
   async function loadSessionInfo() {
     try {
