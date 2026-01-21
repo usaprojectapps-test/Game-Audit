@@ -385,6 +385,10 @@ select option {
   max-width: 35%;
 }
 
+#qrModal {
+  display: none !important;
+}
+
 /* QR Scanner Modal */
 .qr-overlay {
   position: fixed;
