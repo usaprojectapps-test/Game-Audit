@@ -459,14 +459,11 @@ async function saveAudit() {
     const date =
       document.getElementById("auditEntryDate")?.value || todayISO();
 
-     let machineNoRaw = document.getElementById("auditMachineNo")?.value.trim() || "";
+    const machineNoRaw =
+      document.getElementById("auditMachineNo")?.value.trim() || "";
 
-           // Extract 101-00 or 102-01 etc.
-          let match = machineNoRaw.match(/(\d{1,5}-\d{1,5})/);
-
-            let machineNo = match ? match[1] : machineNoRaw;
-
-    }
+    const match = machineNoRaw.match(/(\d{1,5}-\d{1,5})/);
+    const machineNo = match ? match[1] : machineNoRaw;
 
     const locationId =
       document.getElementById("auditLocationSelect")?.value || null;
@@ -511,7 +508,7 @@ async function saveAudit() {
 
     if (dupErr) {
       console.error("Duplicate check error:", dupErr);
-      showToast("Unable to validate duplicate entry", "error");
+      showToast("Database error while checking duplicates", "error");
       return;
     }
     if (dupData) {
@@ -595,7 +592,7 @@ async function saveAudit() {
 }
 
 // -------------------------------------------------------------
-// MODULE INIT (FOR DASHBOARD LOADER)
+// MODULE INIT
 // -------------------------------------------------------------
 async function initAuditModule() {
   await loadSessionInfo();
