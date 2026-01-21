@@ -370,7 +370,6 @@ select option {
   color: #333;
   line-height: 1.2;
 }
-
 /* -------------------------------------------------------------
    AUDIT MODULE — Custom Styling
 ------------------------------------------------------------- */
@@ -400,6 +399,10 @@ select option {
   z-index: 99999;
 }
 
+.qr-overlay.show {
+  display: flex !important;
+}
+
 .qr-modal {
   background: #fff;
   padding: 20px;
@@ -425,24 +428,6 @@ select option {
   cursor: pointer;
 }
 
-
-/* Scan Icon */
-.scan-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.scan-icon {
-  font-size: 22px;
-  cursor: pointer;
-  color: #ccc;
-}
-
-.scan-icon:hover {
-  color: #fff;
-}
-
 /* Grid rows */
 .row-2col {
   display: grid;
@@ -461,10 +446,10 @@ select option {
 /* Dark theme */
 .audit-module-container { color: #e6eef8; }
 
-/* Panel backgrounds (image1 tone) */
+/* Panels */
 .audit-module .module-left,
 .audit-module .module-right {
-  background: rgba(255,255,255,0.06) /*linear-gradient(180deg, rgb(255,255,255,0.06) 0%, rgb(255,255,255,0.06) 100%) */;
+  background: rgba(255,255,255,0.06);
   color: #e6eef8;
   border: 1px solid rgba(255,255,255,0.15);
   box-shadow: 0 6px 18px rgba(2,6,23,0.6);
@@ -528,21 +513,4 @@ select option {
   .row-3col {
     grid-template-columns: 1fr;
   }
-}
-
-/* Force 65 / 35 split for audit module */
-.audit-module-container .audit-module {
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
-}
-
-.audit-module-container .audit-module .module-left {
-  flex: 0 0 65% !important;
-  max-width: 65% !important;
-}
-
-.audit-module-container .audit-module .module-right {
-  flex: 0 0 35% !important;
-  max-width: 35% !important;
 }

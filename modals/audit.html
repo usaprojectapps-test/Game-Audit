@@ -13,7 +13,7 @@
         </div>
         <div class="form-item">
           <label>Date</label>
-          <input type="date" id="auditDate">
+          <input type="date" id="auditFilterDate">
         </div>
         <div class="form-item">
           <label>Total Mach. Entered Today</label>
@@ -40,7 +40,7 @@
       <!-- Table -->
       <div class="full-width">
         <div class="table-wrapper"> 
-          <table class="striped">
+          <table id="auditTable" class="striped">
             <thead>
               <tr>
                 <th>Date</th>
@@ -52,8 +52,11 @@
                 <th>Total IN</th>
                 <th>Total OUT</th>
                 <th>NET</th>
-                </tr>
+                <th>User</th>
+                <th></th>
+              </tr>
             </thead>
+            <tbody></tbody>
           </table>
         </div>
       </div>
@@ -66,8 +69,8 @@
       <!-- Row 1: 2 columns -->
       <div class="row-2col">
         <div class="form-item">
-           <label>Date</label>
-          <input type="date" id="auditDate">
+          <label>Date</label>
+          <input type="date" id="auditEntryDate">
         </div>
         <div class="form-item">
           <label>Machine No</label>
@@ -142,8 +145,17 @@
       </div>
 
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
   </div>
 </section>
 
+<!-- Predefined QR Modal -->
+<div id="qrModal" class="qr-overlay" style="display:none;">
+  <div class="qr-modal" role="dialog" aria-modal="true">
+    <video id="qrVideo" class="qr-video"></video>
+    <button id="qrCloseBtn" class="qr-close-btn">Close</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="audit.final.js"></script>
