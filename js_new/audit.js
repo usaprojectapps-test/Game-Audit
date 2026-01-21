@@ -3,6 +3,7 @@
 // -------------------------------------------------------------
 import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
+console.log("AUDIT JS LOADED");
 
 // -------------------------------------------------------------
 // STATE
@@ -501,5 +502,10 @@ async function initAuditModule() {
 
 // IMPORTANT: this is how your dashboard loader triggers the module
 window.addEventListener("auditModuleLoaded", () => {
+  initAuditModule();
+});
+console.log("AUDIT LISTENER ATTACHED");
+window.addEventListener("auditModuleLoaded", () => {
+  console.log("AUDIT MODULE LOADED EVENT FIRED");
   initAuditModule();
 });
