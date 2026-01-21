@@ -459,12 +459,13 @@ async function saveAudit() {
     const date =
       document.getElementById("auditEntryDate")?.value || todayISO();
 
-    let machineNo =
-      document.getElementById("auditMachineNo")?.value.trim() || "";
+     let machineNoRaw = document.getElementById("auditMachineNo")?.value.trim() || "";
 
-    let match = machineNo.match(/(\d{1,5}-\d{1,5})/);
-    if (match) {
-      machineNo = match[1];
+           // Extract 101-00 or 102-01 etc.
+          let match = machineNoRaw.match(/(\d{1,5}-\d{1,5})/);
+
+            let machineNo = match ? match[1] : machineNoRaw;
+
     }
 
     const locationId =
