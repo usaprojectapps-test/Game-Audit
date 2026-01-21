@@ -4,6 +4,7 @@
 import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 console.log("AUDIT JS LOADED");
+window.supabase = supabase;
 
 // -------------------------------------------------------------
 // STATE
