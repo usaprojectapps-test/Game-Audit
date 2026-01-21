@@ -178,8 +178,6 @@ async function loadAudits() {
 
     tbody.innerHTML = "";
     (data || []).forEach((row) => {
-      const tr = document.createElement("tr");
-
       const prevIn = Number(row.prev_in || 0);
       const prevOut = Number(row.prev_out || 0);
       const curIn = Number(row.cur_in || 0);
@@ -188,6 +186,7 @@ async function loadAudits() {
       const totalOut = curOut - prevOut;
       const net = totalIn - totalOut;
 
+      const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${row.date ?? ""}</td>
         <td>${row.machine_no ?? ""}</td>
@@ -377,14 +376,15 @@ async function saveAudit() {
 
     const date =
       document.getElementById("auditEntryDate")?.value || todayISO();
-    /* const machineNo =
-      (document.getElementById("auditMachineNo")?.value || "").trim(); */
 
-      let machineNo = document.getElementById("auditMachineNo")?.value.trim() || "";
+    let machineNo =
+      document.getElementById("auditMachineNo")?.value.trim() || "";
 
-      // Extract only digits (in case user types manually)
-      const match = machineNo.match(/(\d+)/);
-      if (match) machineNo = match[1];
+    // Prefer patterns like 102-00; if not found, keep as typed
+    let match = machineNo.match(/(\d{1,5}-\d{1,5})/);
+    if (match) {
+      machineNo = match[1];
+    }
 
     const locationId =
       document.getElementById("auditLocationSelect")?.value || null;
@@ -459,21 +459,21 @@ async function saveAudit() {
     );
 
     const { error } = await supabase.from("audit").insert(payload);
+
     // -------------------------------------------------------------
     // UPDATE MACHINE HEALTH IN MACHINES TABLE
     // -------------------------------------------------------------
-    if (machineHealth) {
+    if (!error && machineHealth) {
       const { error: machineErr } = await supabase
         .from("machines")
-        .update({ healthstatus: machineHealth })   // <-- your exact column name
-        .eq("machineid", machineNo);              // <-- your exact column name
+        .update({ healthstatus: machineHealth })
+        .eq("machineid", machineNo);
 
       if (machineErr) {
         console.error("Machine health update error:", machineErr);
         showToast("Audit saved, but machine health update failed", "error");
       }
     }
-
 
     if (error) {
       console.error("Supabase insert error:", error);
@@ -516,9 +516,6 @@ async function initAuditModule() {
 }
 
 // IMPORTANT: this is how your dashboard loader triggers the module
-window.addEventListener("auditModuleLoaded", () => {
-  initAuditModule();
-});
 console.log("AUDIT LISTENER ATTACHED");
 window.addEventListener("auditModuleLoaded", () => {
   console.log("AUDIT MODULE LOADED EVENT FIRED");
