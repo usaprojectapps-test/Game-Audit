@@ -376,8 +376,15 @@ async function saveAudit() {
 
     const date =
       document.getElementById("auditEntryDate")?.value || todayISO();
-    const machineNo =
-      (document.getElementById("auditMachineNo")?.value || "").trim();
+    /* const machineNo =
+      (document.getElementById("auditMachineNo")?.value || "").trim(); */
+
+      let machineNo = document.getElementById("auditMachineNo")?.value.trim() || "";
+
+      // Extract only digits (in case user types manually)
+      const match = machineNo.match(/(\d+)/);
+      if (match) machineNo = match[1];
+
     const locationId =
       document.getElementById("auditLocationSelect")?.value || null;
 

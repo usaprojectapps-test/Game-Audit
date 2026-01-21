@@ -102,7 +102,14 @@
           );
 
           if (code && code.data) {
-            const value = code.data.trim();
+            let value = code.data.trim();
+
+            // Extract only the machine number (digits)
+            const match = value.match(/(\d+)/);
+            if (match) {
+              value = match[1];
+            }
+
 
             if (targetInputId) {
               const input = document.getElementById(targetInputId);
