@@ -459,6 +459,21 @@ async function saveAudit() {
     );
 
     const { error } = await supabase.from("audit").insert(payload);
+    // -------------------------------------------------------------
+    // UPDATE MACHINE HEALTH IN MACHINES TABLE
+    // -------------------------------------------------------------
+    if (machineHealth) {
+      const { error: machineErr } = await supabase
+        .from("machines")
+        .update({ healthstatus: machineHealth })   // <-- your exact column name
+        .eq("machineid", machineNo);              // <-- your exact column name
+
+      if (machineErr) {
+        console.error("Machine health update error:", machineErr);
+        showToast("Audit saved, but machine health update failed", "error");
+      }
+    }
+
 
     if (error) {
       console.error("Supabase insert error:", error);
