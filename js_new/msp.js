@@ -42,14 +42,19 @@ async function initMSPModule() {
       const { data: sessionData } = await supabase.auth.getSession();
       const meta = sessionData?.session?.user?.user_metadata || {};
 
-      userRole = meta.role;
-      userLocationId = meta.location_id;
+      userRole = meta.role || null;
+      userLocationId = meta.location_id || null;
 
-      dbg("User Role:", userRole);
-      dbg("User Location:", userLocationId);
+      dbg("Loaded userRole:", userRole);
+      dbg("Loaded userLocationId:", userLocationId);
     }
 
     await loadUserProfile();
+
+    if (!userLocationId) {
+      console.error("❌ MSP ERROR: userLocationId is NULL — cannot continue");
+      return;
+    }
 
     // -------------------------------------------------------------
     // ELEMENTS
@@ -71,11 +76,6 @@ async function initMSPModule() {
     const saveBtn = document.getElementById("mspSaveBtn");
     const deleteBtn = document.getElementById("mspDeleteBtn");
     const scanBtn = document.getElementById("mspQRBtn");
-
-    if (!locationSelect || !saveBtn) {
-      console.warn("MSP HTML not ready yet.");
-      return;
-    }
 
     // -------------------------------------------------------------
     // STATE
@@ -136,6 +136,11 @@ async function initMSPModule() {
       const locationId = locationSelect.value;
 
       dbg("Loading MSP for:", { date, locationId });
+
+      if (!locationId) {
+        console.error("❌ MSP ERROR: locationId is EMPTY — cannot query");
+        return;
+      }
 
       const { data, error } = await supabase
         .from("msp")
