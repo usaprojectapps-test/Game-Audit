@@ -292,3 +292,4 @@ async function initMSPModule() {
 // MAKE FUNCTION AVAILABLE GLOBALLY
 // -------------------------------------------------------------
 window.initMSPModule = initMSPModule;
+
