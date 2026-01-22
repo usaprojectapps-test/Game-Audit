@@ -15,25 +15,42 @@ function dbg(...args) {
 dbg("msp.js executed — top of file", { ready: document.readyState });
 
 // -------------------------------------------------------------
-// AUTO INITIALIZER (same pattern as vendors.js)
+// AUTO INITIALIZER
 // -------------------------------------------------------------
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", () => {
-    dbg("DOMContentLoaded fired → calling initMSPModule()");
     setTimeout(initMSPModule, 300);
   });
 } else {
-  dbg("Document already ready → calling initMSPModule()");
   setTimeout(initMSPModule, 300);
 }
 
 // -------------------------------------------------------------
 // MAIN MODULE FUNCTION
 // -------------------------------------------------------------
-function initMSPModule() {
+async function initMSPModule() {
   dbg("MSP module initializing...");
 
   try {
+    // -------------------------------------------------------------
+    // LOAD USER PROFILE (CRITICAL FIX)
+    // -------------------------------------------------------------
+    let userRole = null;
+    let userLocationId = null;
+
+    async function loadUserProfile() {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const meta = sessionData?.session?.user?.user_metadata || {};
+
+      userRole = meta.role;
+      userLocationId = meta.location_id;
+
+      dbg("User Role:", userRole);
+      dbg("User Location:", userLocationId);
+    }
+
+    await loadUserProfile();
+
     // -------------------------------------------------------------
     // ELEMENTS
     // -------------------------------------------------------------
@@ -106,11 +123,11 @@ function initMSPModule() {
     // FUNCTIONS
     // -------------------------------------------------------------
     async function loadLocations() {
-      if (window.userRole === "SuperAdmin") {
+      if (userRole === "SuperAdmin") {
         const { data } = await supabase.from("locations").select("*").order("name");
         locationSelect.innerHTML = data.map(l => `<option value="${l.id}">${l.name}</option>`).join("");
       } else {
-        locationSelect.innerHTML = `<option value="${window.userLocationId}">${window.userLocationName}</option>`;
+        locationSelect.innerHTML = `<option value="${userLocationId}">My Location</option>`;
       }
     }
 
@@ -118,14 +135,21 @@ function initMSPModule() {
       const date = dateInput.value;
       const locationId = locationSelect.value;
 
-      const { data } = await supabase
+      dbg("Loading MSP for:", { date, locationId });
+
+      const { data, error } = await supabase
         .from("msp")
         .select("*")
         .eq("entry_date", date)
         .eq("location_id", locationId)
         .order("created_at");
 
-      renderTable(data || []);   // ⭐ FIX: ALWAYS pass array
+      if (error) {
+        console.error("MSP load error:", error);
+        return;
+      }
+
+      renderTable(data || []);
     }
 
     function renderTable(entries = []) {
@@ -174,11 +198,6 @@ function initMSPModule() {
       });
 
       const rows = document.querySelectorAll(".msp-row");
-      if (!rows || rows.length === 0) {
-        dbg("No MSP rows found — table empty");
-        return;
-      }
-
       rows.forEach(row => {
         row.addEventListener("click", () => {
           selectedMachine = row.dataset.machine;
