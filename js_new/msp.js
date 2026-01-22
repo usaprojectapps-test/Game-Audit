@@ -28,8 +28,16 @@ if (document.readyState === "loading") {
 // -------------------------------------------------------------
 // MAIN MODULE FUNCTION
 // -------------------------------------------------------------
+console.log("🔥 initMSPModule CALLED");
+
 async function initMSPModule() {
   dbg("MSP module initializing...");
+
+  if (!document.getElementById("mspSaveBtn")) {
+  dbg("MSP HTML not ready — retrying in 200ms");
+  setTimeout(initMSPModule, 200);
+  return;
+}
 
   // ⭐ FIX 1: Wait until MSP HTML is actually in the DOM
   if (!document.getElementById("mspLocation")) {
