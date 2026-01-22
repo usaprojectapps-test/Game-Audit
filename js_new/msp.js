@@ -1,6 +1,8 @@
 console.log("MSP JS Loaded");
 
-document.addEventListener("DOMContentLoaded", () => {
+export function initMSPModule() {
+  console.log("MSP Module Initialized");
+
   const supabase = window.supabaseClient;
 
   const locationSelect = document.getElementById("mspLocation");
@@ -34,11 +36,29 @@ document.addEventListener("DOMContentLoaded", () => {
     loadTable();
 
     // Delete button access
-    if (["SuperAdmin", "LocationAdmin"].includes(window.userRole)) {
-      deleteBtn.disabled = false;
-    } else {
-      deleteBtn.disabled = true;
-    }
+    deleteBtn.disabled = !["SuperAdmin", "LocationAdmin"].includes(window.userRole);
+
+    attachEvents();
+  }
+
+  function attachEvents() {
+    dateInput.addEventListener("change", () => {
+      formDate.value = dateInput.value;
+      loadTable();
+    });
+
+    locationSelect.addEventListener("change", loadTable);
+
+    saveBtn.addEventListener("click", saveEntry);
+    deleteBtn.addEventListener("click", deleteEntry);
+
+    document.getElementById("mspQRBtn").addEventListener("click", () => {
+      openQRScanner((result) => {
+        formMachineNo.value = result;
+        selectedMachine = result;
+        loadMachineEntries(result);
+      });
+    });
   }
 
   async function loadLocations() {
@@ -49,13 +69,6 @@ document.addEventListener("DOMContentLoaded", () => {
       locationSelect.innerHTML = `<option value="${window.userLocationId}">${window.userLocationName}</option>`;
     }
   }
-
-  dateInput.addEventListener("change", () => {
-    formDate.value = dateInput.value;
-    loadTable();
-  });
-
-  locationSelect.addEventListener("change", loadTable);
 
   async function loadTable() {
     const date = dateInput.value;
@@ -72,69 +85,57 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTable(entries) {
-  // Group by machine
-  const machines = {};
-  let dailyTotal = 0;
+    const machines = {};
+    let dailyTotal = 0;
 
-  entries.forEach(e => {
-    if (!machines[e.machine_no]) machines[e.machine_no] = [];
-    machines[e.machine_no].push(e);
-    dailyTotal += Number(e.amount);
-  });
-
-  // Update daily total
-  dailyTotalBox.textContent = `₹${dailyTotal}`;
-
-  // Determine max MSP count across all machines
-  let maxMSP = 0;
-  Object.values(machines).forEach(list => {
-    const mspCount = list.filter(x => x.type === "MSP").length;
-    if (mspCount > maxMSP) maxMSP = mspCount;
-  });
-
-  // Build table header
-  let headerHTML = `<tr><th>Machine No</th>`;
-  for (let i = 1; i <= maxMSP; i++) {
-    headerHTML += `<th>MSP${i}</th>`;
-  }
-  headerHTML += `<th>EOD</th><th>Total</th></tr>`;
-  tableHead.innerHTML = headerHTML;
-
-  // Build table body
-  tableBody.innerHTML = "";
-
-  Object.keys(machines).forEach(machineNo => {
-    const list = machines[machineNo];
-
-    const msps = list.filter(x => x.type === "MSP");
-    const eod = list.find(x => x.type === "EOD");
-    const total = list.reduce((sum, x) => sum + Number(x.amount), 0);
-
-    let rowHTML = `<tr class="msp-row" data-machine="${machineNo}">
-      <td>${machineNo}</td>`;
-
-    // MSP columns
-    for (let i = 0; i < maxMSP; i++) {
-      rowHTML += `<td>${msps[i] ? msps[i].amount : ""}</td>`;
-    }
-
-    // EOD
-    rowHTML += `<td>${eod ? eod.amount : ""}</td>`;
-
-    // Total
-    rowHTML += `<td>${total}</td></tr>`;
-
-    tableBody.innerHTML += rowHTML;
-  });
-
-  // Attach click events
-  document.querySelectorAll(".msp-row").forEach(row => {
-    row.addEventListener("click", () => {
-      selectedMachine = row.dataset.machine;
-      loadMachineEntries(selectedMachine);
+    entries.forEach(e => {
+      if (!machines[e.machine_no]) machines[e.machine_no] = [];
+      machines[e.machine_no].push(e);
+      dailyTotal += Number(e.amount);
     });
-  });
-}
+
+    dailyTotalBox.textContent = `₹${dailyTotal}`;
+
+    let maxMSP = 0;
+    Object.values(machines).forEach(list => {
+      const mspCount = list.filter(x => x.type === "MSP").length;
+      if (mspCount > maxMSP) maxMSP = mspCount;
+    });
+
+    let headerHTML = `<tr><th>Machine No</th>`;
+    for (let i = 1; i <= maxMSP; i++) headerHTML += `<th>MSP${i}</th>`;
+    headerHTML += `<th>EOD</th><th>Total</th></tr>`;
+    tableHead.innerHTML = headerHTML;
+
+    tableBody.innerHTML = "";
+
+    Object.keys(machines).forEach(machineNo => {
+      const list = machines[machineNo];
+
+      const msps = list.filter(x => x.type === "MSP");
+      const eod = list.find(x => x.type === "EOD");
+      const total = list.reduce((sum, x) => sum + Number(x.amount), 0);
+
+      let rowHTML = `<tr class="msp-row" data-machine="${machineNo}">
+        <td>${machineNo}</td>`;
+
+      for (let i = 0; i < maxMSP; i++) {
+        rowHTML += `<td>${msps[i] ? msps[i].amount : ""}</td>`;
+      }
+
+      rowHTML += `<td>${eod ? eod.amount : ""}</td>`;
+      rowHTML += `<td>${total}</td></tr>`;
+
+      tableBody.innerHTML += rowHTML;
+    });
+
+    document.querySelectorAll(".msp-row").forEach(row => {
+      row.addEventListener("click", () => {
+        selectedMachine = row.dataset.machine;
+        loadMachineEntries(selectedMachine);
+      });
+    });
+  }
 
   async function loadMachineEntries(machineNo) {
     formMachineNo.value = machineNo;
@@ -147,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .order("created_at");
 
     if (!data || data.length === 0) {
-      formMachineTotal.textContent = `$${total.toFixed(2)}`;
+      formMachineTotal.textContent = `$0.00`;
       return;
     }
 
@@ -162,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
     formMachineTotal.textContent = `$${total.toFixed(2)}`;
   }
 
-  saveBtn.addEventListener("click", async () => {
+  async function saveEntry() {
     if (!selectedMachine) {
       alert("Select a machine from the table");
       return;
@@ -178,25 +179,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadTable();
     loadMachineEntries(selectedMachine);
-  });
+  }
 
-  deleteBtn.addEventListener("click", async () => {
+  async function deleteEntry() {
     if (!editingEntryId) return;
-
     if (!confirm("Delete this entry?")) return;
 
     await supabase.from("msp_entries").delete().eq("id", editingEntryId);
 
     loadTable();
-    formMachineTotal.textContent = `$${total.toFixed(2)}`;
-  });
-
-  document.getElementById("mspQRBtn").addEventListener("click", () => {
-  openQRScanner((result) => {
-    formMachineNo.value = result;
-    selectedMachine = result;
-    loadMachineEntries(result);
-  });
-});
-
-});
+    formMachineTotal.textContent = `$0.00`;
+  }
+}
