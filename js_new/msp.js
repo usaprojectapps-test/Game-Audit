@@ -4,6 +4,12 @@
 import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 
+if (window.__MSP_LOADED__) {
+  console.log("⚠ MSP.js already loaded — skipping duplicate load");
+  return;
+}
+window.__MSP_LOADED__ = true;
+
 // ----------------------
 // Debug helper
 // ----------------------
