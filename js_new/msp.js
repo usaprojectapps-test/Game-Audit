@@ -33,14 +33,20 @@ async function initMSPModule() {
 
   try {
     // -------------------------------------------------------------
-    // LOAD USER PROFILE (CRITICAL FIX)
+    // LOAD USER PROFILE (FINAL FIX)
     // -------------------------------------------------------------
     let userRole = null;
     let userLocationId = null;
 
     async function loadUserProfile() {
       const { data: sessionData } = await supabase.auth.getSession();
-      const meta = sessionData?.session?.user?.user_metadata || {};
+
+      if (!sessionData?.session?.user) {
+        console.error("❌ No Supabase session found");
+        return;
+      }
+
+      const meta = sessionData.session.user.user_metadata || {};
 
       userRole = meta.role || null;
       userLocationId = meta.location_id || null;
@@ -55,6 +61,7 @@ async function initMSPModule() {
       console.error("❌ MSP ERROR: userLocationId is NULL — cannot continue");
       return;
     }
+
 
     // -------------------------------------------------------------
     // ELEMENTS
