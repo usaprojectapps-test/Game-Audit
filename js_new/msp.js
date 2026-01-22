@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .order("created_at");
 
     if (!data || data.length === 0) {
-      formMachineTotal.textContent = "₹0";
+      formMachineTotal.textContent = `$${total.toFixed(2)}`;
       return;
     }
 
@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
     formNotes.value = last.remarks || "";
 
     const total = data.reduce((sum, x) => sum + Number(x.amount), 0);
-    formMachineTotal.textContent = `₹${total}`;
+    formMachineTotal.textContent = `$${total.toFixed(2)}`;
   }
 
   saveBtn.addEventListener("click", async () => {
@@ -186,6 +186,15 @@ document.addEventListener("DOMContentLoaded", () => {
     await supabase.from("msp_entries").delete().eq("id", editingEntryId);
 
     loadTable();
-    formMachineTotal.textContent = "₹0";
+    formMachineTotal.textContent = `$${total.toFixed(2)}`;
   });
+
+  document.getElementById("mspQRBtn").addEventListener("click", () => {
+  openQRScanner((result) => {
+    formMachineNo.value = result;
+    selectedMachine = result;
+    loadMachineEntries(result);
+  });
+});
+
 });
