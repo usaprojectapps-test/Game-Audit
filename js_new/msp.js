@@ -3,9 +3,9 @@
 // -------------------------------------------------------------
 if (window.__MSP_LOADED__) {
   console.log("⚠ MSP.js already loaded — skipping duplicate load");
-  return;
+} else {
+  window.__MSP_LOADED__ = true;
 }
-window.__MSP_LOADED__ = true;
 
 // -------------------------------------------------------------
 // SUPABASE IMPORT
