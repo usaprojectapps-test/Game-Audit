@@ -1,3 +1,5 @@
+console.log("MSP JS Loaded");
+
 document.addEventListener("DOMContentLoaded", () => {
   const supabase = window.supabaseClient;
 
