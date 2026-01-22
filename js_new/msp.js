@@ -22,7 +22,7 @@ window.addEventListener("mspModuleLoaded", () => {
   setTimeout(() => {
     console.log("🔥 DOM settled — initializing MSP");
     initMSPModule();
-  }, 150);
+  }, 500);
 });
 
 // -------------------------------------------------------------
