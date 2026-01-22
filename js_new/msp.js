@@ -70,57 +70,69 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTable(entries) {
-    const machines = {};
-    let dailyTotal = 0;
+  // Group by machine
+  const machines = {};
+  let dailyTotal = 0;
 
-    entries.forEach(e => {
-      if (!machines[e.machine_no]) machines[e.machine_no] = [];
-      machines[e.machine_no].push(e);
-      dailyTotal += Number(e.amount);
-    });
+  entries.forEach(e => {
+    if (!machines[e.machine_no]) machines[e.machine_no] = [];
+    machines[e.machine_no].push(e);
+    dailyTotal += Number(e.amount);
+  });
 
-    dailyTotalBox.textContent = `₹${dailyTotal}`;
+  // Update daily total
+  dailyTotalBox.textContent = `₹${dailyTotal}`;
 
-    let maxMSP = 0;
-    Object.values(machines).forEach(list => {
-      const mspCount = list.filter(x => x.type === "MSP").length;
-      if (mspCount > maxMSP) maxMSP = mspCount;
-    });
+  // Determine max MSP count across all machines
+  let maxMSP = 0;
+  Object.values(machines).forEach(list => {
+    const mspCount = list.filter(x => x.type === "MSP").length;
+    if (mspCount > maxMSP) maxMSP = mspCount;
+  });
 
-    let header = `<tr><th>Machine No</th>`;
-    for (let i = 1; i <= maxMSP; i++) header += `<th>MSP${i}</th>`;
-    header += `<th>EOD</th><th>Total</th></tr>`;
-    tableHead.innerHTML = header;
-
-    tableBody.innerHTML = "";
-
-    Object.keys(machines).forEach(machineNo => {
-      const list = machines[machineNo];
-
-      const msps = list.filter(x => x.type === "MSP");
-      const eod = list.find(x => x.type === "EOD");
-      const total = list.reduce((sum, x) => sum + Number(x.amount), 0);
-
-      let row = `<tr class="msp-row" data-machine="${machineNo}">
-        <td>${machineNo}</td>`;
-
-      for (let i = 0; i < maxMSP; i++) {
-        row += `<td>${msps[i] ? msps[i].amount : ""}</td>`;
-      }
-
-      row += `<td>${eod ? eod.amount : ""}</td>`;
-      row += `<td>${total}</td></tr>`;
-
-      tableBody.innerHTML += row;
-    });
-
-    document.querySelectorAll(".msp-row").forEach(row => {
-      row.addEventListener("click", () => {
-        selectedMachine = row.dataset.machine;
-        loadMachineEntries(selectedMachine);
-      });
-    });
+  // Build table header
+  let headerHTML = `<tr><th>Machine No</th>`;
+  for (let i = 1; i <= maxMSP; i++) {
+    headerHTML += `<th>MSP${i}</th>`;
   }
+  headerHTML += `<th>EOD</th><th>Total</th></tr>`;
+  tableHead.innerHTML = headerHTML;
+
+  // Build table body
+  tableBody.innerHTML = "";
+
+  Object.keys(machines).forEach(machineNo => {
+    const list = machines[machineNo];
+
+    const msps = list.filter(x => x.type === "MSP");
+    const eod = list.find(x => x.type === "EOD");
+    const total = list.reduce((sum, x) => sum + Number(x.amount), 0);
+
+    let rowHTML = `<tr class="msp-row" data-machine="${machineNo}">
+      <td>${machineNo}</td>`;
+
+    // MSP columns
+    for (let i = 0; i < maxMSP; i++) {
+      rowHTML += `<td>${msps[i] ? msps[i].amount : ""}</td>`;
+    }
+
+    // EOD
+    rowHTML += `<td>${eod ? eod.amount : ""}</td>`;
+
+    // Total
+    rowHTML += `<td>${total}</td></tr>`;
+
+    tableBody.innerHTML += rowHTML;
+  });
+
+  // Attach click events
+  document.querySelectorAll(".msp-row").forEach(row => {
+    row.addEventListener("click", () => {
+      selectedMachine = row.dataset.machine;
+      loadMachineEntries(selectedMachine);
+    });
+  });
+}
 
   async function loadMachineEntries(machineNo) {
     formMachineNo.value = machineNo;
