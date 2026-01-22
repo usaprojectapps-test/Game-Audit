@@ -87,15 +87,14 @@ function initMSPModule() {
 
     scanBtn.addEventListener("click", () => {
       qrScanner.open({
-      targetInputId: "formMachineNo",
-      onScan: (result) => {
-      formMachineNo.value = result;
-      selectedMachine = result;
-      loadMachineEntries(result);
-    }
-  });
-});
-
+        targetInputId: "formMachineNo",
+        onScan: (result) => {
+          formMachineNo.value = result;
+          selectedMachine = result;
+          loadMachineEntries(result);
+        }
+      });
+    });
 
     // -------------------------------------------------------------
     // INITIAL LOAD
@@ -126,10 +125,10 @@ function initMSPModule() {
         .eq("location_id", locationId)
         .order("created_at");
 
-      renderTable(data);
+      renderTable(data || []);   // ⭐ FIX: ALWAYS pass array
     }
 
-    function renderTable(entries) {
+    function renderTable(entries = []) {
       const machines = {};
       let dailyTotal = 0;
 
@@ -175,18 +174,17 @@ function initMSPModule() {
       });
 
       const rows = document.querySelectorAll(".msp-row");
-        if (!rows || rows.length === 0) {
-        dbg("No MSP rows found yet — table empty or HTML not ready");
-       return;
+      if (!rows || rows.length === 0) {
+        dbg("No MSP rows found — table empty");
+        return;
       }
 
-        rows.forEach(row => {
+      rows.forEach(row => {
         row.addEventListener("click", () => {
-        selectedMachine = row.dataset.machine;
-        loadMachineEntries(selectedMachine);
-       });
+          selectedMachine = row.dataset.machine;
+          loadMachineEntries(selectedMachine);
+        });
       });
-
     }
 
     async function loadMachineEntries(machineNo) {
@@ -251,6 +249,6 @@ function initMSPModule() {
 }
 
 // -------------------------------------------------------------
-// MAKE FUNCTION AVAILABLE GLOBALLY (same as vendors.js)
+// MAKE FUNCTION AVAILABLE GLOBALLY
 // -------------------------------------------------------------
 window.initMSPModule = initMSPModule;
