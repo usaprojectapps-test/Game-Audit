@@ -1,5 +1,10 @@
 console.log("MSP JS Loaded");
 
+// ⭐ THIS IS THE MISSING LINE ⭐
+// Your dashboard dispatches "MSPModuleLoaded"
+// This line tells MSP.js to run initMSPModule() when that event fires.
+window.addEventListener("MSPModuleLoaded", initMSPModule);
+
 export function initMSPModule() {
   console.log("MSP Module Initialized");
 
@@ -35,7 +40,6 @@ export function initMSPModule() {
     await loadLocations();
     loadTable();
 
-    // Delete button access
     deleteBtn.disabled = !["SuperAdmin", "LocationAdmin"].includes(window.userRole);
 
     attachEvents();
