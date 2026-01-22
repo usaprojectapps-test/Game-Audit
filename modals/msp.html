@@ -4,56 +4,69 @@
     <h2>MSP Entry</h2>
   </div>
 
-  <div class="module-body">
+  <div class="module-body msp-flex">
 
-    <!-- 1 — Date -->
-    <div class="form-row form-item">
-      <label>Date</label>
-      <input id="mspDate" type="date" class="input" />
-    </div>
+    <!-- LEFT SIDE — 65% -->
+    <div class="module-left">
 
-    <!-- 2 — Machine No + QR -->
-    <div class="form-row form-item">
-      <label>Machine No</label>
-      <div class="input-with-btn">
-        <input id="mspMachineNo" type="text" class="input" />
-        <button id="mspQRBtn" class="btn">Scan</button>
+      <!-- Date -->
+      <div class="form-row form-item">
+        <label>Select Date</label>
+        <input id="mspDate" type="date" class="input" />
       </div>
+
+      <!-- Machine No -->
+      <div class="form-row form-item">
+        <label>Machine No</label>
+        <div class="input-with-btn">
+          <input id="mspMachineNo" type="text" class="input" />
+          <button id="mspQRBtn" class="btn">Scan</button>
+        </div>
+      </div>
+
+      <!-- Summary Row -->
+      <div class="row-3col">
+        <div class="summary-value">Total MSP</div>
+        <div class="summary-value">Total EOD</div>
+        <div id="mspTotalBox" class="summary-value">₹0</div>
+      </div>
+
+      <!-- Entry List -->
+      <div id="mspEntryList" class="entry-list"></div>
+
     </div>
 
-    <!-- 3 — MSP Type -->
-    <div class="form-row form-item">
-      <label>Type</label>
-      <select id="mspType" class="input">
-        <option value="MSP">MSP</option>
-        <option value="EOD">EOD</option>
-      </select>
-    </div>
+    <!-- RIGHT SIDE — 35% -->
+    <div class="module-right">
 
-    <!-- 4 — Amount -->
-    <div class="form-row form-item">
-      <label>Amount</label>
-      <input id="mspAmount" type="number" class="input" />
-    </div>
+      <!-- Type -->
+      <div class="form-row form-item">
+        <label>Type</label>
+        <select id="mspType" class="input">
+          <option value="MSP">MSP</option>
+          <option value="EOD">EOD</option>
+        </select>
+      </div>
 
-    <!-- 5 — Notes + Total -->
-    <div class="form-row form-item">
-      <label>Notes</label>
-      <div class="notes-with-total">
+      <!-- Amount -->
+      <div class="form-row form-item">
+        <label>Amount</label>
+        <input id="mspAmount" type="number" class="input" />
+      </div>
+
+      <!-- Notes -->
+      <div class="form-row form-item">
+        <label>Notes</label>
         <input id="mspRemarks" type="text" class="input" />
-        <div id="mspTotalBox" class="total-box">₹0</div>
       </div>
-    </div>
 
-    <!-- Entry List -->
-    <div id="mspEntryList" class="entry-list"></div>
+      <!-- Save -->
+      <div class="form-actions">
+        <button id="mspSaveBtn" class="btn primary">Save</button>
+      </div>
 
-    <!-- Status -->
-    <div id="mspStatus" class="status"></div>
+      <div id="mspStatus" class="status"></div>
 
-    <!-- Save -->
-    <div class="form-actions">
-      <button id="mspSaveBtn" class="btn primary">Save</button>
     </div>
 
   </div>
