@@ -18,8 +18,11 @@ dbg("msp.js loaded — waiting for mspModuleLoaded event");
 // INITIALIZER — ONLY RUN AFTER DASHBOARD INSERTS MSP HTML
 // -------------------------------------------------------------
 window.addEventListener("mspModuleLoaded", () => {
-  console.log("🔥 mspModuleLoaded event received — initializing MSP");
-  initMSPModule();
+  console.log("🔥 mspModuleLoaded event received — waiting for DOM settle");
+  setTimeout(() => {
+    console.log("🔥 DOM settled — initializing MSP");
+    initMSPModule();
+  }, 150);
 });
 
 // -------------------------------------------------------------
