@@ -20,11 +20,11 @@ dbg("msp.js executed — top of file", { ready: document.readyState });
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", () => {
     dbg("DOMContentLoaded fired → calling initMSPModule()");
-    setTimeout(initMSPModule, 100);
+    setTimeout(initMSPModule, 300);
   });
 } else {
   dbg("Document already ready → calling initMSPModule()");
-  setTimeout(initMSPModule, 100);
+  setTimeout(initMSPModule, 300);
 }
 
 // -------------------------------------------------------------
