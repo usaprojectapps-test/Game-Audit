@@ -18,12 +18,19 @@ dbg("msp.js loaded — waiting for mspModuleLoaded event");
 // INITIALIZER — ONLY RUN AFTER DASHBOARD INSERTS MSP HTML
 // -------------------------------------------------------------
 window.addEventListener("mspModuleLoaded", () => {
-  console.log("🔥 mspModuleLoaded event received — waiting for DOM settle");
-  setTimeout(() => {
-    console.log("🔥 DOM settled — initializing MSP");
-    initMSPModule();
-  }, 500);
+  console.log("🔥 mspModuleLoaded — waiting for right panel to stabilize");
+
+  const check = setInterval(() => {
+    const saveBtn = document.getElementById("mspSaveBtn");
+
+    if (saveBtn && saveBtn.isConnected) {
+      console.log("🔥 Right panel stable — initializing MSP");
+      clearInterval(check);
+      initMSPModule();
+    }
+  }, 100);
 });
+
 
 // -------------------------------------------------------------
 // MAIN MODULE FUNCTION
