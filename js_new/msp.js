@@ -31,22 +31,23 @@ if (document.readyState === "loading") {
 async function initMSPModule() {
   dbg("MSP module initializing...");
 
+  // ⭐ FIX 1: Wait until MSP HTML is actually in the DOM
+  if (!document.getElementById("mspLocation")) {
+    dbg("MSP HTML not ready — retrying in 200ms");
+    setTimeout(initMSPModule, 200);
+    return;
+  }
+
   try {
     // -------------------------------------------------------------
-    // LOAD USER PROFILE (FINAL FIX)
+    // LOAD USER PROFILE
     // -------------------------------------------------------------
     let userRole = null;
     let userLocationId = null;
 
     async function loadUserProfile() {
       const { data: sessionData } = await supabase.auth.getSession();
-
-      if (!sessionData?.session?.user) {
-        console.error("❌ No Supabase session found");
-        return;
-      }
-
-      const meta = sessionData.session.user.user_metadata || {};
+      const meta = sessionData?.session?.user?.user_metadata || {};
 
       userRole = meta.role || null;
       userLocationId = meta.location_id || null;
@@ -61,7 +62,6 @@ async function initMSPModule() {
       console.error("❌ MSP ERROR: userLocationId is NULL — cannot continue");
       return;
     }
-
 
     // -------------------------------------------------------------
     // ELEMENTS
@@ -123,8 +123,8 @@ async function initMSPModule() {
     // -------------------------------------------------------------
     // INITIAL LOAD
     // -------------------------------------------------------------
-    loadLocations();
-    loadTable();
+    await loadLocations();
+    await loadTable();
 
     // -------------------------------------------------------------
     // FUNCTIONS
@@ -135,16 +135,22 @@ async function initMSPModule() {
 
         locationSelect.innerHTML = data.map(l => `<option value="${l.id}">${l.name}</option>`).join("");
 
-        // ⭐ FIX: force selection
-        locationSelect.value = data[0]?.id || "";
+        // ⭐ FIX 2: Force selection AFTER HTML is applied
+        setTimeout(() => {
+          locationSelect.value = data[0]?.id || "";
+          dbg("SuperAdmin locationSelect.value:", locationSelect.value);
+        }, 50);
+
       } else {
         locationSelect.innerHTML = `<option value="${userLocationId}">My Location</option>`;
 
-        // ⭐ FIX: force selection
-        locationSelect.value = userLocationId;
+        // ⭐ FIX 2: Force selection AFTER HTML is applied
+        setTimeout(() => {
+          locationSelect.value = userLocationId;
+          dbg("User locationSelect.value:", locationSelect.value);
+        }, 50);
       }
     }
-
 
     async function loadTable() {
       const date = dateInput.value;
