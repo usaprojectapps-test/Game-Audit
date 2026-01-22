@@ -13,9 +13,6 @@ if (window.__MSP_LOADED__) {
 import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 
-// ----------------------
-// Debug helper
-// ----------------------
 const IS_DEV = window.location.hostname === "localhost" || window.location.hostname.endsWith(".local");
 function dbg(...args) {
   if (IS_DEV) console.log(...args);
@@ -46,7 +43,6 @@ window.addEventListener("mspModuleLoaded", () => {
 async function initMSPModule() {
   dbg("MSP module initializing...");
 
-  // Wait until FULL MSP HTML is in DOM
   if (!document.getElementById("mspSaveBtn")) {
     dbg("MSP HTML not ready — retrying in 200ms");
     setTimeout(initMSPModule, 200);
@@ -148,26 +144,31 @@ async function initMSPModule() {
       if (userRole === "SuperAdmin") {
         const { data } = await supabase.from("locations").select("*").order("name");
 
-        locationSelect.innerHTML = data.map(l => `<option value="${l.id}">${l.name}</option>`).join("");
+        locationSelect.innerHTML = data
+          .map(l => `<option value="${l.id}">${l.name}</option>`)
+          .join("");
 
         setTimeout(() => {
           locationSelect.value = data[0]?.id || "";
-          dbg("SuperAdmin locationSelect.value:", locationSelect.value);
         }, 50);
 
       } else {
-        locationSelect.innerHTML = `<option value="${userLocationId}">${actualLocationName}</option>`;
-          const { data: loc } = await supabase
+        // ⭐ LocationAdmin — show actual location name
+        const { data: loc, error: locErr } = await supabase
           .from("locations")
           .select("name")
           .eq("id", userLocationId)
           .single();
 
+        if (locErr) {
+          console.error("Failed to load location name:", locErr);
+          locationSelect.innerHTML = `<option value="${userLocationId}">My Location</option>`;
+        } else {
           locationSelect.innerHTML = `<option value="${userLocationId}">${loc.name}</option>`;
+        }
 
         setTimeout(() => {
           locationSelect.value = userLocationId;
-          dbg("User locationSelect.value:", locationSelect.value);
         }, 50);
       }
     }
@@ -313,7 +314,4 @@ async function initMSPModule() {
   }
 }
 
-// -------------------------------------------------------------
-// MAKE FUNCTION AVAILABLE GLOBALLY
-// -------------------------------------------------------------
 window.initMSPModule = initMSPModule;
