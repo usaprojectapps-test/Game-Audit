@@ -1,45 +1,60 @@
-<div class="msp-module" style="max-width:600px; margin:auto;">
+<div class="module-container">
 
-  <h3>MSP Entry</h3>
-
-  <div class="form-row">
-    <label>Machine No</label>
-    <input id="mspMachineNo" type="text">
+  <div class="module-header">
+    <h2>MSP Entry</h2>
   </div>
 
-  <div class="form-row">
-    <label>Date</label>
-    <input id="mspDate" type="date">
+  <div class="module-body">
+
+    <!-- 1 — Date -->
+    <div class="form-row">
+      <label>Date</label>
+      <input id="mspDate" type="date" class="input" />
+    </div>
+
+    <!-- 2 — Machine No + QR -->
+    <div class="form-row">
+      <label>Machine No</label>
+      <div class="input-with-btn">
+        <input id="mspMachineNo" type="text" class="input" />
+        <button id="mspQRBtn" class="btn btn-secondary">Scan</button>
+      </div>
+    </div>
+
+    <!-- 3 — MSP Type -->
+    <div class="form-row">
+      <label>Type</label>
+      <select id="mspType" class="input">
+        <option value="MSP">MSP</option>
+        <option value="EOD">EOD</option>
+      </select>
+    </div>
+
+    <!-- 4 — Amount -->
+    <div class="form-row">
+      <label>Amount</label>
+      <input id="mspAmount" type="number" class="input" />
+    </div>
+
+    <!-- 5 — Notes + Total -->
+    <div class="form-row">
+      <label>Notes</label>
+      <div class="notes-with-total">
+        <input id="mspRemarks" type="text" class="input" />
+        <div id="mspTotalBox" class="total-box">₹0</div>
+      </div>
+    </div>
+
+    <!-- Entry List -->
+    <div id="mspEntryList" class="entry-list"></div>
+
+    <!-- Status -->
+    <div id="mspStatus" class="status"></div>
+
+    <!-- Save -->
+    <div class="form-actions">
+      <button id="mspSaveBtn" class="btn btn-primary">Save</button>
+    </div>
+
   </div>
-
-  <div class="form-row">
-    <label>Amount</label>
-    <input id="mspAmount" type="number">
-  </div>
-
-  <div class="form-row">
-    <label>Type</label>
-    <select id="mspType">
-      <option value="MSP">MSP</option>
-      <option value="EOD">EOD</option>
-    </select>
-  </div>
-
-  <div class="form-row">
-    <label>Remarks</label>
-    <input id="mspRemarks" type="text">
-  </div>
-
-  <div id="mspTotalBox" style="margin-top:10px; font-weight:600;">
-    Total MSP Today: $0.00
-  </div>
-
-  <div id="mspEntryList" style="margin-top:12px; display:flex; flex-direction:column; gap:10px;"></div>
-
-  <div id="mspStatus" style="margin-top:8px;"></div>
-
-  <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
-    <button id="mspSaveBtn" class="btn btn-primary">Save</button>
-  </div>
-
 </div>
