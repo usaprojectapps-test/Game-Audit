@@ -1,14 +1,17 @@
 // -------------------------------------------------------------
-// SUPABASE IMPORT
+// PREVENT DOUBLE LOAD
 // -------------------------------------------------------------
-import { supabase } from "./supabaseClient.js";
-import { showToast } from "./toast.js";
-
 if (window.__MSP_LOADED__) {
   console.log("⚠ MSP.js already loaded — skipping duplicate load");
   return;
 }
 window.__MSP_LOADED__ = true;
+
+// -------------------------------------------------------------
+// SUPABASE IMPORT
+// -------------------------------------------------------------
+import { supabase } from "./supabaseClient.js";
+import { showToast } from "./toast.js";
 
 // ----------------------
 // Debug helper
@@ -21,22 +24,21 @@ function dbg(...args) {
 dbg("msp.js loaded — waiting for mspModuleLoaded event");
 
 // -------------------------------------------------------------
-// INITIALIZER — ONLY RUN AFTER DASHBOARD INSERTS MSP HTML
+// INITIALIZER — WAIT FOR FINAL DOM
 // -------------------------------------------------------------
 window.addEventListener("mspModuleLoaded", () => {
-  console.log("🔥 mspModuleLoaded — waiting for right panel to stabilize");
+  console.log("🔥 mspModuleLoaded — waiting for DOM to stabilize");
 
   const check = setInterval(() => {
     const saveBtn = document.getElementById("mspSaveBtn");
 
     if (saveBtn && saveBtn.isConnected) {
-      console.log("🔥 Right panel stable — initializing MSP");
+      console.log("🔥 DOM stable — initializing MSP");
       clearInterval(check);
       initMSPModule();
     }
   }, 100);
 });
-
 
 // -------------------------------------------------------------
 // MAIN MODULE FUNCTION
@@ -308,5 +310,3 @@ async function initMSPModule() {
 // MAKE FUNCTION AVAILABLE GLOBALLY
 // -------------------------------------------------------------
 window.initMSPModule = initMSPModule;
-
-
