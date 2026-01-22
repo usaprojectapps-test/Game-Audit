@@ -129,7 +129,7 @@ async function initMSPModule() {
     // -------------------------------------------------------------
     // FUNCTIONS
     // -------------------------------------------------------------
-    aasync function loadLocations() {
+    async function loadLocations() {
       if (userRole === "SuperAdmin") {
         const { data } = await supabase.from("locations").select("*").order("name");
 
