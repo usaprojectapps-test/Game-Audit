@@ -174,12 +174,19 @@ function initMSPModule() {
         tableBody.innerHTML += rowHTML;
       });
 
-      document.querySelectorAll(".msp-row").forEach(row => {
+      const rows = document.querySelectorAll(".msp-row");
+        if (!rows || rows.length === 0) {
+        dbg("No MSP rows found yet — table empty or HTML not ready");
+       return;
+      }
+
+        rows.forEach(row => {
         row.addEventListener("click", () => {
-          selectedMachine = row.dataset.machine;
-          loadMachineEntries(selectedMachine);
-        });
+        selectedMachine = row.dataset.machine;
+        loadMachineEntries(selectedMachine);
+       });
       });
+
     }
 
     async function loadMachineEntries(machineNo) {
