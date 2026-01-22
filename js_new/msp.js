@@ -129,14 +129,22 @@ async function initMSPModule() {
     // -------------------------------------------------------------
     // FUNCTIONS
     // -------------------------------------------------------------
-    async function loadLocations() {
+    aasync function loadLocations() {
       if (userRole === "SuperAdmin") {
         const { data } = await supabase.from("locations").select("*").order("name");
+
         locationSelect.innerHTML = data.map(l => `<option value="${l.id}">${l.name}</option>`).join("");
+
+        // ⭐ FIX: force selection
+        locationSelect.value = data[0]?.id || "";
       } else {
         locationSelect.innerHTML = `<option value="${userLocationId}">My Location</option>`;
+
+        // ⭐ FIX: force selection
+        locationSelect.value = userLocationId;
       }
     }
+
 
     async function loadTable() {
       const date = dateInput.value;
