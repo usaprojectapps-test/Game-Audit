@@ -12,13 +12,13 @@ function dbg(...args) {
   if (IS_DEV) console.log(...args);
 }
 
-dbg("msp.js loaded — waiting for MSPModuleLoaded event");
+dbg("msp.js loaded — waiting for mspModuleLoaded event");
 
 // -------------------------------------------------------------
 // INITIALIZER — ONLY RUN AFTER DASHBOARD INSERTS MSP HTML
 // -------------------------------------------------------------
-window.addEventListener("MSPModuleLoaded", () => {
-  console.log("🔥 MSPModuleLoaded event received — initializing MSP");
+window.addEventListener("mspModuleLoaded", () => {
+  console.log("🔥 mspModuleLoaded event received — initializing MSP");
   initMSPModule();
 });
 
@@ -292,4 +292,5 @@ async function initMSPModule() {
 // MAKE FUNCTION AVAILABLE GLOBALLY
 // -------------------------------------------------------------
 window.initMSPModule = initMSPModule;
+
 
