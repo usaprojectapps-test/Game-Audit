@@ -534,3 +534,106 @@ select option {
   flex: 0 0 35% !important;
   max-width: 35% !important;
 }
+
+/* -------------------------------------------------------------
+   MSP MODULE — Dark Theme Matching Audit Module
+------------------------------------------------------------- */
+
+.msp-module .module-body {
+  background: rgba(255,255,255,0.06);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+  color: #e6eef8;
+}
+
+/* Labels */
+.msp-module .form-item label {
+  color: #bcd3f7;
+  font-weight: 600;
+}
+
+/* Inputs */
+.msp-module .input {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  color: #e6eef8;
+}
+
+/* QR Button */
+.msp-module .input-with-btn {
+  display: flex;
+  gap: 10px;
+}
+
+.msp-module .btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #dbeeff;
+  cursor: pointer;
+}
+
+.msp-module .btn.primary {
+  background: linear-gradient(180deg,#1f6fff,#0b4fd6);
+  color: #fff;
+}
+
+/* Notes + Total */
+.notes-with-total {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.total-box {
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 10px;
+  min-width: 80px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Entry List */
+.entry-list {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.entry-card {
+  background: rgba(255,255,255,0.08);
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.entry-card strong {
+  color: #9fbbe8;
+}
+
+.entry-remarks {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.entry-time {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: 4px;
+}
+
+/* Save Button */
+.form-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}

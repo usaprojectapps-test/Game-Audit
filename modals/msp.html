@@ -1,4 +1,4 @@
-<div class="module-container">
+<div class="module-container msp-module">
 
   <div class="module-header">
     <h2>MSP Entry</h2>
@@ -7,22 +7,22 @@
   <div class="module-body">
 
     <!-- 1 — Date -->
-    <div class="form-row">
+    <div class="form-row form-item">
       <label>Date</label>
       <input id="mspDate" type="date" class="input" />
     </div>
 
     <!-- 2 — Machine No + QR -->
-    <div class="form-row">
+    <div class="form-row form-item">
       <label>Machine No</label>
       <div class="input-with-btn">
         <input id="mspMachineNo" type="text" class="input" />
-        <button id="mspQRBtn" class="btn btn-secondary">Scan</button>
+        <button id="mspQRBtn" class="btn">Scan</button>
       </div>
     </div>
 
     <!-- 3 — MSP Type -->
-    <div class="form-row">
+    <div class="form-row form-item">
       <label>Type</label>
       <select id="mspType" class="input">
         <option value="MSP">MSP</option>
@@ -31,13 +31,13 @@
     </div>
 
     <!-- 4 — Amount -->
-    <div class="form-row">
+    <div class="form-row form-item">
       <label>Amount</label>
       <input id="mspAmount" type="number" class="input" />
     </div>
 
     <!-- 5 — Notes + Total -->
-    <div class="form-row">
+    <div class="form-row form-item">
       <label>Notes</label>
       <div class="notes-with-total">
         <input id="mspRemarks" type="text" class="input" />
@@ -53,7 +53,7 @@
 
     <!-- Save -->
     <div class="form-actions">
-      <button id="mspSaveBtn" class="btn btn-primary">Save</button>
+      <button id="mspSaveBtn" class="btn primary">Save</button>
     </div>
 
   </div>
