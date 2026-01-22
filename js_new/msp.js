@@ -1,51 +1,80 @@
-console.log("MSP JS Loaded");
+// -------------------------------------------------------------
+// SUPABASE IMPORT
+// -------------------------------------------------------------
+import { supabase } from "./supabaseClient.js";
+import { showToast } from "./toast.js";
 
-// ⭐ THIS IS THE MISSING LINE ⭐
-// Your dashboard dispatches "MSPModuleLoaded"
-// This line tells MSP.js to run initMSPModule() when that event fires.
-window.addEventListener("MSPModuleLoaded", initMSPModule);
+// ----------------------
+// Debug helper
+// ----------------------
+const IS_DEV = window.location.hostname === "localhost" || window.location.hostname.endsWith(".local");
+function dbg(...args) {
+  if (IS_DEV) console.log(...args);
+}
 
-export function initMSPModule() {
-  console.log("MSP Module Initialized");
+dbg("msp.js executed — top of file", { ready: document.readyState });
 
-  const supabase = window.supabaseClient;
+// -------------------------------------------------------------
+// AUTO INITIALIZER (same pattern as vendors.js)
+// -------------------------------------------------------------
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
+    dbg("DOMContentLoaded fired → calling initMSPModule()");
+    setTimeout(initMSPModule, 100);
+  });
+} else {
+  dbg("Document already ready → calling initMSPModule()");
+  setTimeout(initMSPModule, 100);
+}
 
-  const locationSelect = document.getElementById("mspLocation");
-  const dateInput = document.getElementById("mspDate");
-  const dailyTotalBox = document.getElementById("mspDailyTotal");
+// -------------------------------------------------------------
+// MAIN MODULE FUNCTION
+// -------------------------------------------------------------
+function initMSPModule() {
+  dbg("MSP module initializing...");
 
-  const tableHead = document.getElementById("mspTableHead");
-  const tableBody = document.getElementById("mspTableBody");
+  try {
+    // -------------------------------------------------------------
+    // ELEMENTS
+    // -------------------------------------------------------------
+    const locationSelect = document.getElementById("mspLocation");
+    const dateInput = document.getElementById("mspDate");
+    const dailyTotalBox = document.getElementById("mspDailyTotal");
 
-  const formDate = document.getElementById("formDate");
-  const formMachineNo = document.getElementById("formMachineNo");
-  const formType = document.getElementById("formType");
-  const formAmount = document.getElementById("formAmount");
-  const formNotes = document.getElementById("formNotes");
-  const formMachineTotal = document.getElementById("formMachineTotal");
+    const tableHead = document.getElementById("mspTableHead");
+    const tableBody = document.getElementById("mspTableBody");
 
-  const saveBtn = document.getElementById("mspSaveBtn");
-  const deleteBtn = document.getElementById("mspDeleteBtn");
+    const formDate = document.getElementById("formDate");
+    const formMachineNo = document.getElementById("formMachineNo");
+    const formType = document.getElementById("formType");
+    const formAmount = document.getElementById("formAmount");
+    const formNotes = document.getElementById("formNotes");
+    const formMachineTotal = document.getElementById("formMachineTotal");
 
-  let selectedMachine = null;
-  let editingEntryId = null;
+    const saveBtn = document.getElementById("mspSaveBtn");
+    const deleteBtn = document.getElementById("mspDeleteBtn");
+    const scanBtn = document.getElementById("mspQRBtn");
 
-  // Default date = today
-  dateInput.value = new Date().toISOString().split("T")[0];
-  formDate.value = dateInput.value;
+    if (!locationSelect || !saveBtn) {
+      console.warn("MSP HTML not ready yet.");
+      return;
+    }
 
-  init();
+    // -------------------------------------------------------------
+    // STATE
+    // -------------------------------------------------------------
+    let selectedMachine = null;
+    let editingEntryId = null;
 
-  async function init() {
-    await loadLocations();
-    loadTable();
+    // -------------------------------------------------------------
+    // DEFAULT DATE
+    // -------------------------------------------------------------
+    dateInput.value = new Date().toISOString().split("T")[0];
+    formDate.value = dateInput.value;
 
-    deleteBtn.disabled = !["SuperAdmin", "LocationAdmin"].includes(window.userRole);
-
-    attachEvents();
-  }
-
-  function attachEvents() {
+    // -------------------------------------------------------------
+    // EVENTS
+    // -------------------------------------------------------------
     dateInput.addEventListener("change", () => {
       formDate.value = dateInput.value;
       loadTable();
@@ -56,142 +85,161 @@ export function initMSPModule() {
     saveBtn.addEventListener("click", saveEntry);
     deleteBtn.addEventListener("click", deleteEntry);
 
-    document.getElementById("mspQRBtn").addEventListener("click", () => {
+    scanBtn.addEventListener("click", () => {
       openQRScanner((result) => {
         formMachineNo.value = result;
         selectedMachine = result;
         loadMachineEntries(result);
       });
     });
-  }
 
-  async function loadLocations() {
-    if (window.userRole === "SuperAdmin") {
-      const { data } = await supabase.from("locations").select("*").order("name");
-      locationSelect.innerHTML = data.map(l => `<option value="${l.id}">${l.name}</option>`).join("");
-    } else {
-      locationSelect.innerHTML = `<option value="${window.userLocationId}">${window.userLocationName}</option>`;
+    // -------------------------------------------------------------
+    // INITIAL LOAD
+    // -------------------------------------------------------------
+    loadLocations();
+    loadTable();
+
+    // -------------------------------------------------------------
+    // FUNCTIONS
+    // -------------------------------------------------------------
+    async function loadLocations() {
+      if (window.userRole === "SuperAdmin") {
+        const { data } = await supabase.from("locations").select("*").order("name");
+        locationSelect.innerHTML = data.map(l => `<option value="${l.id}">${l.name}</option>`).join("");
+      } else {
+        locationSelect.innerHTML = `<option value="${window.userLocationId}">${window.userLocationName}</option>`;
+      }
     }
-  }
 
-  async function loadTable() {
-    const date = dateInput.value;
-    const locationId = locationSelect.value;
+    async function loadTable() {
+      const date = dateInput.value;
+      const locationId = locationSelect.value;
 
-    const { data } = await supabase
-      .from("msp_entries")
-      .select("*")
-      .eq("entry_date", date)
-      .eq("location_id", locationId)
-      .order("created_at");
+      const { data } = await supabase
+        .from("msp_entries")
+        .select("*")
+        .eq("entry_date", date)
+        .eq("location_id", locationId)
+        .order("created_at");
 
-    renderTable(data);
-  }
+      renderTable(data);
+    }
 
-  function renderTable(entries) {
-    const machines = {};
-    let dailyTotal = 0;
+    function renderTable(entries) {
+      const machines = {};
+      let dailyTotal = 0;
 
-    entries.forEach(e => {
-      if (!machines[e.machine_no]) machines[e.machine_no] = [];
-      machines[e.machine_no].push(e);
-      dailyTotal += Number(e.amount);
-    });
+      entries.forEach(e => {
+        if (!machines[e.machine_no]) machines[e.machine_no] = [];
+        machines[e.machine_no].push(e);
+        dailyTotal += Number(e.amount);
+      });
 
-    dailyTotalBox.textContent = `₹${dailyTotal}`;
+      dailyTotalBox.textContent = `₹${dailyTotal}`;
 
-    let maxMSP = 0;
-    Object.values(machines).forEach(list => {
-      const mspCount = list.filter(x => x.type === "MSP").length;
-      if (mspCount > maxMSP) maxMSP = mspCount;
-    });
+      let maxMSP = 0;
+      Object.values(machines).forEach(list => {
+        const mspCount = list.filter(x => x.type === "MSP").length;
+        if (mspCount > maxMSP) maxMSP = mspCount;
+      });
 
-    let headerHTML = `<tr><th>Machine No</th>`;
-    for (let i = 1; i <= maxMSP; i++) headerHTML += `<th>MSP${i}</th>`;
-    headerHTML += `<th>EOD</th><th>Total</th></tr>`;
-    tableHead.innerHTML = headerHTML;
+      let headerHTML = `<tr><th>Machine No</th>`;
+      for (let i = 1; i <= maxMSP; i++) headerHTML += `<th>MSP${i}</th>`;
+      headerHTML += `<th>EOD</th><th>Total</th></tr>`;
+      tableHead.innerHTML = headerHTML;
 
-    tableBody.innerHTML = "";
+      tableBody.innerHTML = "";
 
-    Object.keys(machines).forEach(machineNo => {
-      const list = machines[machineNo];
+      Object.keys(machines).forEach(machineNo => {
+        const list = machines[machineNo];
 
-      const msps = list.filter(x => x.type === "MSP");
-      const eod = list.find(x => x.type === "EOD");
-      const total = list.reduce((sum, x) => sum + Number(x.amount), 0);
+        const msps = list.filter(x => x.type === "MSP");
+        const eod = list.find(x => x.type === "EOD");
+        const total = list.reduce((sum, x) => sum + Number(x.amount), 0);
 
-      let rowHTML = `<tr class="msp-row" data-machine="${machineNo}">
-        <td>${machineNo}</td>`;
+        let rowHTML = `<tr class="msp-row" data-machine="${machineNo}">
+          <td>${machineNo}</td>`;
 
-      for (let i = 0; i < maxMSP; i++) {
-        rowHTML += `<td>${msps[i] ? msps[i].amount : ""}</td>`;
+        for (let i = 0; i < maxMSP; i++) {
+          rowHTML += `<td>${msps[i] ? msps[i].amount : ""}</td>`;
+        }
+
+        rowHTML += `<td>${eod ? eod.amount : ""}</td>`;
+        rowHTML += `<td>${total}</td></tr>`;
+
+        tableBody.innerHTML += rowHTML;
+      });
+
+      document.querySelectorAll(".msp-row").forEach(row => {
+        row.addEventListener("click", () => {
+          selectedMachine = row.dataset.machine;
+          loadMachineEntries(selectedMachine);
+        });
+      });
+    }
+
+    async function loadMachineEntries(machineNo) {
+      formMachineNo.value = machineNo;
+
+      const { data } = await supabase
+        .from("msp_entries")
+        .select("*")
+        .eq("machine_no", machineNo)
+        .eq("entry_date", dateInput.value)
+        .order("created_at");
+
+      if (!data || data.length === 0) {
+        formMachineTotal.textContent = `$0.00`;
+        return;
       }
 
-      rowHTML += `<td>${eod ? eod.amount : ""}</td>`;
-      rowHTML += `<td>${total}</td></tr>`;
+      const last = data[data.length - 1];
+      editingEntryId = last.id;
 
-      tableBody.innerHTML += rowHTML;
-    });
+      formType.value = last.type;
+      formAmount.value = last.amount;
+      formNotes.value = last.remarks || "";
 
-    document.querySelectorAll(".msp-row").forEach(row => {
-      row.addEventListener("click", () => {
-        selectedMachine = row.dataset.machine;
-        loadMachineEntries(selectedMachine);
-      });
-    });
-  }
+      const total = data.reduce((sum, x) => sum + Number(x.amount), 0);
+      formMachineTotal.textContent = `$${total.toFixed(2)}`;
+    }
 
-  async function loadMachineEntries(machineNo) {
-    formMachineNo.value = machineNo;
+    async function saveEntry() {
+      if (!selectedMachine) {
+        showToast("Select a machine first", "error");
+        return;
+      }
 
-    const { data } = await supabase
-      .from("msp_entries")
-      .select("*")
-      .eq("machine_no", machineNo)
-      .eq("entry_date", dateInput.value)
-      .order("created_at");
+      const payload = {
+        type: formType.value,
+        amount: Number(formAmount.value),
+        remarks: formNotes.value
+      };
 
-    if (!data || data.length === 0) {
+      await supabase.from("msp_entries").update(payload).eq("id", editingEntryId);
+
+      showToast("Saved", "success");
+      loadTable();
+      loadMachineEntries(selectedMachine);
+    }
+
+    async function deleteEntry() {
+      if (!editingEntryId) return;
+      if (!confirm("Delete this entry?")) return;
+
+      await supabase.from("msp_entries").delete().eq("id", editingEntryId);
+
+      showToast("Deleted", "warning");
+      loadTable();
       formMachineTotal.textContent = `$0.00`;
-      return;
     }
 
-    const last = data[data.length - 1];
-    editingEntryId = last.id;
-
-    formType.value = last.type;
-    formAmount.value = last.amount;
-    formNotes.value = last.remarks || "";
-
-    const total = data.reduce((sum, x) => sum + Number(x.amount), 0);
-    formMachineTotal.textContent = `$${total.toFixed(2)}`;
-  }
-
-  async function saveEntry() {
-    if (!selectedMachine) {
-      alert("Select a machine from the table");
-      return;
-    }
-
-    const payload = {
-      type: formType.value,
-      amount: Number(formAmount.value),
-      remarks: formNotes.value
-    };
-
-    await supabase.from("msp_entries").update(payload).eq("id", editingEntryId);
-
-    loadTable();
-    loadMachineEntries(selectedMachine);
-  }
-
-  async function deleteEntry() {
-    if (!editingEntryId) return;
-    if (!confirm("Delete this entry?")) return;
-
-    await supabase.from("msp_entries").delete().eq("id", editingEntryId);
-
-    loadTable();
-    formMachineTotal.textContent = `$0.00`;
+  } catch (err) {
+    console.error("initMSPModule error:", err);
   }
 }
+
+// -------------------------------------------------------------
+// MAKE FUNCTION AVAILABLE GLOBALLY (same as vendors.js)
+// -------------------------------------------------------------
+window.initMSPModule = initMSPModule;
