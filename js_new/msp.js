@@ -156,7 +156,14 @@ async function initMSPModule() {
         }, 50);
 
       } else {
-        locationSelect.innerHTML = `<option value="${userLocationId}">My Location</option>`;
+        locationSelect.innerHTML = `<option value="${userLocationId}">${actualLocationName}</option>`;
+          const { data: loc } = await supabase
+          .from("locations")
+          .select("name")
+          .eq("id", userLocationId)
+          .single();
+
+          locationSelect.innerHTML = `<option value="${userLocationId}">${loc.name}</option>`;
 
         setTimeout(() => {
           locationSelect.value = userLocationId;
