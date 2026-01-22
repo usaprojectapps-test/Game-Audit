@@ -119,7 +119,7 @@ function initMSPModule() {
       const locationId = locationSelect.value;
 
       const { data } = await supabase
-        .from("msp_entries")
+        .from("msp")
         .select("*")
         .eq("entry_date", date)
         .eq("location_id", locationId)
@@ -191,7 +191,7 @@ function initMSPModule() {
       formMachineNo.value = machineNo;
 
       const { data } = await supabase
-        .from("msp_entries")
+        .from("msp")
         .select("*")
         .eq("machine_no", machineNo)
         .eq("entry_date", dateInput.value)
@@ -225,7 +225,7 @@ function initMSPModule() {
         remarks: formNotes.value
       };
 
-      await supabase.from("msp_entries").update(payload).eq("id", editingEntryId);
+      await supabase.from("msp").update(payload).eq("id", editingEntryId);
 
       showToast("Saved", "success");
       loadTable();
@@ -236,7 +236,7 @@ function initMSPModule() {
       if (!editingEntryId) return;
       if (!confirm("Delete this entry?")) return;
 
-      await supabase.from("msp_entries").delete().eq("id", editingEntryId);
+      await supabase.from("msp").delete().eq("id", editingEntryId);
 
       showToast("Deleted", "warning");
       loadTable();
