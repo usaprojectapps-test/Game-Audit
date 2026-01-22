@@ -141,37 +141,35 @@ async function initMSPModule() {
     // FUNCTIONS
     // -------------------------------------------------------------
     async function loadLocations() {
-      if (userRole === "SuperAdmin") {
-        const { data } = await supabase.from("locations").select("*").order("name");
+  if (userRole === "SuperAdmin") {
+    const { data } = await supabase.from("locations").select("*").order("name");
 
-        locationSelect.innerHTML = data
-          .map(l => `<option value="${l.id}">${l.name}</option>`)
-          .join("");
+    locationSelect.innerHTML = data
+      .map(l => `<option value="${l.id}">${l.name}</option>`)
+      .join("");
 
-        setTimeout(() => {
-          locationSelect.value = data[0]?.id || "";
-        }, 50);
+    // Set value immediately
+    locationSelect.value = data[0]?.id || "";
+    return;
+  }
 
-      } else {
-        // ⭐ LocationAdmin — show actual location name
-        const { data: loc, error: locErr } = await supabase
-          .from("locations")
-          .select("name")
-          .eq("id", userLocationId)
-          .single();
+  // ⭐ LocationAdmin — show actual location name
+  const { data: loc, error: locErr } = await supabase
+    .from("locations")
+    .select("name")
+    .eq("id", userLocationId)
+    .single();
 
-        if (locErr) {
-          console.error("Failed to load location name:", locErr);
-          locationSelect.innerHTML = `<option value="${userLocationId}">My Location</option>`;
-        } else {
-          locationSelect.innerHTML = `<option value="${userLocationId}">${loc.name}</option>`;
-        }
+  if (locErr) {
+    console.error("Failed to load location name:", locErr);
+    locationSelect.innerHTML = `<option value="${userLocationId}">My Location</option>`;
+  } else {
+    locationSelect.innerHTML = `<option value="${userLocationId}">${loc.name}</option>`;
+  }
 
-        setTimeout(() => {
-          locationSelect.value = userLocationId;
-        }, 50);
-      }
-    }
+  // Set value immediately (NO setTimeout)
+  locationSelect.value = userLocationId;
+}
 
     async function loadTable() {
       const date = dateInput.value;
