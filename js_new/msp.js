@@ -12,35 +12,24 @@ function dbg(...args) {
   if (IS_DEV) console.log(...args);
 }
 
-dbg("msp.js executed — top of file", { ready: document.readyState });
+dbg("msp.js loaded — waiting for MSPModuleLoaded event");
 
 // -------------------------------------------------------------
-// AUTO INITIALIZER
+// INITIALIZER — ONLY RUN AFTER DASHBOARD INSERTS MSP HTML
 // -------------------------------------------------------------
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
-    setTimeout(initMSPModule, 300);
-  });
-} else {
-  setTimeout(initMSPModule, 300);
-}
+window.addEventListener("MSPModuleLoaded", () => {
+  console.log("🔥 MSPModuleLoaded event received — initializing MSP");
+  initMSPModule();
+});
 
 // -------------------------------------------------------------
 // MAIN MODULE FUNCTION
 // -------------------------------------------------------------
-console.log("🔥 initMSPModule CALLED");
-
 async function initMSPModule() {
   dbg("MSP module initializing...");
 
+  // Wait until FULL MSP HTML is in DOM
   if (!document.getElementById("mspSaveBtn")) {
-  dbg("MSP HTML not ready — retrying in 200ms");
-  setTimeout(initMSPModule, 200);
-  return;
-}
-
-  // ⭐ FIX 1: Wait until MSP HTML is actually in the DOM
-  if (!document.getElementById("mspLocation")) {
     dbg("MSP HTML not ready — retrying in 200ms");
     setTimeout(initMSPModule, 200);
     return;
@@ -143,7 +132,6 @@ async function initMSPModule() {
 
         locationSelect.innerHTML = data.map(l => `<option value="${l.id}">${l.name}</option>`).join("");
 
-        // ⭐ FIX 2: Force selection AFTER HTML is applied
         setTimeout(() => {
           locationSelect.value = data[0]?.id || "";
           dbg("SuperAdmin locationSelect.value:", locationSelect.value);
@@ -152,7 +140,6 @@ async function initMSPModule() {
       } else {
         locationSelect.innerHTML = `<option value="${userLocationId}">My Location</option>`;
 
-        // ⭐ FIX 2: Force selection AFTER HTML is applied
         setTimeout(() => {
           locationSelect.value = userLocationId;
           dbg("User locationSelect.value:", locationSelect.value);
@@ -305,4 +292,3 @@ async function initMSPModule() {
 // MAKE FUNCTION AVAILABLE GLOBALLY
 // -------------------------------------------------------------
 window.initMSPModule = initMSPModule;
-window.addEventListener("MSPModuleLoaded", initMSPModule);
