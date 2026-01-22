@@ -86,12 +86,16 @@ function initMSPModule() {
     deleteBtn.addEventListener("click", deleteEntry);
 
     scanBtn.addEventListener("click", () => {
-      openQRScanner((result) => {
-        formMachineNo.value = result;
-        selectedMachine = result;
-        loadMachineEntries(result);
-      });
-    });
+      qrScanner.open({
+      targetInputId: "formMachineNo",
+      onScan: (result) => {
+      formMachineNo.value = result;
+      selectedMachine = result;
+      loadMachineEntries(result);
+    }
+  });
+});
+
 
     // -------------------------------------------------------------
     // INITIAL LOAD
