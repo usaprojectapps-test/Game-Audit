@@ -297,3 +297,4 @@ async function initMSPModule() {
 // MAKE FUNCTION AVAILABLE GLOBALLY
 // -------------------------------------------------------------
 window.initMSPModule = initMSPModule;
+window.addEventListener("MSPModuleLoaded", initMSPModule);
