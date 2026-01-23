@@ -144,45 +144,43 @@ async function initMSPModule() {
     // FUNCTIONS
     // -------------------------------------------------------------
     async function loadLocations() {
-      if (userRole === "SuperAdmin") {
-        const { data, error } = await supabase
-          .from("locations")
-          .select("*")
-          .order("name");
+  if (userRole === "SuperAdmin") {
+    const { data, error } = await supabase
+      .from("locations")
+      .select("*")
+      .order("name");
 
-        if (error) {
-          console.error("Failed to load locations:", error);
-          return;
-        }
-
-        locationSelect.innerHTML = (data || [])
-          .map((l) => `<option value="${l.id}">${l.name}</option>`)
-          .join("");
-
-        // Set first location as default
-        locationSelect.value = data?.[0]?.id || "";
-        dbg("SuperAdmin locationSelect.value:", locationSelect.value);
-        return;
-      }
-
-      // LocationAdmin (and others) — show actual location name
-      const { data: loc, error: locErr } = await supabase
-        .from("locations")
-        .select("name")
-        .eq("id", userLocationId)
-        .single();
-
-      if (locErr) {
-        console.error("Failed to load location name:", locErr);
-        locationSelect.innerHTML = `<option value="${userLocationId}">My Location</option>`;
-      } else {
-        locationSelect.innerHTML = `<option value="${userLocationId}">${loc.name}</option>`;
-      }
-
-      // Set value immediately (no setTimeout)
-      locationSelect.value = userLocationId;
-      dbg("User locationSelect.value:", locationSelect.value);
+    if (error) {
+      console.error("Failed to load locations:", error);
+      return;
     }
+
+    locationSelect.innerHTML = data
+      .map((l) => `<option value="${l.id}">${l.name}</option>`)
+      .join("");
+
+    locationSelect.value = data?.[0]?.id || "";
+    return;
+  }
+
+  // LocationAdmin — show actual location name
+  const { data: loc, error: locErr } = await supabase
+    .from("locations")
+    .select("name")
+    .eq("id", userLocationId)
+    .single();
+
+  if (locErr) {
+    console.error("Failed to load location name:", locErr);
+    locationSelect.innerHTML = `<option value="${userLocationId}">My Location</option>`;
+  } else {
+    locationSelect.innerHTML = `<option value="${userLocationId}">${loc.name}</option>`;
+  }
+
+  // Set value immediately
+  locationSelect.value = userLocationId;
+}
+
 
     async function loadTable() {
       const date = dateInput.value;
