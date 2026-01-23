@@ -141,7 +141,11 @@ async function initMSPModule() {
     // INITIAL LOAD
     // -------------------------------------------------------------
     await loadLocations();
-    await loadTable();
+
+      setTimeout(() => {
+        loadTable();
+      }, 200);
+
 
     // -------------------------------------------------------------
     // FUNCTIONS
