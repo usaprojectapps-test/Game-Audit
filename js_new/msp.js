@@ -13,7 +13,10 @@ if (window.__MSP_LOADED__) {
 import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 
-const IS_DEV = window.location.hostname === "localhost" || window.location.hostname.endsWith(".local");
+const IS_DEV =
+  window.location.hostname === "localhost" ||
+  window.location.hostname.endsWith(".local");
+
 function dbg(...args) {
   if (IS_DEV) console.log(...args);
 }
@@ -141,35 +144,45 @@ async function initMSPModule() {
     // FUNCTIONS
     // -------------------------------------------------------------
     async function loadLocations() {
-  if (userRole === "SuperAdmin") {
-    const { data } = await supabase.from("locations").select("*").order("name");
+      if (userRole === "SuperAdmin") {
+        const { data, error } = await supabase
+          .from("locations")
+          .select("*")
+          .order("name");
 
-    locationSelect.innerHTML = data
-      .map(l => `<option value="${l.id}">${l.name}</option>`)
-      .join("");
+        if (error) {
+          console.error("Failed to load locations:", error);
+          return;
+        }
 
-    // Set value immediately
-    locationSelect.value = data[0]?.id || "";
-    return;
-  }
+        locationSelect.innerHTML = (data || [])
+          .map((l) => `<option value="${l.id}">${l.name}</option>`)
+          .join("");
 
-  // ⭐ LocationAdmin — show actual location name
-  const { data: loc, error: locErr } = await supabase
-    .from("locations")
-    .select("name")
-    .eq("id", userLocationId)
-    .single();
+        // Set first location as default
+        locationSelect.value = data?.[0]?.id || "";
+        dbg("SuperAdmin locationSelect.value:", locationSelect.value);
+        return;
+      }
 
-  if (locErr) {
-    console.error("Failed to load location name:", locErr);
-    locationSelect.innerHTML = `<option value="${userLocationId}">My Location</option>`;
-  } else {
-    locationSelect.innerHTML = `<option value="${userLocationId}">${loc.name}</option>`;
-  }
+      // LocationAdmin (and others) — show actual location name
+      const { data: loc, error: locErr } = await supabase
+        .from("locations")
+        .select("name")
+        .eq("id", userLocationId)
+        .single();
 
-  // Set value immediately (NO setTimeout)
-  locationSelect.value = userLocationId;
-}
+      if (locErr) {
+        console.error("Failed to load location name:", locErr);
+        locationSelect.innerHTML = `<option value="${userLocationId}">My Location</option>`;
+      } else {
+        locationSelect.innerHTML = `<option value="${userLocationId}">${loc.name}</option>`;
+      }
+
+      // Set value immediately (no setTimeout)
+      locationSelect.value = userLocationId;
+      dbg("User locationSelect.value:", locationSelect.value);
+    }
 
     async function loadTable() {
       const date = dateInput.value;
@@ -201,7 +214,7 @@ async function initMSPModule() {
       const machines = {};
       let dailyTotal = 0;
 
-      entries.forEach(e => {
+      entries.forEach((e) => {
         if (!machines[e.machine_no]) machines[e.machine_no] = [];
         machines[e.machine_no].push(e);
         dailyTotal += Number(e.amount);
@@ -210,8 +223,8 @@ async function initMSPModule() {
       dailyTotalBox.textContent = `₹${dailyTotal}`;
 
       let maxMSP = 0;
-      Object.values(machines).forEach(list => {
-        const mspCount = list.filter(x => x.type === "MSP").length;
+      Object.values(machines).forEach((list) => {
+        const mspCount = list.filter((x) => x.type === "MSP").length;
         if (mspCount > maxMSP) maxMSP = mspCount;
       });
 
@@ -222,11 +235,11 @@ async function initMSPModule() {
 
       tableBody.innerHTML = "";
 
-      Object.keys(machines).forEach(machineNo => {
+      Object.keys(machines).forEach((machineNo) => {
         const list = machines[machineNo];
 
-        const msps = list.filter(x => x.type === "MSP");
-        const eod = list.find(x => x.type === "EOD");
+        const msps = list.filter((x) => x.type === "MSP");
+        const eod = list.find((x) => x.type === "EOD");
         const total = list.reduce((sum, x) => sum + Number(x.amount), 0);
 
         let rowHTML = `<tr class="msp-row" data-machine="${machineNo}">
@@ -243,7 +256,7 @@ async function initMSPModule() {
       });
 
       const rows = document.querySelectorAll(".msp-row");
-      rows.forEach(row => {
+      rows.forEach((row) => {
         row.addEventListener("click", () => {
           selectedMachine = row.dataset.machine;
           loadMachineEntries(selectedMachine);
@@ -254,14 +267,23 @@ async function initMSPModule() {
     async function loadMachineEntries(machineNo) {
       formMachineNo.value = machineNo;
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("msp")
         .select("*")
         .eq("machine_no", machineNo)
         .eq("entry_date", dateInput.value)
         .order("created_at");
 
+      if (error) {
+        console.error("MSP machine load error:", error);
+        return;
+      }
+
       if (!data || data.length === 0) {
+        editingEntryId = null;
+        formType.value = "MSP";
+        formAmount.value = "";
+        formNotes.value = "";
         formMachineTotal.textContent = `$0.00`;
         return;
       }
@@ -283,33 +305,59 @@ async function initMSPModule() {
         return;
       }
 
+      if (!editingEntryId) {
+        showToast("No existing entry selected to update", "error");
+        return;
+      }
+
       const payload = {
         type: formType.value,
         amount: Number(formAmount.value),
         remarks: formNotes.value
       };
 
-      await supabase.from("msp").update(payload).eq("id", editingEntryId);
+      const { error } = await supabase
+        .from("msp")
+        .update(payload)
+        .eq("id", editingEntryId);
+
+      if (error) {
+        console.error("MSP save error:", error);
+        showToast("Save failed", "error");
+        return;
+      }
 
       showToast("Saved", "success");
-      loadTable();
-      loadMachineEntries(selectedMachine);
+      await loadTable();
+      await loadMachineEntries(selectedMachine);
     }
 
     async function deleteEntry() {
       if (!editingEntryId) return;
       if (!confirm("Delete this entry?")) return;
 
-      await supabase.from("msp").delete().eq("id", editingEntryId);
+      const { error } = await supabase
+        .from("msp")
+        .delete()
+        .eq("id", editingEntryId);
+
+      if (error) {
+        console.error("MSP delete error:", error);
+        showToast("Delete failed", "error");
+        return;
+      }
 
       showToast("Deleted", "warning");
-      loadTable();
+      await loadTable();
       formMachineTotal.textContent = `$0.00`;
+      editingEntryId = null;
     }
-
   } catch (err) {
     console.error("initMSPModule error:", err);
   }
 }
 
+// -------------------------------------------------------------
+// MAKE FUNCTION AVAILABLE GLOBALLY
+// -------------------------------------------------------------
 window.initMSPModule = initMSPModule;
