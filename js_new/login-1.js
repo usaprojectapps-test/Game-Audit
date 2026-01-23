@@ -18,7 +18,6 @@ loginForm.addEventListener("submit", async (e) => {
     return;
   }
 
-  // 1. Authenticate user
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password
@@ -31,26 +30,14 @@ loginForm.addEventListener("submit", async (e) => {
   }
 
   const user = data.user;
+  const { name, role, location_id } = user.user_metadata;
 
-  // 2. Fetch role + location from user_access (NEW — replaces metadata)
-  const { data: access, error: accessError } = await supabase
-    .from("user_access")
-    .select("role, location_id")
-    .eq("email", user.email)
-    .single();
-
-  if (accessError || !access) {
-    errorMsg.textContent = "Access configuration missing. Contact admin.";
-    loginBtn.disabled = false;
-    return;
-  }
-
-  // 3. Store session data
+  // Store session data
   sessionStorage.setItem("userId", user.id);
-  sessionStorage.setItem("userName", user.email); // or fetch from users table if needed
-  sessionStorage.setItem("role", access.role);
-  sessionStorage.setItem("locationId", access.location_id);
+  sessionStorage.setItem("userName", name);
+  sessionStorage.setItem("role", role);
+  sessionStorage.setItem("locationId", location_id);
 
-  // 4. Redirect to dashboard
+  // Redirect to dashboard
   window.location.href = "dashboard.html";
 });
