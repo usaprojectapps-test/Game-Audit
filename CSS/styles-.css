@@ -1,0 +1,527 @@
+/* ============================================================
+   GLOBAL BASE
+============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&family=Sora:wght@500;600&family=Inter:wght@400;500&family=Poppins:wght@500&display=swap');
+
+:root{
+  --bg-1:#0f172a; --bg-2:#1e1b4b; --bg-3:#312e81;
+  --glass-bg: rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.15);
+  --muted:#cbd5e1; --text:#e2e8f0;
+  --accent-1:#4f8cff; --accent-2:#6a5cff;
+}
+
+* { box-sizing: border-box; }
+html,body { height:100%; }
+body {
+  margin:0; padding:0; min-height:100vh;
+  font-family:'Inter',sans-serif; color:var(--text);
+  background: linear-gradient(135deg,var(--bg-1),var(--bg-2),var(--bg-3));
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+}
+
+/* ============================================================
+   MODULE WRAPPER (GLOBAL)
+   Left flexible / Right compact (single global rule)
+============================================================ */
+.module-wrapper {
+  display:flex;
+  gap:20px;
+  width:100%;
+  max-width:1400px;
+  margin:30px auto;
+  padding:0 24px;
+  align-items:stretch; /* ensure both panels stretch vertically */
+}
+
+/* LEFT PANEL — flexible, takes remaining space */
+.module-left {
+  flex:1 1 auto;
+  min-width:0;
+  background:var(--glass-bg);
+  border-radius:16px;
+  border:1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  padding:20px;
+}
+
+/* RIGHT PANEL — compact and consistent across all modules */
+.module-right {
+  flex:0 0 380px;      /* fixed compact width */
+  width:380px;
+  max-width:380px;
+  min-width:320px;
+  background:var(--glass-bg);
+  border-radius:16px;
+  border:1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch; /* critical: children fill width */
+  gap:12px;
+}
+
+/* Responsive: stack on small screens */
+@media (max-width:900px) {
+  .module-wrapper { padding:0 16px; gap:16px; flex-direction:column; }
+  .module-right { width:100%; max-width:100%; min-width:0; }
+}
+
+/* ============================================================
+   CARD HEADER
+============================================================ */
+.card-header {
+  font-family:'Sora',sans-serif;
+  font-size:20px;
+  font-weight:600;
+  color:#fff;
+  margin:0 0 12px 0;
+  padding-bottom:8px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+/* ============================================================
+   FILTERS / SEARCH ROW
+============================================================ */
+.filters-row,
+.search-row {
+  display:flex; gap:12px; align-items:center; margin-bottom:16px; flex-wrap:wrap;
+}
+
+.filters-row input[type="text"],
+.search-row input[type="text"] {
+  flex:1 1 320px; min-width:160px;
+  padding:10px 12px; border-radius:10px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.06); color:var(--text);
+}
+
+.filters-row select,
+.search-row select {
+  padding:10px 12px; border-radius:10px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.06); color:var(--text);
+  min-width:140px;
+}
+
+/* ============================================================
+   TABLE (GLASS) — fixed layout, no horizontal scroll
+============================================================ */
+.table-wrapper {
+  width:100%; max-height:420px; overflow-y:auto; overflow-x:hidden;
+  border-radius:12px; background:rgba(255,255,255,0.03);
+  box-shadow:0 0 0 1px rgba(255,255,255,0.04) inset;
+}
+
+.table-wrapper table {
+  width:100%; border-collapse:collapse; table-layout:fixed; font-size:14px; color:var(--text);
+}
+
+.table-wrapper th,
+.table-wrapper td {
+  padding:10px 14px; text-align:left; vertical-align:middle; word-break:break-word;
+}
+
+.table-wrapper th {
+  position:sticky; top:0; background:rgba(255,255,255,0.04);
+  color:var(--muted); font-weight:600; text-transform:uppercase; font-size:12px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+
+.table-wrapper tr:hover td { background: rgba(255,255,255,0.03); }
+
+/* sensible default column widths */
+.table-wrapper th:nth-child(1){ width:110px; }
+.table-wrapper th:nth-child(2){ width:180px; }
+.table-wrapper th:nth-child(3){ width:140px; }
+.table-wrapper th:nth-child(4){ width:90px; }
+.table-wrapper th:nth-child(5){ width:auto; }
+
+/* pagination/footer */
+.table-footer { display:flex; justify-content:space-between; align-items:center; margin-top:12px; color:var(--muted); font-size:13px; }
+
+/* ============================================================
+   FORMS — universal styles
+   Right-side form uses 2-column grid by default
+   CRITICAL: ensure children stretch to full panel width
+============================================================ */
+.form-grid,
+.form-grid-2 {
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px 16px;
+  width:100%;
+  align-items:start;
+}
+
+/* Force form grid children to stretch */
+.module-right .form-grid,
+.module-right .form-grid-2 {
+  width:100%;
+}
+
+/* Ensure form groups fill their grid cell */
+.form-group { display:flex; flex-direction:column; gap:6px; width:100%; }
+
+/* labels */
+.form-group label { font-size:13px; font-weight:600; color:var(--muted); }
+
+/* section label */
+.form-section-label { font-size:13px; font-weight:700; color:var(--muted); margin:8px 0 6px; }
+
+/* inputs */
+input[type="text"], input[type="tel"], input[type="date"], select, textarea {
+  width:100%; padding:10px 12px; border-radius:10px;
+  border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04);
+  color:var(--text); font-size:14px; outline:none;
+}
+
+/* textarea sizing */
+textarea { resize:vertical; min-height:100px; }
+
+/* focus */
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 0 0 3px rgba(79,140,255,0.06);
+}
+
+/* action buttons row inside right panel */
+.form-actions, .button-row { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+.btn { padding:10px 16px; border-radius:10px; cursor:pointer; font-family:'Poppins',sans-serif; font-size:14px; border:none; transition:all .14s ease; color:var(--text); background:rgba(255,255,255,0.06); }
+.btn-primary { background: linear-gradient(135deg,var(--accent-1),var(--accent-2)); color:#fff; }
+.btn-secondary { background: rgba(255,255,255,0.08); color:var(--text); }
+.btn-danger { background:#ff4f4f; color:#fff; }
+.btn-icon { padding:8px 10px; border-radius:8px; }
+
+/* ============================================================
+   QR SECTION (machines only) — full-width balanced layout
+============================================================ */
+.qr-section { display:grid; grid-template-columns: 1fr 160px 120px; gap:16px; width:100%; align-items:start; margin-top:8px; }
+@media (max-width:700px) { .qr-section { grid-template-columns:1fr 140px; } .qr-section>.qr-buttons{ grid-column:1/-1; display:flex; gap:8px; justify-content:flex-start; } }
+.qr-notes label{ font-weight:600; color:var(--muted); margin-bottom:6px; }
+.qr-preview{ width:100%; max-width:160px; margin:0 auto; display:flex; justify-content:center; align-items:center; }
+.qr-buttons{ display:flex; flex-direction:column; gap:8px; }
+
+/* ============================================================
+   UTILITIES & POLISH
+============================================================ */
+.center{ display:flex; align-items:center; justify-content:center; }
+.muted{ color:var(--muted); font-size:13px; }
+.module-left-inner{ max-width:100%; margin:0; padding:0; }
+.table-wrapper::-webkit-scrollbar{ height:8px; width:8px; }
+.table-wrapper::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.06); border-radius:8px; }
+
+
+/* ===== FORCE RIGHT PANEL CONTENT TO FILL WIDTH ===== */
+.module-right {
+  box-sizing: border-box;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;    /* children fill width */
+  justify-content: flex-start !important;
+  width: 380px !important;
+  max-width: 380px !important;
+  padding: 20px !important;
+}
+
+/* Ensure any inner wrapper does not center or limit width */
+.module-right > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Remove any accidental centering or fixed widths inside */
+.module-right .container,
+.module-right .card,
+.module-right .card-body,
+.module-right .inner,
+.module-right .panel {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Make form grid and its children stretch fully */
+.module-right .form-grid,
+.module-right .form-grid-2 {
+  width: 100% !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 12px 16px !important;
+}
+
+.module-right .form-group,
+.module-right .form-group * {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Inputs, selects, textarea must fill the cell */
+.module-right input,
+.module-right select,
+.module-right textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Make textareas taller so panel looks filled */
+.module-right textarea { min-height: 100px !important; }
+
+/* QR area: stop centering and let it occupy its column */
+.module-right .qr-section,
+.module-right .qr-notes,
+.module-right .qr-preview,
+.module-right .qr-buttons {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Prevent elements from being centered with margin:auto */
+.module-right [style*="margin: auto"],
+.module-right [style*="margin:auto"] {
+  margin: 0 !important;
+}
+
+/* Buttons alignment */
+.module-right .form-actions,
+.module-right .button-row { justify-content: flex-end !important; width:100% !important; }
+
+/* Defensive: remove any inline max-widths on images or canvases */
+.module-right img,
+.module-right canvas,
+.module-right svg {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
+}
+
+/* Debug helper (temporary): outlines to see what is constrained
+   Remove or comment out in production */
+.module-right * {
+  /* outline: 0.5px dashed rgba(255,255,255,0.04); */
+}
+/* ===========================
+   FINAL OVERRIDE — FORCE COMPACT RIGHT PANEL
+   Paste this at the very end of your stylesheet
+   =========================== */
+
+/* Make wrapper left-aligned and prevent centering */
+.module-wrapper {
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+  gap: 20px !important;
+  width: 100% !important;
+  max-width: 1400px !important;
+  margin: 30px auto !important;
+  padding: 0 24px !important;
+  box-sizing: border-box !important;
+}
+
+/* Right panel: compact, content-driven, children must fill width */
+.module-right {
+  flex: 0 0 auto !important;        /* do not grow */
+  width: auto !important;           /* size to content */
+  max-width: 420px !important;      /* global cap */
+  min-width: 320px !important;      /* keep usable */
+  box-sizing: border-box !important;
+  padding: 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;  /* children fill width */
+  justify-content: flex-start !important;
+  margin: 0 !important;
+}
+
+/* Force every direct child to fill the panel width */
+.module-right > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Defensive: common inner wrappers that may center content */
+.module-right .container,
+.module-right .inner,
+.module-right .card,
+.module-right .panel,
+.module-right .card-body,
+.module-right .content {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Ensure form grid and groups stretch fully */
+.module-right .form-grid,
+.module-right .form-grid-2 {
+  width: 100% !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 12px 16px !important;
+  align-items: start !important;
+}
+
+.module-right .form-group,
+.module-right .form-group * {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Inputs and textarea must fill the available width */
+.module-right input,
+.module-right select,
+.module-right textarea,
+.module-right button {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Make textareas taller so the panel feels filled */
+.module-right textarea { min-height: 120px !important; }
+
+/* Prevent centering via margin:auto or inline styles */
+.module-right [style*="margin: auto"],
+.module-right [style*="margin:auto"] {
+  margin: 0 !important;
+}
+
+/* Images, canvas, svg should not overflow or be centered */
+.module-right img,
+.module-right canvas,
+.module-right svg {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Buttons row alignment */
+.module-right .form-actions,
+.module-right .button-row {
+  width: 100% !important;
+  justify-content: flex-end !important;
+}
+
+/* Temporary visual debug outlines (comment out in production) */
+/* .module-right * { outline: 0.5px dashed rgba(255,255,255,0.04); } */
+/* ===========================
+   FINAL: Right panel fills content and form fields stretch
+   Paste this at the very end of your stylesheet
+   =========================== */
+
+/* Ensure wrapper alignment and stretching */
+.module-wrapper {
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+  gap: 20px !important;
+  width: 100% !important;
+  max-width: 1400px !important;
+  margin: 30px auto !important;
+  padding: 0 24px !important;
+  box-sizing: border-box !important;
+}
+
+/* Compact right panel globally */
+.module-right {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: 420px !important;   /* cap width so it doesn't look huge */
+  min-width: 320px !important;   /* keep usable on small screens */
+  box-sizing: border-box !important;
+  padding: 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important; /* children fill width */
+  justify-content: flex-start !important;
+  margin: 0 !important;
+}
+
+/* Force every direct child to fill the panel width */
+.module-right > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Make the right-panel form a single full-width column
+   so inputs fill the panel and remove the "half-width" look */
+.module-right .form-grid,
+.module-right .form-grid-2 {
+  display: grid !important;
+  grid-template-columns: 1fr !important;   /* single column for full width */
+  gap: 12px 16px !important;
+  width: 100% !important;
+  align-items: start !important;
+}
+
+/* If you still want two columns on very wide panels, use this instead:
+   grid-template-columns: 1fr 1fr; and set specific fields to span both columns.
+   But single column removes the empty space immediately. */
+
+/* Ensure form groups and inputs stretch */
+.module-right .form-group,
+.module-right .form-group * {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Inputs, selects, textarea must fill the available width */
+.module-right input,
+.module-right select,
+.module-right textarea,
+.module-right button {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Make textareas taller so the panel feels filled */
+.module-right textarea { min-height: 120px !important; }
+
+/* Defensive: remove centering via margin:auto or inline styles */
+.module-right [style*="margin: auto"],
+.module-right [style*="margin:auto"] {
+  margin: 0 !important;
+}
+
+/* Images, canvas, svg should not overflow or be centered */
+.module-right img,
+.module-right canvas,
+.module-right svg {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Buttons row alignment */
+.module-right .form-actions,
+.module-right .button-row {
+  width: 100% !important;
+  justify-content: flex-end !important;
+}
+/* ===== DIAGNOSTIC OVERLAY — paste at end of CSS, reload page ===== */
+.module-right { outline: 2px solid rgba(0,255,200,0.06); background: rgba(0,0,0,0.02); }
+.module-right > * { outline: 1px dashed rgba(255,255,255,0.03); }
+.module-right .form-grid { background: rgba(255,0,0,0.03); outline: 1px solid rgba(255,0,0,0.06); }
+.module-right .form-group { background: rgba(0,128,255,0.02); outline: 1px dotted rgba(0,128,255,0.04); }
+.module-right input, .module-right select, .module-right textarea { background: rgba(255,255,255,0.02); outline: 1px solid rgba(255,255,255,0.02); }

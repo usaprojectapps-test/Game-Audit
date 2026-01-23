@@ -3,525 +3,762 @@
 ============================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&family=Sora:wght@500;600&family=Inter:wght@400;500&family=Poppins:wght@500&display=swap');
 
-:root{
-  --bg-1:#0f172a; --bg-2:#1e1b4b; --bg-3:#312e81;
-  --glass-bg: rgba(255,255,255,0.06);
-  --glass-border: rgba(255,255,255,0.15);
-  --muted:#cbd5e1; --text:#e2e8f0;
-  --accent-1:#4f8cff; --accent-2:#6a5cff;
-}
-
-* { box-sizing: border-box; }
-html,body { height:100%; }
 body {
-  margin:0; padding:0; min-height:100vh;
-  font-family:'Inter',sans-serif; color:var(--text);
-  background: linear-gradient(135deg,var(--bg-1),var(--bg-2),var(--bg-3));
-  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-  overflow-x:hidden;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #0f172a, #1e1b4b, #312e81);
+  font-family: 'Inter', sans-serif;
+  color: #e2e8f0;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* ============================================================
-   MODULE WRAPPER (GLOBAL)
-   Left flexible / Right compact (single global rule)
+   UNIVERSAL MODULE LAYOUT — 50/50 LEFT TABLE + RIGHT FORM
 ============================================================ */
-.module-wrapper {
-  display:flex;
-  gap:20px;
-  width:100%;
-  max-width:1400px;
-  margin:30px auto;
-  padding:0 24px;
-  align-items:stretch; /* ensure both panels stretch vertically */
+.module-wrapper,
+.vendor-wrapper {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 20px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 30px auto;
+  box-sizing: border-box;
 }
 
-/* LEFT PANEL — flexible, takes remaining space */
-.module-left {
-  flex:1 1 auto;
-  min-width:0;
-  background:var(--glass-bg);
-  border-radius:16px;
-  border:1px solid var(--glass-border);
+.module-left,
+.module-right,
+.vendor-left,
+.vendor-right {
+  flex: 0 0 50%;
+  max-width: 50%;
+  min-width: 0;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
-  padding:20px;
+  padding: 20px;
+  overflow: hidden;
 }
 
-/* RIGHT PANEL — compact and consistent across all modules */
-.module-right {
-  flex:0 0 380px;      /* fixed compact width */
-  width:380px;
-  max-width:380px;
-  min-width:320px;
-  background:var(--glass-bg);
-  border-radius:16px;
-  border:1px solid var(--glass-border);
-  backdrop-filter: blur(12px);
-  padding:20px;
-  display:flex;
-  flex-direction:column;
-  align-items:stretch; /* critical: children fill width */
-  gap:12px;
+/* MOBILE */
+@media (max-width: 768px) {
+  .module-wrapper,
+  .vendor-wrapper {
+    flex-direction: column;
+  }
+
+  .module-left,
+  .module-right,
+  .vendor-left,
+  .vendor-right {
+    max-width: 100%;
+    flex: 0 0 100%;
+  }
 }
 
-/* Responsive: stack on small screens */
-@media (max-width:900px) {
-  .module-wrapper { padding:0 16px; gap:16px; flex-direction:column; }
-  .module-right { width:100%; max-width:100%; min-width:0; }
+/* ============================================================
+   INPUTS + SELECTS + TEXTAREA (95% width)
+============================================================ */
+input,
+select,
+textarea {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.12);
+  color: white;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: 0.2s ease;
+  width: 95%;
+  max-width: 95%;
+  box-sizing: border-box;
 }
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #ffffff;
+  background: rgba(255,255,255,0.18);
+}
+
+select option {
+  background-color: #1e1e1e;
+  color: white;
+}
+
+/* ============================================================
+   FORM GRID — 2 Columns
+============================================================ */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 20px;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* ============================================================
+   FORM ACTIONS
+============================================================ */
+.form-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+/* ============================================================
+   TABLE WRAPPER — Sticky Header + Scrollable Body
+============================================================ */
+.table-wrapper {
+  width: 100%;
+  max-height: 420px;
+  overflow-y: auto;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #e2e8f0;
+}
+
+.table-wrapper th {
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.table-wrapper td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+}
+
+.table-wrapper tr:hover td {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================================
+   SEARCH BAR (Vendor + Users + Locations)
+============================================================ */
+.search-row,
+.vendor-search-bar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.search-row input,
+.vendor-search-bar input {
+  flex: 1 1 auto;
+  max-width: 300px;
+}
+
+.search-row select,
+.vendor-search-bar select {
+  flex: 0 0 auto;
+  width: 160px;
+}
+
+.vendor-search-bar input::placeholder {
+  color: #ccc;
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: nowrap;       /* ⭐ Prevent wrapping */
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  overflow-x: auto;        /* ⭐ Prevent clipping if screen is narrow */
+}
+.filters-row input {
+  flex: 1 1 auto;
+  max-width: 300px;
+}
+
+.filters-row select {
+  flex: 0 0 auto;
+  width: 160px;
+}
+
+.filters-row button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+
 
 /* ============================================================
    CARD HEADER
 ============================================================ */
 .card-header {
-  font-family:'Sora',sans-serif;
-  font-size:20px;
-  font-weight:600;
-  color:#fff;
-  margin:0 0 12px 0;
-  padding-bottom:8px;
-  border-bottom:1px solid rgba(255,255,255,0.08);
+  font-size: 22px;
+  font-weight: 600;
+  font-family: 'Sora', sans-serif;
+  color: #ffffff;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 8px;
 }
-
-/* ============================================================
-   FILTERS / SEARCH ROW
-============================================================ */
-.filters-row,
-.search-row {
-  display:flex; gap:12px; align-items:center; margin-bottom:16px; flex-wrap:wrap;
-}
-
-.filters-row input[type="text"],
-.search-row input[type="text"] {
-  flex:1 1 320px; min-width:160px;
-  padding:10px 12px; border-radius:10px;
-  border:1px solid rgba(255,255,255,0.12);
-  background:rgba(255,255,255,0.06); color:var(--text);
-}
-
-.filters-row select,
-.search-row select {
-  padding:10px 12px; border-radius:10px;
-  border:1px solid rgba(255,255,255,0.12);
-  background:rgba(255,255,255,0.06); color:var(--text);
-  min-width:140px;
-}
-
-/* ============================================================
-   TABLE (GLASS) — fixed layout, no horizontal scroll
-============================================================ */
-.table-wrapper {
-  width:100%; max-height:420px; overflow-y:auto; overflow-x:hidden;
-  border-radius:12px; background:rgba(255,255,255,0.03);
-  box-shadow:0 0 0 1px rgba(255,255,255,0.04) inset;
-}
-
-.table-wrapper table {
-  width:100%; border-collapse:collapse; table-layout:fixed; font-size:14px; color:var(--text);
-}
-
-.table-wrapper th,
-.table-wrapper td {
-  padding:10px 14px; text-align:left; vertical-align:middle; word-break:break-word;
-}
-
-.table-wrapper th {
-  position:sticky; top:0; background:rgba(255,255,255,0.04);
-  color:var(--muted); font-weight:600; text-transform:uppercase; font-size:12px;
-  border-bottom:1px solid rgba(255,255,255,0.06);
-}
-
-.table-wrapper tr:hover td { background: rgba(255,255,255,0.03); }
-
-/* sensible default column widths */
-.table-wrapper th:nth-child(1){ width:110px; }
-.table-wrapper th:nth-child(2){ width:180px; }
-.table-wrapper th:nth-child(3){ width:140px; }
-.table-wrapper th:nth-child(4){ width:90px; }
-.table-wrapper th:nth-child(5){ width:auto; }
-
-/* pagination/footer */
-.table-footer { display:flex; justify-content:space-between; align-items:center; margin-top:12px; color:var(--muted); font-size:13px; }
-
-/* ============================================================
-   FORMS — universal styles
-   Right-side form uses 2-column grid by default
-   CRITICAL: ensure children stretch to full panel width
-============================================================ */
-.form-grid,
-.form-grid-2 {
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:12px 16px;
-  width:100%;
-  align-items:start;
-}
-
-/* Force form grid children to stretch */
-.module-right .form-grid,
-.module-right .form-grid-2 {
-  width:100%;
-}
-
-/* Ensure form groups fill their grid cell */
-.form-group { display:flex; flex-direction:column; gap:6px; width:100%; }
-
-/* labels */
-.form-group label { font-size:13px; font-weight:600; color:var(--muted); }
-
-/* section label */
-.form-section-label { font-size:13px; font-weight:700; color:var(--muted); margin:8px 0 6px; }
-
-/* inputs */
-input[type="text"], input[type="tel"], input[type="date"], select, textarea {
-  width:100%; padding:10px 12px; border-radius:10px;
-  border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04);
-  color:var(--text); font-size:14px; outline:none;
-}
-
-/* textarea sizing */
-textarea { resize:vertical; min-height:100px; }
-
-/* focus */
-input:focus, select:focus, textarea:focus {
-  border-color: rgba(255,255,255,0.22);
-  background: rgba(255,255,255,0.06);
-  box-shadow: 0 0 0 3px rgba(79,140,255,0.06);
-}
-
-/* action buttons row inside right panel */
-.form-actions, .button-row { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
 
 /* ============================================================
    BUTTONS
 ============================================================ */
-.btn { padding:10px 16px; border-radius:10px; cursor:pointer; font-family:'Poppins',sans-serif; font-size:14px; border:none; transition:all .14s ease; color:var(--text); background:rgba(255,255,255,0.06); }
-.btn-primary { background: linear-gradient(135deg,var(--accent-1),var(--accent-2)); color:#fff; }
-.btn-secondary { background: rgba(255,255,255,0.08); color:var(--text); }
-.btn-danger { background:#ff4f4f; color:#fff; }
-.btn-icon { padding:8px 10px; border-radius:8px; }
+.btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.btn-danger {
+  background: #ff4f4f;
+  color: white;
+}
+
+.btn-danger:hover {
+  opacity: 0.85;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4f8cff, #6a5cff);
+  color: white;
+}
+
+.btn-primary:hover {
+  opacity: 0.85;
+}
 
 /* ============================================================
-   QR SECTION (machines only) — full-width balanced layout
+   LOGOUT BUTTON
 ============================================================ */
-.qr-section { display:grid; grid-template-columns: 1fr 160px 120px; gap:16px; width:100%; align-items:start; margin-top:8px; }
-@media (max-width:700px) { .qr-section { grid-template-columns:1fr 140px; } .qr-section>.qr-buttons{ grid-column:1/-1; display:flex; gap:8px; justify-content:flex-start; } }
-.qr-notes label{ font-weight:600; color:var(--muted); margin-bottom:6px; }
-.qr-preview{ width:100%; max-width:160px; margin:0 auto; display:flex; justify-content:center; align-items:center; }
-.qr-buttons{ display:flex; flex-direction:column; gap:8px; }
+#logoutBtn {
+  background-color: #cc5500;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
 
+#logoutBtn:hover {
+  background-color: #e65c00;
+}
 /* ============================================================
-   UTILITIES & POLISH
+   QR code + buttons+ NOTES
 ============================================================ */
-.center{ display:flex; align-items:center; justify-content:center; }
-.muted{ color:var(--muted); font-size:13px; }
-.module-left-inner{ max-width:100%; margin:0; padding:0; }
-.table-wrapper::-webkit-scrollbar{ height:8px; width:8px; }
-.table-wrapper::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.06); border-radius:8px; }
+.notes-qr-inline-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 24px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+.notes-column {
+  flex: 1;
+  min-width: 280px;
+}
+
+.qr-column {
+  width: 160px;
+  flex-shrink: 0;
+}
+
+.qr-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;     /* ⭐ Center horizontally */
+  justify-content: center; /* ⭐ Center vertically */
+  text-align: center;
+  position: relative;
+}
+
+.qr-button-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+@media (max-width: 768px) {
+  .notes-qr-inline-row {
+    flex-direction: column;
+  }
+
+  .qr-button-column {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}
+
+/* Mini Ticket Style */
+.ticket-preview {
+  width: 140px;                 /* slightly narrower */
+  padding: 8px 10px;            /* reduced padding */
+  border: 2px solid #000;
+  border-radius: 8px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;                     /* reduced spacing */
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
 
 
-/* ===== FORCE RIGHT PANEL CONTENT TO FILL WIDTH ===== */
-.module-right {
+/* Center QR image */
+#machines-qr-canvas img,
+#machines-qr-canvas canvas {
+  width: 100px !important; /* reduced from 120 */ 
+  height: 60px !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+/* Label under QR */
+.qr-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.2;
+}
+/* -------------------------------------------------------------
+   AUDIT MODULE — Custom Styling
+------------------------------------------------------------- */
+
+/* 65 / 35 layout */
+.audit-module .module-left {
+  flex: 0 0 65%;
+  max-width: 65%;
+}
+
+.audit-module .module-right {
+  flex: 0 0 35%;
+  max-width: 35%;
+}
+
+#qrModal {
+  display: none !important;
+}
+
+/* QR Scanner Modal */
+.qr-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.qr-overlay.show {
+  display: flex !important;
+}
+
+.qr-modal {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  width: 320px;
+}
+
+.qr-video {
+  width: 280px;
+  height: 280px;
+  border-radius: 10px;
+  background: #000;
+}
+
+.qr-close-btn {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: #d9534f;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Grid rows */
+.row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.row-3col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* Dark theme */
+.audit-module-container { color: #e6eef8; }
+
+/* Panels */
+.audit-module .module-left,
+.audit-module .module-right {
+  background: rgba(255,255,255,0.06);
+  color: #e6eef8;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+}
+
+/* Labels */
+.audit-module .form-item label {
+  color: #bcd3f7;
+  font-weight: 600;
+}
+
+/* Inputs */
+.audit-module .form-item input,
+.audit-module .form-item select,
+.audit-module .summary-value {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #e6eef8;
+}
+
+/* Summary */
+.audit-module .summary-value {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.12);
+  font-size: 14px;
+}
+
+/* Table */
+.audit-module table.striped th {
+  color: #9fbbe8;
+  background: rgba(255,255,255,0.06);
+}
+
+.audit-module table.striped td {
+  color: #dbeeff;
+}
+
+/* Buttons */
+.audit-module .btn {
+  background: transparent;
+  color: #dbeeff;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.audit-module .btn.primary {
+  background: linear-gradient(180deg,#1f6fff,#0b4fd6);
+  color: #fff;
+}
+
+/* Responsive */
+@media (max-width:720px) {
+  .audit-module .module-left,
+  .audit-module .module-right {
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .row-2col,
+  .row-3col {
+    grid-template-columns: 1fr;
+  }
+}
+/* Force 65 / 35 split for audit module */
+.audit-module-container .audit-module {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.audit-module-container .audit-module .module-left {
+  flex: 0 0 65% !important;
+  max-width: 65% !important;
+}
+
+.audit-module-container .audit-module .module-right {
+  flex: 0 0 35% !important;
+  max-width: 35% !important;
+}
+/* -------------------------------------------------------------
+   MSP MODULE — Final Combined Styling (Dark Theme)
+------------------------------------------------------------- */
+
+/* 65/35 Layout */
+.msp-flex {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.msp-flex .module-right {
+  flex: 0 0 35%;
+  max-width: 35%;
+}
+
+.msp-flex .module-left {
+  max-width: 700px;
+}
+
+.msp-flex .module-left {
+  flex: 0 0 65%;
+  max-width: 65%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;     /* centers table */
+  justify-content: flex-start;
+}
+
+@media (max-width:720px) {
+  .msp-flex {
+    flex-direction: column;
+  }
+  .msp-flex .module-left,
+  .msp-flex .module-right {
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+}
+
+/* Remove Backgrounds */
+.msp-module .module-body,
+.msp-module table,
+.msp-module .entry-card {
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+/* Labels */
+.msp-module .form-item label {
+  color: #bcd3f7;
+  font-weight: 600;
+}
+
+/* Inputs */
+.msp-module .input {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  color: #e6eef8;
+}
+
+/* QR Button */
+.msp-module .input-with-btn {
+  display: flex;
+  gap: 10px;
+}
+
+.msp-module .btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #dbeeff;
+  cursor: pointer;
+}
+
+.msp-module .btn.primary {
+  background: linear-gradient(180deg,#1f6fff,#0b4fd6);
+  color: #fff;
+}
+
+/* Notes + Total */
+.notes-with-total {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.total-box {
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 10px;
+  min-width: 80px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Entry List */
+.entry-list {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.entry-card strong {
+  color: #9fbbe8;
+}
+
+.entry-remarks {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.entry-time {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: 4px;
+}
+
+/* Save Button */
+.form-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* -------------------------------------------------------------
+   Professional Table Styling
+------------------------------------------------------------- */
+
+.msp-module table.striped {
+  width: 100%;
+  max-width: 600px;        /* keeps table centered and readable */
+  border-collapse: collapse;
+  font-size: 14px;
+  color: #dbeeff;
+}
+
+.msp-module table.striped th,
+.msp-module table.striped td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  text-align: left;
+}
+
+.msp-module table.striped th {
+  color: #9fbbe8;
+  font-weight: 600;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+}
+
+.msp-module table.striped tr:nth-child(even) {
+  background-color: rgba(255,255,255,0.02);
+}
+
+.msp-module table.striped tr:hover {
+  background-color: rgba(255,255,255,0.04);
+  cursor: pointer;
+}
+/* FORCE MSP LAYOUT TO BE 65–35 EXACTLY */
+.msp-module .module-body {
+  padding: 0 !important;
+  box-shadow: none !important;
+  background: none !important;
+}
+.msp-module .row-3col {
+  margin-bottom: 16px;
+}
+.module-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
   box-sizing: border-box;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;    /* children fill width */
-  justify-content: flex-start !important;
-  width: 380px !important;
-  max-width: 380px !important;
-  padding: 20px !important;
 }
 
-/* Ensure any inner wrapper does not center or limit width */
-.module-right > * {
-  width: 100% !important;
-  max-width: 100% !important;
+/* LEFT PANEL — TRUE 65% */
+.msp-module .module-left {
+  width: 65% !important;
+  max-width: 65% !important;
+  flex: 0 0 65% !important;
+  display: block !important;
   margin: 0 !important;
-  box-sizing: border-box !important;
+  padding-right: 10px !important;
 }
 
-/* Remove any accidental centering or fixed widths inside */
-.module-right .container,
-.module-right .card,
-.module-right .card-body,
-.module-right .inner,
-.module-right .panel {
-  width: 100% !important;
-  max-width: 100% !important;
+/* RIGHT PANEL — TRUE 35% */
+.msp-module .module-right {
+  width: 35% !important;
+  max-width: 35% !important;
+  flex: 0 0 35% !important;
   margin: 0 !important;
-  padding: 0 !important;
+  padding-left: 10px !important;
 }
 
-/* Make form grid and its children stretch fully */
-.module-right .form-grid,
-.module-right .form-grid-2 {
+/* TABLE CENTERING FIX */
+#mspTable {
   width: 100% !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 12px 16px !important;
+  margin: 0 auto !important;
 }
-
-.module-right .form-group,
-.module-right .form-group * {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+.msp-module .module-left {
+  padding-left: 20px;
+  padding-right: 20px;
+  box-sizing: border-box;
 }
-
-/* Inputs, selects, textarea must fill the cell */
-.module-right input,
-.module-right select,
-.module-right textarea {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+#mspTable {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 600px;
 }
-
-/* Make textareas taller so panel looks filled */
-.module-right textarea { min-height: 100px !important; }
-
-/* QR area: stop centering and let it occupy its column */
-.module-right .qr-section,
-.module-right .qr-notes,
-.module-right .qr-preview,
-.module-right .qr-buttons {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  box-sizing: border-box !important;
+.msp-module .module-left {
+  max-width: 780px;
 }
-
-/* Prevent elements from being centered with margin:auto */
-.module-right [style*="margin: auto"],
-.module-right [style*="margin:auto"] {
-  margin: 0 !important;
+.content-wrapper {
+  padding-left: 24px;
+  padding-right: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
-
-/* Buttons alignment */
-.module-right .form-actions,
-.module-right .button-row { justify-content: flex-end !important; width:100% !important; }
-
-/* Defensive: remove any inline max-widths on images or canvases */
-.module-right img,
-.module-right canvas,
-.module-right svg {
-  max-width: 100% !important;
-  width: 100% !important;
-  height: auto !important;
-}
-
-/* Debug helper (temporary): outlines to see what is constrained
-   Remove or comment out in production */
-.module-right * {
-  /* outline: 0.5px dashed rgba(255,255,255,0.04); */
-}
-/* ===========================
-   FINAL OVERRIDE — FORCE COMPACT RIGHT PANEL
-   Paste this at the very end of your stylesheet
-   =========================== */
-
-/* Make wrapper left-aligned and prevent centering */
-.module-wrapper {
-  display: flex !important;
-  justify-content: flex-start !important;
-  align-items: stretch !important;
-  gap: 20px !important;
-  width: 100% !important;
-  max-width: 1400px !important;
-  margin: 30px auto !important;
-  padding: 0 24px !important;
-  box-sizing: border-box !important;
-}
-
-/* Right panel: compact, content-driven, children must fill width */
-.module-right {
-  flex: 0 0 auto !important;        /* do not grow */
-  width: auto !important;           /* size to content */
-  max-width: 420px !important;      /* global cap */
-  min-width: 320px !important;      /* keep usable */
-  box-sizing: border-box !important;
-  padding: 20px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;  /* children fill width */
-  justify-content: flex-start !important;
-  margin: 0 !important;
-}
-
-/* Force every direct child to fill the panel width */
-.module-right > * {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  box-sizing: border-box !important;
-}
-
-/* Defensive: common inner wrappers that may center content */
-.module-right .container,
-.module-right .inner,
-.module-right .card,
-.module-right .panel,
-.module-right .card-body,
-.module-right .content {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  box-sizing: border-box !important;
-}
-
-/* Ensure form grid and groups stretch fully */
-.module-right .form-grid,
-.module-right .form-grid-2 {
-  width: 100% !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 12px 16px !important;
-  align-items: start !important;
-}
-
-.module-right .form-group,
-.module-right .form-group * {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-/* Inputs and textarea must fill the available width */
-.module-right input,
-.module-right select,
-.module-right textarea,
-.module-right button {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-/* Make textareas taller so the panel feels filled */
-.module-right textarea { min-height: 120px !important; }
-
-/* Prevent centering via margin:auto or inline styles */
-.module-right [style*="margin: auto"],
-.module-right [style*="margin:auto"] {
-  margin: 0 !important;
-}
-
-/* Images, canvas, svg should not overflow or be centered */
-.module-right img,
-.module-right canvas,
-.module-right svg {
-  width: 100% !important;
-  max-width: 100% !important;
-  height: auto !important;
-}
-
-/* Buttons row alignment */
-.module-right .form-actions,
-.module-right .button-row {
-  width: 100% !important;
-  justify-content: flex-end !important;
-}
-
-/* Temporary visual debug outlines (comment out in production) */
-/* .module-right * { outline: 0.5px dashed rgba(255,255,255,0.04); } */
-/* ===========================
-   FINAL: Right panel fills content and form fields stretch
-   Paste this at the very end of your stylesheet
-   =========================== */
-
-/* Ensure wrapper alignment and stretching */
-.module-wrapper {
-  display: flex !important;
-  justify-content: flex-start !important;
-  align-items: stretch !important;
-  gap: 20px !important;
-  width: 100% !important;
-  max-width: 1400px !important;
-  margin: 30px auto !important;
-  padding: 0 24px !important;
-  box-sizing: border-box !important;
-}
-
-/* Compact right panel globally */
-.module-right {
-  flex: 0 0 auto !important;
-  width: auto !important;
-  max-width: 420px !important;   /* cap width so it doesn't look huge */
-  min-width: 320px !important;   /* keep usable on small screens */
-  box-sizing: border-box !important;
-  padding: 20px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important; /* children fill width */
-  justify-content: flex-start !important;
-  margin: 0 !important;
-}
-
-/* Force every direct child to fill the panel width */
-.module-right > * {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  box-sizing: border-box !important;
-}
-
-/* Make the right-panel form a single full-width column
-   so inputs fill the panel and remove the "half-width" look */
-.module-right .form-grid,
-.module-right .form-grid-2 {
-  display: grid !important;
-  grid-template-columns: 1fr !important;   /* single column for full width */
-  gap: 12px 16px !important;
-  width: 100% !important;
-  align-items: start !important;
-}
-
-/* If you still want two columns on very wide panels, use this instead:
-   grid-template-columns: 1fr 1fr; and set specific fields to span both columns.
-   But single column removes the empty space immediately. */
-
-/* Ensure form groups and inputs stretch */
-.module-right .form-group,
-.module-right .form-group * {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-/* Inputs, selects, textarea must fill the available width */
-.module-right input,
-.module-right select,
-.module-right textarea,
-.module-right button {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-/* Make textareas taller so the panel feels filled */
-.module-right textarea { min-height: 120px !important; }
-
-/* Defensive: remove centering via margin:auto or inline styles */
-.module-right [style*="margin: auto"],
-.module-right [style*="margin:auto"] {
-  margin: 0 !important;
-}
-
-/* Images, canvas, svg should not overflow or be centered */
-.module-right img,
-.module-right canvas,
-.module-right svg {
-  width: 100% !important;
-  max-width: 100% !important;
-  height: auto !important;
-}
-
-/* Buttons row alignment */
-.module-right .form-actions,
-.module-right .button-row {
-  width: 100% !important;
-  justify-content: flex-end !important;
-}
-/* ===== DIAGNOSTIC OVERLAY — paste at end of CSS, reload page ===== */
-.module-right { outline: 2px solid rgba(0,255,200,0.06); background: rgba(0,0,0,0.02); }
-.module-right > * { outline: 1px dashed rgba(255,255,255,0.03); }
-.module-right .form-grid { background: rgba(255,0,0,0.03); outline: 1px solid rgba(255,0,0,0.06); }
-.module-right .form-group { background: rgba(0,128,255,0.02); outline: 1px dotted rgba(0,128,255,0.04); }
-.module-right input, .module-right select, .module-right textarea { background: rgba(255,255,255,0.02); outline: 1px solid rgba(255,255,255,0.02); }
