@@ -283,6 +283,17 @@ textarea:focus {
   flex-shrink: 0;
   white-space: nowrap;
 }
+.qr-preview {
+  width: 100%;
+  max-width: 160px;
+  margin: 0 auto;
+}
+
+.qr-button-column {
+  width: 100%;
+  max-width: 160px;
+  margin: 0 auto;
+}
 
 /* ============================================================
    MODULE OVERRIDES (OPTIONAL)
@@ -299,7 +310,7 @@ textarea:focus {
 /* Machines → stays 65/35 default */
 .machines-module .module-left {flex: 0 0 65%; max-width: 65%;}
 .machines-module .module-right {flex: 0 0 35%;  max-width: 35%;}
-.machines-module .module-right {max-width: 480px;}
+.machines-module .module-right {max-width: 520px;}
 
 .machines-module .table-wrapper {
   overflow-x: hidden;
