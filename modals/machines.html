@@ -4,7 +4,8 @@
   <div class="module-left">
     <div class="card-header">Machine Management</div>
 
-    <div class="filters-row compact-row">
+    <!-- SEARCH + FILTERS + BUTTONS IN ONE ROW -->
+    <div class="filters-row">
       <input type="text" id="machines-search-input" class="input" placeholder="Search by Machine ID or Name" />
       <select id="machines-health-filter" class="select">
         <option value="">All</option>
@@ -84,23 +85,28 @@
       </div>
     </div>
 
-    <div class="notes-qr-inline-row">
-      <div class="notes-column">
+    <!-- NOTES + QR PREVIEW + QR BUTTONS IN 3 COLUMNS -->
+    <div class="form-grid-3" style="margin-top: 16px;">
+      <div class="form-group">
         <label>Notes</label>
-        <textarea id="machines-notes-input" class="textarea" rows="2" style="width: 100%; resize: vertical;"></textarea>
+        <textarea id="machines-notes-input" class="textarea" rows="2" style="resize: vertical;"></textarea>
       </div>
-      <div class="qr-column">
+
+      <div class="form-group">
         <label>Machine QR Code</label>
         <div id="machines-qr-preview" class="qr-preview ticket-preview">
           <div id="machines-qr-canvas"></div>
           <div id="machines-qr-label" class="qr-label"></div>
         </div>
-
       </div>
-      <div class="qr-button-column">
-        <button id="machines-generate-qr-btn" class="btn btn-secondary">Generate QR</button>
-        <button id="machines-print-qr-btn" class="btn btn-secondary">Print</button>
-        <button id="machines-download-qr-btn" class="btn btn-secondary">Download</button>
+
+      <div class="form-group">
+        <label>&nbsp;</label>
+        <div class="qr-button-column">
+          <button id="machines-generate-qr-btn" class="btn btn-secondary">Generate QR</button>
+          <button id="machines-print-qr-btn" class="btn btn-secondary">Print</button>
+          <button id="machines-download-qr-btn" class="btn btn-secondary">Download</button>
+        </div>
       </div>
     </div>
 
