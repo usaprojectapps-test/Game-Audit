@@ -313,3 +313,111 @@ input:focus, select:focus, textarea:focus {
 .module-right * {
   /* outline: 0.5px dashed rgba(255,255,255,0.04); */
 }
+/* ===========================
+   FINAL OVERRIDE — FORCE COMPACT RIGHT PANEL
+   Paste this at the very end of your stylesheet
+   =========================== */
+
+/* Make wrapper left-aligned and prevent centering */
+.module-wrapper {
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+  gap: 20px !important;
+  width: 100% !important;
+  max-width: 1400px !important;
+  margin: 30px auto !important;
+  padding: 0 24px !important;
+  box-sizing: border-box !important;
+}
+
+/* Right panel: compact, content-driven, children must fill width */
+.module-right {
+  flex: 0 0 auto !important;        /* do not grow */
+  width: auto !important;           /* size to content */
+  max-width: 420px !important;      /* global cap */
+  min-width: 320px !important;      /* keep usable */
+  box-sizing: border-box !important;
+  padding: 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;  /* children fill width */
+  justify-content: flex-start !important;
+  margin: 0 !important;
+}
+
+/* Force every direct child to fill the panel width */
+.module-right > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Defensive: common inner wrappers that may center content */
+.module-right .container,
+.module-right .inner,
+.module-right .card,
+.module-right .panel,
+.module-right .card-body,
+.module-right .content {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Ensure form grid and groups stretch fully */
+.module-right .form-grid,
+.module-right .form-grid-2 {
+  width: 100% !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 12px 16px !important;
+  align-items: start !important;
+}
+
+.module-right .form-group,
+.module-right .form-group * {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Inputs and textarea must fill the available width */
+.module-right input,
+.module-right select,
+.module-right textarea,
+.module-right button {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Make textareas taller so the panel feels filled */
+.module-right textarea { min-height: 120px !important; }
+
+/* Prevent centering via margin:auto or inline styles */
+.module-right [style*="margin: auto"],
+.module-right [style*="margin:auto"] {
+  margin: 0 !important;
+}
+
+/* Images, canvas, svg should not overflow or be centered */
+.module-right img,
+.module-right canvas,
+.module-right svg {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Buttons row alignment */
+.module-right .form-actions,
+.module-right .button-row {
+  width: 100% !important;
+  justify-content: flex-end !important;
+}
+
+/* Temporary visual debug outlines (comment out in production) */
+/* .module-right * { outline: 0.5px dashed rgba(255,255,255,0.04); } */
