@@ -735,3 +735,17 @@ select option {
   width: 100% !important;
   margin: 0 auto !important;
 }
+.msp-module .module-left {
+  padding-left: 20px;
+  padding-right: 20px;
+  box-sizing: border-box;
+}
+#mspTable {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 600px;
+}
+.msp-module .module-left {
+  max-width: 780px;
+}
