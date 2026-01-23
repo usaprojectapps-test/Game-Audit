@@ -702,13 +702,12 @@ select option {
 }
 /* FORCE MSP LAYOUT TO BE 65–35 EXACTLY */
 .msp-module .module-body {
-  display: flex !important;
-  flex-direction: row !important;
-  justify-content: flex-start !important;
-  align-items: flex-start !important;
-  gap: 20px !important;
-  width: 100% !important;
   padding: 0 !important;
+  box-shadow: none !important;
+  background: none !important;
+}
+.msp-module .row-3col {
+  margin-bottom: 16px;
 }
 
 /* LEFT PANEL — TRUE 65% */
@@ -748,4 +747,11 @@ select option {
 }
 .msp-module .module-left {
   max-width: 780px;
+}
+.content-wrapper {
+  padding-left: 24px;
+  padding-right: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
