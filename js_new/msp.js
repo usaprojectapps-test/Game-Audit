@@ -113,10 +113,13 @@ async function initMSPModule() {
     // -------------------------------------------------------------
     // EVENTS
     // -------------------------------------------------------------
-    dateInput.addEventListener("change", () => {
+    setTimeout(() => {
+      dateInput.addEventListener("change", () => {
       formDate.value = dateInput.value;
       loadTable();
-    });
+      });
+    }, 200);
+
 
     locationSelect.addEventListener("change", loadTable);
 
