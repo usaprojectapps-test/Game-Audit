@@ -46,7 +46,7 @@ serve(async (req) => {
 
     const uid = authUser.user.id;
 
-    // 2. Insert into users table
+    // 2. Insert into your existing "users" table
     const { error: dbError } = await supabase.from("users").insert({
       id: uid,
       name,
@@ -60,6 +60,22 @@ serve(async (req) => {
 
     if (dbError) {
       return new Response(JSON.stringify({ error: dbError }), {
+        status: 400,
+        headers: corsHeaders
+      });
+    }
+
+    // 3. Insert into NEW user_access table (for RLS)
+    const { error: accessError } = await supabase
+      .from("user_access")
+      .insert({
+        email,
+        role,
+        location_id
+      });
+
+    if (accessError) {
+      return new Response(JSON.stringify({ error: accessError }), {
         status: 400,
         headers: corsHeaders
       });
