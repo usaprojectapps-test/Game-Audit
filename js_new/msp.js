@@ -209,58 +209,85 @@ async function initMSPModule() {
     }
 
     function renderTable(entries = []) {
-      const machines = {};
-      let dailyTotal = 0;
+  const machines = {};
+  let dailyTotal = 0;
 
-      entries.forEach((e) => {
-        if (!machines[e.machine_no]) machines[e.machine_no] = [];
-        machines[e.machine_no].push(e);
-        dailyTotal += Number(e.amount);
-      });
+  // Group by machine
+  entries.forEach(e => {
+    if (!machines[e.machine_no]) machines[e.machine_no] = [];
+    machines[e.machine_no].push(e);
+    dailyTotal += Number(e.amount);
+  });
 
-      dailyTotalBox.textContent = `₹${dailyTotal}`;
+  dailyTotalBox.textContent = `₹${dailyTotal}`;
 
-      let maxMSP = 0;
-      Object.values(machines).forEach((list) => {
-        const mspCount = list.filter((x) => x.type === "MSP").length;
-        if (mspCount > maxMSP) maxMSP = mspCount;
-      });
+  // Count MSP columns
+  let maxMSP = 0;
+  Object.values(machines).forEach(list => {
+    const mspCount = list.filter(x => x.type === "MSP").length;
+    if (mspCount > maxMSP) maxMSP = mspCount;
+  });
 
-      let headerHTML = `<tr><th>Machine No</th>`;
-      for (let i = 1; i <= maxMSP; i++) headerHTML += `<th>MSP${i}</th>`;
-      headerHTML += `<th>EOD</th><th>Total</th></tr>`;
-      tableHead.innerHTML = headerHTML;
+  // -------------------------------
+  // BUILD HEADER
+  // -------------------------------
+  let headerHTML = `<tr>
+      <th>Date</th>
+      <th>Machine No</th>`;
 
-      tableBody.innerHTML = "";
+  for (let i = 1; i <= maxMSP; i++) {
+    headerHTML += `<th>MSP${i}</th>`;
+  }
 
-      Object.keys(machines).forEach((machineNo) => {
-        const list = machines[machineNo];
+  headerHTML += `<th>Total</th>`;
 
-        const msps = list.filter((x) => x.type === "MSP");
-        const eod = list.find((x) => x.type === "EOD");
-        const total = list.reduce((sum, x) => sum + Number(x.amount), 0);
+  if (userRole === "SuperAdmin") {
+    headerHTML += `<th>Location</th>`;
+  }
 
-        let rowHTML = `<tr class="msp-row" data-machine="${machineNo}">
-          <td>${machineNo}</td>`;
+  headerHTML += `</tr>`;
 
-        for (let i = 0; i < maxMSP; i++) {
-          rowHTML += `<td>${msps[i] ? msps[i].amount : ""}</td>`;
-        }
+  tableHead.innerHTML = headerHTML;
 
-        rowHTML += `<td>${eod ? eod.amount : ""}</td>`;
-        rowHTML += `<td>${total}</td></tr>`;
+  // -------------------------------
+  // BUILD BODY
+  // -------------------------------
+  tableBody.innerHTML = "";
 
-        tableBody.innerHTML += rowHTML;
-      });
+  Object.keys(machines).forEach(machineNo => {
+    const list = machines[machineNo];
 
-      const rows = document.querySelectorAll(".msp-row");
-      rows.forEach((row) => {
-        row.addEventListener("click", () => {
-          selectedMachine = row.dataset.machine;
-          loadMachineEntries(selectedMachine);
-        });
-      });
+    const msps = list.filter(x => x.type === "MSP");
+    const total = list.reduce((sum, x) => sum + Number(x.amount), 0);
+
+    let rowHTML = `<tr class="msp-row" data-machine="${machineNo}">
+        <td>${dateInput.value}</td>
+        <td>${machineNo}</td>`;
+
+    for (let i = 0; i < maxMSP; i++) {
+      rowHTML += `<td>${msps[i] ? msps[i].amount : ""}</td>`;
     }
+
+    rowHTML += `<td>${total}</td>`;
+
+    if (userRole === "SuperAdmin") {
+      rowHTML += `<td>${locationSelect.options[locationSelect.selectedIndex].text}</td>`;
+    }
+
+    rowHTML += `</tr>`;
+
+    tableBody.innerHTML += rowHTML;
+  });
+
+  // Row click handler
+  const rows = document.querySelectorAll(".msp-row");
+  rows.forEach(row => {
+    row.addEventListener("click", () => {
+      selectedMachine = row.dataset.machine;
+      loadMachineEntries(selectedMachine);
+    });
+  });
+}
 
     async function loadMachineEntries(machineNo) {
       formMachineNo.value = machineNo;
