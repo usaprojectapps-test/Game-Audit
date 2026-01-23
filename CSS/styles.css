@@ -709,6 +709,13 @@ select option {
 .msp-module .row-3col {
   margin-bottom: 16px;
 }
+.module-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+  box-sizing: border-box;
+}
 
 /* LEFT PANEL — TRUE 65% */
 .msp-module .module-left {
