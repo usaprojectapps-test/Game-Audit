@@ -1,11 +1,12 @@
-<div class="vendor-wrapper horizontal">
+<div class="module-wrapper vendor-module">
 
-  <!-- LEFT SIDE (slimmer) -->
-  <div class="vendor-left">
+  <!-- LEFT SIDE (60%) -->
+  <div class="module-left">
 
     <!-- SEARCH + FILTERS -->
-    <div class="vendor-search-bar">
+    <div class="search-row">
       <input id="vendorSearch" type="text" placeholder="Search vendor name / ID">
+
       <select id="vendorFilterStatus">
         <option value="">All Status</option>
         <option value="Active">Active</option>
@@ -44,13 +45,13 @@
 
   </div>
 
-  <!-- RIGHT SIDE (wider) -->
-   <div class="vendor-right">
+  <!-- RIGHT SIDE (40%) -->
+  <div class="module-right">
 
     <div class="card-header">Vendor Details</div>
 
-    <!-- FORM GRID -->
-    <div class="form-grid" style="margin-top: 20px;">
+    <!-- RIGHT SIDE ALWAYS 2‑COLUMN FORM -->
+    <div class="form-grid">
 
       <div class="form-group">
         <label>Vendor ID</label>
@@ -72,7 +73,8 @@
         <input id="vendorFormPhone" type="tel" maxlength="12" placeholder="123-456-7890">
       </div>
 
-      <div class="form-group full">
+      <!-- FULL-WIDTH FIELD -->
+      <div class="form-group" style="grid-column: 1 / 3;">
         <label>Address</label>
         <input id="vendorFormAddress" type="text">
       </div>
