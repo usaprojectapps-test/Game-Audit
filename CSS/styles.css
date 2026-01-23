@@ -421,3 +421,101 @@ input:focus, select:focus, textarea:focus {
 
 /* Temporary visual debug outlines (comment out in production) */
 /* .module-right * { outline: 0.5px dashed rgba(255,255,255,0.04); } */
+/* ===========================
+   FINAL: Right panel fills content and form fields stretch
+   Paste this at the very end of your stylesheet
+   =========================== */
+
+/* Ensure wrapper alignment and stretching */
+.module-wrapper {
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+  gap: 20px !important;
+  width: 100% !important;
+  max-width: 1400px !important;
+  margin: 30px auto !important;
+  padding: 0 24px !important;
+  box-sizing: border-box !important;
+}
+
+/* Compact right panel globally */
+.module-right {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: 420px !important;   /* cap width so it doesn't look huge */
+  min-width: 320px !important;   /* keep usable on small screens */
+  box-sizing: border-box !important;
+  padding: 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important; /* children fill width */
+  justify-content: flex-start !important;
+  margin: 0 !important;
+}
+
+/* Force every direct child to fill the panel width */
+.module-right > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Make the right-panel form a single full-width column
+   so inputs fill the panel and remove the "half-width" look */
+.module-right .form-grid,
+.module-right .form-grid-2 {
+  display: grid !important;
+  grid-template-columns: 1fr !important;   /* single column for full width */
+  gap: 12px 16px !important;
+  width: 100% !important;
+  align-items: start !important;
+}
+
+/* If you still want two columns on very wide panels, use this instead:
+   grid-template-columns: 1fr 1fr; and set specific fields to span both columns.
+   But single column removes the empty space immediately. */
+
+/* Ensure form groups and inputs stretch */
+.module-right .form-group,
+.module-right .form-group * {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Inputs, selects, textarea must fill the available width */
+.module-right input,
+.module-right select,
+.module-right textarea,
+.module-right button {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Make textareas taller so the panel feels filled */
+.module-right textarea { min-height: 120px !important; }
+
+/* Defensive: remove centering via margin:auto or inline styles */
+.module-right [style*="margin: auto"],
+.module-right [style*="margin:auto"] {
+  margin: 0 !important;
+}
+
+/* Images, canvas, svg should not overflow or be centered */
+.module-right img,
+.module-right canvas,
+.module-right svg {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Buttons row alignment */
+.module-right .form-actions,
+.module-right .button-row {
+  width: 100% !important;
+  justify-content: flex-end !important;
+}
