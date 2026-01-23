@@ -700,3 +700,38 @@ select option {
   background-color: rgba(255,255,255,0.04);
   cursor: pointer;
 }
+/* FORCE MSP LAYOUT TO BE 65–35 EXACTLY */
+.msp-module .module-body {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  gap: 20px !important;
+  width: 100% !important;
+  padding: 0 !important;
+}
+
+/* LEFT PANEL — TRUE 65% */
+.msp-module .module-left {
+  width: 65% !important;
+  max-width: 65% !important;
+  flex: 0 0 65% !important;
+  display: block !important;
+  margin: 0 !important;
+  padding-right: 10px !important;
+}
+
+/* RIGHT PANEL — TRUE 35% */
+.msp-module .module-right {
+  width: 35% !important;
+  max-width: 35% !important;
+  flex: 0 0 35% !important;
+  margin: 0 !important;
+  padding-left: 10px !important;
+}
+
+/* TABLE CENTERING FIX */
+#mspTable {
+  width: 100% !important;
+  margin: 0 auto !important;
+}
