@@ -1,39 +1,24 @@
 /* ============================================================
    GLOBAL BASE
-   Complete, single-file stylesheet for all modules
-   - Left flexible / Right compact (global)
-   - Universal 2-column right-side form
-   - Table, filters, buttons, QR section
 ============================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&family=Sora:wght@500;600&family=Inter:wght@400;500&family=Poppins:wght@500&display=swap');
 
 :root{
-  --bg-1: #0f172a;
-  --bg-2: #1e1b4b;
-  --bg-3: #312e81;
+  --bg-1:#0f172a; --bg-2:#1e1b4b; --bg-3:#312e81;
   --glass-bg: rgba(255,255,255,0.06);
   --glass-border: rgba(255,255,255,0.15);
-  --muted: #cbd5e1;
-  --text: #e2e8f0;
-  --accent-1: #4f8cff;
-  --accent-2: #6a5cff;
+  --muted:#cbd5e1; --text:#e2e8f0;
+  --accent-1:#4f8cff; --accent-2:#6a5cff;
 }
 
-/* ============================================================
-   BODY
-============================================================ */
 * { box-sizing: border-box; }
 html,body { height:100%; }
 body {
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  font-family: 'Inter', sans-serif;
-  color: var(--text);
-  background: linear-gradient(135deg, var(--bg-1), var(--bg-2), var(--bg-3));
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  overflow-x: hidden;
+  margin:0; padding:0; min-height:100vh;
+  font-family:'Inter',sans-serif; color:var(--text);
+  background: linear-gradient(135deg,var(--bg-1),var(--bg-2),var(--bg-3));
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
 }
 
 /* ============================================================
@@ -41,59 +26,60 @@ body {
    Left flexible / Right compact (single global rule)
 ============================================================ */
 .module-wrapper {
-  display: flex;
-  gap: 20px;
-  width: 100%;
-  max-width: 1400px;
-  margin: 30px auto;
-  padding: 0 24px;
-  align-items: flex-start;
+  display:flex;
+  gap:20px;
+  width:100%;
+  max-width:1400px;
+  margin:30px auto;
+  padding:0 24px;
+  align-items:stretch; /* ensure both panels stretch vertically */
 }
 
 /* LEFT PANEL — flexible, takes remaining space */
 .module-left {
-  flex: 1 1 auto;
-  min-width: 0;
-  background: var(--glass-bg);
-  border-radius: 16px;
-  border: 1px solid var(--glass-border);
+  flex:1 1 auto;
+  min-width:0;
+  background:var(--glass-bg);
+  border-radius:16px;
+  border:1px solid var(--glass-border);
   backdrop-filter: blur(12px);
-  padding: 20px;
+  padding:20px;
 }
 
 /* RIGHT PANEL — compact and consistent across all modules */
 .module-right {
-  width: 380px;        /* compact width chosen for balance */
-  max-width: 380px;
-  min-width: 320px;
-  background: var(--glass-bg);
-  border-radius: 16px;
-  border: 1px solid var(--glass-border);
+  flex:0 0 380px;      /* fixed compact width */
+  width:380px;
+  max-width:380px;
+  min-width:320px;
+  background:var(--glass-bg);
+  border-radius:16px;
+  border:1px solid var(--glass-border);
   backdrop-filter: blur(12px);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch; /* critical: children fill width */
+  gap:12px;
 }
 
 /* Responsive: stack on small screens */
-@media (max-width: 900px) {
-  .module-wrapper { padding: 0 16px; gap: 16px; }
-  .module-right { width: 100%; max-width: 100%; min-width: 0; }
-  .module-wrapper { flex-direction: column; }
+@media (max-width:900px) {
+  .module-wrapper { padding:0 16px; gap:16px; flex-direction:column; }
+  .module-right { width:100%; max-width:100%; min-width:0; }
 }
 
 /* ============================================================
    CARD HEADER
 ============================================================ */
 .card-header {
-  font-family: 'Sora', sans-serif;
-  font-size: 20px;
-  font-weight: 600;
-  color: #fff;
-  margin: 0 0 12px 0;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  font-family:'Sora',sans-serif;
+  font-size:20px;
+  font-weight:600;
+  color:#fff;
+  margin:0 0 12px 0;
+  padding-bottom:8px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
 }
 
 /* ============================================================
@@ -101,255 +87,133 @@ body {
 ============================================================ */
 .filters-row,
 .search-row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
+  display:flex; gap:12px; align-items:center; margin-bottom:16px; flex-wrap:wrap;
 }
 
 .filters-row input[type="text"],
 .search-row input[type="text"] {
-  flex: 1 1 320px;
-  min-width: 160px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  color: var(--text);
+  flex:1 1 320px; min-width:160px;
+  padding:10px 12px; border-radius:10px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.06); color:var(--text);
 }
 
 .filters-row select,
 .search-row select {
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  color: var(--text);
-  min-width: 140px;
-}
-
-.filters-row button,
-.search-row button {
-  white-space: nowrap;
-  flex-shrink: 0;
+  padding:10px 12px; border-radius:10px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.06); color:var(--text);
+  min-width:140px;
 }
 
 /* ============================================================
    TABLE (GLASS) — fixed layout, no horizontal scroll
 ============================================================ */
 .table-wrapper {
-  width: 100%;
-  max-height: 420px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.03);
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset;
+  width:100%; max-height:420px; overflow-y:auto; overflow-x:hidden;
+  border-radius:12px; background:rgba(255,255,255,0.03);
+  box-shadow:0 0 0 1px rgba(255,255,255,0.04) inset;
 }
 
 .table-wrapper table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed; /* prevents column collapse/overlap */
-  font-size: 14px;
-  color: var(--text);
+  width:100%; border-collapse:collapse; table-layout:fixed; font-size:14px; color:var(--text);
 }
 
 .table-wrapper th,
 .table-wrapper td {
-  padding: 10px 14px;
-  text-align: left;
-  vertical-align: middle;
-  word-break: break-word;
+  padding:10px 14px; text-align:left; vertical-align:middle; word-break:break-word;
 }
 
 .table-wrapper th {
-  position: sticky;
-  top: 0;
-  background: rgba(255,255,255,0.04);
-  color: var(--muted);
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  position:sticky; top:0; background:rgba(255,255,255,0.04);
+  color:var(--muted); font-weight:600; text-transform:uppercase; font-size:12px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
 }
 
-.table-wrapper tr:hover td {
-  background: rgba(255,255,255,0.03);
-}
+.table-wrapper tr:hover td { background: rgba(255,255,255,0.03); }
 
-/* sensible default column widths (can be overridden in HTML if needed) */
-.table-wrapper th:nth-child(1) { width: 110px; } /* ID */
-.table-wrapper th:nth-child(2) { width: 180px; } /* Name */
-.table-wrapper th:nth-child(3) { width: 140px; } /* Phone/Vendor */
-.table-wrapper th:nth-child(4) { width: 90px; }  /* Status */
-.table-wrapper th:nth-child(5) { width: auto; }   /* Location */
+/* sensible default column widths */
+.table-wrapper th:nth-child(1){ width:110px; }
+.table-wrapper th:nth-child(2){ width:180px; }
+.table-wrapper th:nth-child(3){ width:140px; }
+.table-wrapper th:nth-child(4){ width:90px; }
+.table-wrapper th:nth-child(5){ width:auto; }
 
 /* pagination/footer */
-.table-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 12px;
-  color: var(--muted);
-  font-size: 13px;
-}
+.table-footer { display:flex; justify-content:space-between; align-items:center; margin-top:12px; color:var(--muted); font-size:13px; }
 
 /* ============================================================
    FORMS — universal styles
    Right-side form uses 2-column grid by default
+   CRITICAL: ensure children stretch to full panel width
 ============================================================ */
 .form-grid,
 .form-grid-2 {
-  display: grid;
+  display:grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px 16px;
-  width: 100%;
+  gap:12px 16px;
+  width:100%;
+  align-items:start;
 }
 
-@media (max-width: 520px) {
-  .form-grid,
-  .form-grid-2 { grid-template-columns: 1fr; }
+/* Force form grid children to stretch */
+.module-right .form-grid,
+.module-right .form-grid-2 {
+  width:100%;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+/* Ensure form groups fill their grid cell */
+.form-group { display:flex; flex-direction:column; gap:6px; width:100%; }
 
-.form-group label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted);
-}
+/* labels */
+.form-group label { font-size:13px; font-weight:600; color:var(--muted); }
 
-/* section label to create visual grouping inside forms */
-.form-section-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--muted);
-  margin: 8px 0 6px;
-}
+/* section label */
+.form-section-label { font-size:13px; font-weight:700; color:var(--muted); margin:8px 0 6px; }
 
 /* inputs */
-input[type="text"],
-input[type="tel"],
-input[type="date"],
-select,
-textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
-  font-size: 14px;
-  outline: none;
+input[type="text"], input[type="tel"], input[type="date"], select, textarea {
+  width:100%; padding:10px 12px; border-radius:10px;
+  border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04);
+  color:var(--text); font-size:14px; outline:none;
 }
 
-textarea { resize: vertical; min-height: 80px; }
+/* textarea sizing */
+textarea { resize:vertical; min-height:100px; }
 
 /* focus */
-input:focus,
-select:focus,
-textarea:focus {
+input:focus, select:focus, textarea:focus {
   border-color: rgba(255,255,255,0.22);
   background: rgba(255,255,255,0.06);
   box-shadow: 0 0 0 3px rgba(79,140,255,0.06);
 }
 
 /* action buttons row inside right panel */
-.form-actions,
-.button-row {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 12px;
-}
+.form-actions, .button-row { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
 
 /* ============================================================
    BUTTONS
 ============================================================ */
-.btn {
-  padding: 10px 16px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  border: none;
-  transition: all .14s ease;
-  color: var(--text);
-  background: rgba(255,255,255,0.06);
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-  color: #fff;
-}
-
-.btn-secondary {
-  background: rgba(255,255,255,0.08);
-  color: var(--text);
-}
-
-.btn-danger {
-  background: #ff4f4f;
-  color: #fff;
-}
-
-/* small icon buttons */
-.btn-icon {
-  padding: 8px 10px;
-  border-radius: 8px;
-}
+.btn { padding:10px 16px; border-radius:10px; cursor:pointer; font-family:'Poppins',sans-serif; font-size:14px; border:none; transition:all .14s ease; color:var(--text); background:rgba(255,255,255,0.06); }
+.btn-primary { background: linear-gradient(135deg,var(--accent-1),var(--accent-2)); color:#fff; }
+.btn-secondary { background: rgba(255,255,255,0.08); color:var(--text); }
+.btn-danger { background:#ff4f4f; color:#fff; }
+.btn-icon { padding:8px 10px; border-radius:8px; }
 
 /* ============================================================
    QR SECTION (machines only) — full-width balanced layout
 ============================================================ */
-.qr-section {
-  display: grid;
-  grid-template-columns: 1fr 160px 120px;
-  gap: 16px;
-  width: 100%;
-  align-items: start;
-  margin-top: 8px;
-}
-
-@media (max-width: 700px) {
-  .qr-section { grid-template-columns: 1fr 140px; grid-auto-rows: auto; }
-  .qr-section > .qr-buttons { grid-column: 1 / -1; display:flex; gap:8px; justify-content:flex-start; }
-}
-
-.qr-notes label { font-weight:600; color:var(--muted); margin-bottom:6px; }
-.qr-preview { width:100%; max-width:160px; margin:0 auto; display:flex; justify-content:center; align-items:center; }
-.qr-buttons { display:flex; flex-direction:column; gap:8px; }
+.qr-section { display:grid; grid-template-columns: 1fr 160px 120px; gap:16px; width:100%; align-items:start; margin-top:8px; }
+@media (max-width:700px) { .qr-section { grid-template-columns:1fr 140px; } .qr-section>.qr-buttons{ grid-column:1/-1; display:flex; gap:8px; justify-content:flex-start; } }
+.qr-notes label{ font-weight:600; color:var(--muted); margin-bottom:6px; }
+.qr-preview{ width:100%; max-width:160px; margin:0 auto; display:flex; justify-content:center; align-items:center; }
+.qr-buttons{ display:flex; flex-direction:column; gap:8px; }
 
 /* ============================================================
-   SMALL UTILITIES
+   UTILITIES & POLISH
 ============================================================ */
-.center { display:flex; align-items:center; justify-content:center; }
-.muted { color: var(--muted); font-size:13px; }
-
-/* ============================================================
-   MODULE INNER (left content container)
-============================================================ */
-.module-left-inner {
-  max-width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-/* ============================================================
-   TWEAKS FOR PROFESSIONAL POLISH
-   - subtle spacing, consistent typography, accessible sizes
-============================================================ */
-.card-header + .filters-row { margin-top: 4px; }
-.form-grid .form-group[style*="grid-column"] { grid-column: auto; } /* allow inline overrides */
-.table-wrapper::-webkit-scrollbar { height:8px; width:8px; }
-.table-wrapper::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius:8px; }
-
-/* ============================================================
-   END OF FILE
-============================================================ */
+.center{ display:flex; align-items:center; justify-content:center; }
+.muted{ color:var(--muted); font-size:13px; }
+.module-left-inner{ max-width:100%; margin:0; padding:0; }
+.table-wrapper::-webkit-scrollbar{ height:8px; width:8px; }
+.table-wrapper::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.06); border-radius:8px; }
