@@ -1,20 +1,44 @@
 /* ============================================================
    GLOBAL BASE
+   Complete, single-file stylesheet for all modules
+   - Left flexible / Right compact (global)
+   - Universal 2-column right-side form
+   - Table, filters, buttons, QR section
 ============================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&family=Sora:wght@500;600&family=Inter:wght@400;500&family=Poppins:wght@500&display=swap');
 
+:root{
+  --bg-1: #0f172a;
+  --bg-2: #1e1b4b;
+  --bg-3: #312e81;
+  --glass-bg: rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.15);
+  --muted: #cbd5e1;
+  --text: #e2e8f0;
+  --accent-1: #4f8cff;
+  --accent-2: #6a5cff;
+}
+
+/* ============================================================
+   BODY
+============================================================ */
+* { box-sizing: border-box; }
+html,body { height:100%; }
 body {
   margin: 0;
   padding: 0;
-  background: linear-gradient(135deg, #0f172a, #1e1b4b, #312e81);
-  font-family: 'Inter', sans-serif;
-  color: #e2e8f0;
   min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  background: linear-gradient(135deg, var(--bg-1), var(--bg-2), var(--bg-3));
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
   overflow-x: hidden;
 }
 
 /* ============================================================
-   UNIVERSAL MODULE WRAPPER — LEFT FLEX / RIGHT FIXED
+   MODULE WRAPPER (GLOBAL)
+   Left flexible / Right compact (single global rule)
 ============================================================ */
 .module-wrapper {
   display: flex;
@@ -23,83 +47,170 @@ body {
   max-width: 1400px;
   margin: 30px auto;
   padding: 0 24px;
-  box-sizing: border-box;
+  align-items: flex-start;
 }
 
-/* LEFT SIDE — FLEXIBLE */
+/* LEFT PANEL — flexible, takes remaining space */
 .module-left {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--glass-bg);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(12px);
   padding: 20px;
-  box-sizing: border-box;
 }
 
-/* RIGHT SIDE — FIXED COMPACT WIDTH (GLOBAL FIX) */
+/* RIGHT PANEL — compact and consistent across all modules */
 .module-right {
-  width: 380px;
+  width: 380px;        /* compact width chosen for balance */
   max-width: 380px;
-  min-width: 360px;
-  background: rgba(255, 255, 255, 0.06);
+  min-width: 320px;
+  background: var(--glass-bg);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(12px);
   padding: 20px;
-  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-/* MOBILE */
-@media (max-width: 768px) {
-  .module-wrapper {
-    flex-direction: column;
-  }
-  .module-right {
-    width: 100%;
-    max-width: 100%;
-  }
+/* Responsive: stack on small screens */
+@media (max-width: 900px) {
+  .module-wrapper { padding: 0 16px; gap: 16px; }
+  .module-right { width: 100%; max-width: 100%; min-width: 0; }
+  .module-wrapper { flex-direction: column; }
 }
 
 /* ============================================================
-   UNIVERSAL RIGHT-SIDE FORM — ALWAYS 2 COLUMNS
+   CARD HEADER
 ============================================================ */
-.module-right .form-grid,
-.module-right .form-grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px 20px;
+.card-header {
+  font-family: 'Sora', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ============================================================
+   FILTERS / SEARCH ROW
+============================================================ */
+.filters-row,
+.search-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.filters-row input[type="text"],
+.search-row input[type="text"] {
+  flex: 1 1 320px;
+  min-width: 160px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+}
+
+.filters-row select,
+.search-row select {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  min-width: 140px;
+}
+
+.filters-row button,
+.search-row button {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   TABLE (GLASS) — fixed layout, no horizontal scroll
+============================================================ */
+.table-wrapper {
   width: 100%;
+  max-height: 420px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset;
 }
 
-@media (max-width: 768px) {
-  .module-right .form-grid,
-  .module-right .form-grid-2 {
-    grid-template-columns: 1fr;
-  }
+.table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* prevents column collapse/overlap */
+  font-size: 14px;
+  color: var(--text);
+}
+
+.table-wrapper th,
+.table-wrapper td {
+  padding: 10px 14px;
+  text-align: left;
+  vertical-align: middle;
+  word-break: break-word;
+}
+
+.table-wrapper th {
+  position: sticky;
+  top: 0;
+  background: rgba(255,255,255,0.04);
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.table-wrapper tr:hover td {
+  background: rgba(255,255,255,0.03);
+}
+
+/* sensible default column widths (can be overridden in HTML if needed) */
+.table-wrapper th:nth-child(1) { width: 110px; } /* ID */
+.table-wrapper th:nth-child(2) { width: 180px; } /* Name */
+.table-wrapper th:nth-child(3) { width: 140px; } /* Phone/Vendor */
+.table-wrapper th:nth-child(4) { width: 90px; }  /* Status */
+.table-wrapper th:nth-child(5) { width: auto; }   /* Location */
+
+/* pagination/footer */
+.table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 /* ============================================================
-   FLEXIBLE FORM GRIDS (LEFT SIDE)
+   FORMS — universal styles
+   Right-side form uses 2-column grid by default
 ============================================================ */
+.form-grid,
 .form-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px 20px;
+  gap: 12px 16px;
+  width: 100%;
 }
 
-.form-grid-3 {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 14px 20px;
-}
-
-@media (max-width: 768px) {
-  .form-grid-2,
-  .form-grid-3 {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 520px) {
+  .form-grid,
+  .form-grid-2 { grid-template-columns: 1fr; }
 }
 
 .form-group {
@@ -109,158 +220,136 @@ body {
 }
 
 .form-group label {
+  font-size: 13px;
   font-weight: 600;
-  margin-bottom: 4px;
+  color: var(--muted);
 }
 
-/* ============================================================
-   INPUTS + SELECTS + TEXTAREA
-============================================================ */
-input,
+/* section label to create visual grouping inside forms */
+.form-section-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  margin: 8px 0 6px;
+}
+
+/* inputs */
+input[type="text"],
+input[type="tel"],
+input[type="date"],
 select,
 textarea {
   width: 100%;
-  max-width: 100%;
-  padding: 10px 14px;
+  padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.25);
-  background: rgba(255,255,255,0.12);
-  color: white;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
   font-size: 14px;
-  box-sizing: border-box;
+  outline: none;
 }
 
+textarea { resize: vertical; min-height: 80px; }
+
+/* focus */
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: #ffffff;
-  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 0 0 3px rgba(79,140,255,0.06);
+}
+
+/* action buttons row inside right panel */
+.form-actions,
+.button-row {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 12px;
 }
 
 /* ============================================================
    BUTTONS
 ============================================================ */
 .btn {
-  padding: 10px 18px;
+  padding: 10px 16px;
   border-radius: 10px;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
   font-size: 14px;
   border: none;
-  transition: 0.2s ease;
+  transition: all .14s ease;
+  color: var(--text);
+  background: rgba(255,255,255,0.06);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #4f8cff, #6a5cff);
-  color: white;
-}
-
-.btn-primary:hover {
-  opacity: 0.85;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: #fff;
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.15);
-  color: #e2e8f0;
-}
-
-.btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
 }
 
 .btn-danger {
   background: #ff4f4f;
-  color: white;
+  color: #fff;
 }
 
-.btn-danger:hover {
-  opacity: 0.85;
-}
-
-/* ============================================================
-   TABLE WRAPPER — GLASS TABLE (PREMIUM)
-============================================================ */
-table {
-  table-layout: fixed;
-  width: 100%;
-  word-wrap: break-word;
-}
-
-.table-wrapper {
-  width: 100%;
-  max-height: 420px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-.table-wrapper table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-  color: #e2e8f0;
-}
-
-.table-wrapper th {
-  position: sticky;
-  top: 0;
-  background: rgba(255, 255, 255, 0.12);
-  color: #cbd5e1;
-  font-weight: 600;
-  text-transform: uppercase;
-  padding: 10px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.table-wrapper td {
-  padding: 10px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.table-wrapper tr:hover td {
-  background: rgba(255, 255, 255, 0.08);
+/* small icon buttons */
+.btn-icon {
+  padding: 8px 10px;
+  border-radius: 8px;
 }
 
 /* ============================================================
-   FILTERS ROW
+   QR SECTION (machines only) — full-width balanced layout
 ============================================================ */
-.filters-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.filters-row input {
-  flex: 1;
-  max-width: 300px;
-}
-
-.filters-row select {
-  width: 160px;
-}
-
-/* ============================================================
-   CARD HEADER
-============================================================ */
-.card-header {
-  font-size: 22px;
-  font-weight: 600;
-  font-family: 'Sora', sans-serif;
-  color: #ffffff;
-  margin-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 8px;
-}
-
-/* ============================================================
-   QR SECTION (ONLY MACHINES WILL USE)
-============================================================ */
-.qr-preview,
-.qr-button-column {
+.qr-section {
+  display: grid;
+  grid-template-columns: 1fr 160px 120px;
+  gap: 16px;
   width: 100%;
-  max-width: 160px;
-  margin: 0 auto;
+  align-items: start;
+  margin-top: 8px;
 }
+
+@media (max-width: 700px) {
+  .qr-section { grid-template-columns: 1fr 140px; grid-auto-rows: auto; }
+  .qr-section > .qr-buttons { grid-column: 1 / -1; display:flex; gap:8px; justify-content:flex-start; }
+}
+
+.qr-notes label { font-weight:600; color:var(--muted); margin-bottom:6px; }
+.qr-preview { width:100%; max-width:160px; margin:0 auto; display:flex; justify-content:center; align-items:center; }
+.qr-buttons { display:flex; flex-direction:column; gap:8px; }
+
+/* ============================================================
+   SMALL UTILITIES
+============================================================ */
+.center { display:flex; align-items:center; justify-content:center; }
+.muted { color: var(--muted); font-size:13px; }
+
+/* ============================================================
+   MODULE INNER (left content container)
+============================================================ */
+.module-left-inner {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================================
+   TWEAKS FOR PROFESSIONAL POLISH
+   - subtle spacing, consistent typography, accessible sizes
+============================================================ */
+.card-header + .filters-row { margin-top: 4px; }
+.form-grid .form-group[style*="grid-column"] { grid-column: auto; } /* allow inline overrides */
+.table-wrapper::-webkit-scrollbar { height:8px; width:8px; }
+.table-wrapper::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius:8px; }
+
+/* ============================================================
+   END OF FILE
+============================================================ */
