@@ -1,11 +1,13 @@
 <div id="machines-module" class="module-wrapper machines-module">
 
-  <!-- LEFT SIDE: TABLE + HEADER -->
-  <div class="module-left">
-    <div class="card-header">Machine Management</div>
+<!-- LEFT SIDE: TABLE + HEADER -->
+<div class="module-left">
+  <div class="card-header">Machine Management</div>
+
+  <!-- Shared container for alignment -->
+  <div class="module-left-inner">
 
     <!-- SEARCH + FILTERS + BUTTONS IN ONE ROW -->
-     <div class="module-left-inner">
     <div class="filters-row">
       <input type="text" id="machines-search-input" class="input" placeholder="Search by Machine ID or Name" />
       <select id="machines-health-filter" class="select">
@@ -19,9 +21,9 @@
       </select>
       <button id="machines-refresh-btn" class="btn btn-secondary">Refresh</button>
       <button id="machines-export-csv-btn" class="btn btn-secondary">Export CSV</button>
-      </div>
-     </div>
+    </div>
 
+    <!-- TABLE -->
     <div class="table-wrapper">
       <table>
         <thead>
@@ -38,6 +40,7 @@
       </table>
     </div>
 
+    <!-- PAGINATION -->
     <div class="table-footer">
       <span id="machines-pagination-text">Showing 0 of 0</span>
       <div class="pagination-controls">
@@ -46,7 +49,9 @@
         <button id="machines-next-page" class="btn btn-icon" disabled>&gt;</button>
       </div>
     </div>
+
   </div>
+</div>
 
   <!-- RIGHT SIDE: FORM -->
   <div class="module-right">

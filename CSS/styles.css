@@ -262,6 +262,28 @@ textarea:focus {
   box-sizing: border-box;
 }
 
+.filters-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filters-row input {
+  flex: 1;
+  max-width: 300px;
+}
+
+.filters-row select {
+  width: 160px;
+}
+
+.filters-row button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 /* ============================================================
    MODULE OVERRIDES (OPTIONAL)
 ============================================================ */
