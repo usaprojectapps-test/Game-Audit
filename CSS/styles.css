@@ -519,3 +519,9 @@ input:focus, select:focus, textarea:focus {
   width: 100% !important;
   justify-content: flex-end !important;
 }
+/* ===== DIAGNOSTIC OVERLAY — paste at end of CSS, reload page ===== */
+.module-right { outline: 2px solid rgba(0,255,200,0.06); background: rgba(0,0,0,0.02); }
+.module-right > * { outline: 1px dashed rgba(255,255,255,0.03); }
+.module-right .form-grid { background: rgba(255,0,0,0.03); outline: 1px solid rgba(255,0,0,0.06); }
+.module-right .form-group { background: rgba(0,128,255,0.02); outline: 1px dotted rgba(0,128,255,0.04); }
+.module-right input, .module-right select, .module-right textarea { background: rgba(255,255,255,0.02); outline: 1px solid rgba(255,255,255,0.02); }
