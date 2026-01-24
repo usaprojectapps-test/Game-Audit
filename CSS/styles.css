@@ -172,8 +172,7 @@ select option {
 /* ============================================================
    SEARCH BAR (Vendor + Users + Locations)
 ============================================================ */
-.search-row,
-.vendor-search-bar {
+.search-row {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
@@ -181,20 +180,14 @@ select option {
   margin-bottom: 16px;
 }
 
-.search-row input,
-.vendor-search-bar input {
+.search-row input{
   flex: 1 1 auto;
   max-width: 300px;
 }
 
-.search-row select,
-.vendor-search-bar select {
+.search-row select {
   flex: 0 0 auto;
   width: 160px;
-}
-
-.vendor-search-bar input::placeholder {
-  color: #ccc;
 }
 
 .filters-row {

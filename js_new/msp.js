@@ -129,7 +129,7 @@ async function initMSPModule() {
     saveBtn.addEventListener("click", saveEntry);
     deleteBtn.addEventListener("click", deleteEntry);
 
-    // FIXED SCANNER
+    // SCANNER
     scanBtn.addEventListener("click", () => {
       qrScanner.open({
         targetInputId: "formMachineNo",
@@ -141,7 +141,7 @@ async function initMSPModule() {
       });
     });
 
-    // FIXED: machine number typed manually
+    // Manual machine entry
     formMachineNo.addEventListener("change", () => {
       const machine = formMachineNo.value?.trim();
       if (machine) {
@@ -164,7 +164,7 @@ async function initMSPModule() {
       formType.value = "MSP";
       formAmount.value = "";
       formNotes.value = "";
-      formMachineTotal.textContent = "₹0.00";
+      formMachineTotal.textContent = "$0.00";
       editingEntryId = null;
       selectedMachine = null;
     }
@@ -176,20 +176,16 @@ async function initMSPModule() {
           .select("*")
           .order("name");
 
-        if (error) {
-          console.error("Failed to load locations:", error);
-          return;
-        }
+        if (error) return;
 
         locationSelect.innerHTML =
           `<option value="">-- Select Location --</option>` +
           data.map((l) => `<option value="${l.id}">${l.name}</option>`).join("");
 
-        locationSelect.value = ""; // force selection
+        locationSelect.value = "";
         return;
       }
 
-      // LocationAdmin
       const { data: loc } = await supabase
         .from("locations")
         .select("name")
@@ -228,7 +224,7 @@ async function initMSPModule() {
         dailyTotal += Number(e.amount);
       });
 
-      dailyTotalBox.textContent = `₹${dailyTotal}`;
+      dailyTotalBox.textContent = `$${dailyTotal.toFixed(2)}`;
 
       let maxMSP = 0;
       Object.values(machines).forEach(list => {
@@ -244,7 +240,7 @@ async function initMSPModule() {
         headerHTML += `<th>MSP${i}</th>`;
       }
 
-      headerHTML += `<th>Total</th>`;
+      headerHTML += `<th>EOD</th><th>Total</th>`;
 
       if (userRole === "SuperAdmin") {
         headerHTML += `<th>Location</th>`;
@@ -258,6 +254,7 @@ async function initMSPModule() {
       Object.keys(machines).forEach(machineNo => {
         const list = machines[machineNo];
         const msps = list.filter(x => x.type === "MSP");
+        const eod = list.find(x => x.type === "EOD");
         const total = list.reduce((sum, x) => sum + Number(x.amount), 0);
 
         let rowHTML = `<tr class="msp-row" data-machine="${machineNo}">
@@ -268,7 +265,8 @@ async function initMSPModule() {
           rowHTML += `<td>${msps[i] ? msps[i].amount : ""}</td>`;
         }
 
-        rowHTML += `<td>${total}</td>`;
+        rowHTML += `<td>${eod ? eod.amount : ""}</td>`;
+        rowHTML += `<td>$${total.toFixed(2)}</td>`;
 
         if (userRole === "SuperAdmin") {
           rowHTML += `<td>${locationSelect.options[locationSelect.selectedIndex].text}</td>`;
@@ -304,7 +302,7 @@ async function initMSPModule() {
         formType.value = "MSP";
         formAmount.value = "";
         formNotes.value = "";
-        formMachineTotal.textContent = "₹0.00";
+        formMachineTotal.textContent = "$0.00";
         return;
       }
 
@@ -316,7 +314,7 @@ async function initMSPModule() {
       formNotes.value = last.remarks || "";
 
       const total = data.reduce((sum, x) => sum + Number(x.amount), 0);
-      formMachineTotal.textContent = `₹${total.toFixed(2)}`;
+      formMachineTotal.textContent = `$${total.toFixed(2)}`;
     }
 
     async function saveEntry() {
@@ -389,7 +387,7 @@ async function initMSPModule() {
 
       showToast("Deleted", "warning");
       await loadTable();
-      formMachineTotal.textContent = "₹0.00";
+      formMachineTotal.textContent = "$0.00";
       editingEntryId = null;
     }
 
@@ -398,7 +396,4 @@ async function initMSPModule() {
   }
 }
 
-// -------------------------------------------------------------
-// MAKE FUNCTION AVAILABLE GLOBALLY
-// -------------------------------------------------------------
 window.initMSPModule = initMSPModule;
