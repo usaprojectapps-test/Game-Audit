@@ -128,14 +128,15 @@ async function initMSPModule() {
 
     scanBtn.addEventListener("click", () => {
       qrScanner.open({
-        targetInputId: "formMachineNo",
-        onScan: (result) => {
-          formMachineNo.value = result;
-          selectedMachine = result;
-          loadMachineEntries(result);
-        }
-      });
-    });
+      targetInputId: "formMachineNo",
+      onScan: (result) => {
+      formMachineNo.value = result;
+      selectedMachine = result;
+      loadMachineEntries(result);
+    }
+  });
+});
+
 
     // -------------------------------------------------------------
     // INITIAL LOAD
@@ -332,37 +333,32 @@ async function initMSPModule() {
     }
 
     async function saveEntry() {
-      if (!selectedMachine) {
-        showToast("Select a machine first", "error");
-        return;
-      }
+  if (!selectedMachine || !editingEntryId) {
+    showToast("Select a machine first", "error");
+    return;
+  }
 
-      if (!editingEntryId) {
-        showToast("No existing entry selected to update", "error");
-        return;
-      }
+  const payload = {
+    type: formType.value,
+    amount: Number(formAmount.value),
+    remarks: formNotes.value
+  };
 
-      const payload = {
-        type: formType.value,
-        amount: Number(formAmount.value),
-        remarks: formNotes.value
-      };
+  const { error } = await supabase
+    .from("msp")
+    .update(payload)
+    .eq("id", editingEntryId);
 
-      const { error } = await supabase
-        .from("msp")
-        .update(payload)
-        .eq("id", editingEntryId);
+  if (error) {
+    console.error("MSP save error:", error);
+    showToast("Save failed", "error");
+    return;
+  }
 
-      if (error) {
-        console.error("MSP save error:", error);
-        showToast("Save failed", "error");
-        return;
-      }
-
-      showToast("Saved", "success");
-      await loadTable();
-      await loadMachineEntries(selectedMachine);
-    }
+  showToast("Saved", "success");
+  await loadTable();
+  await loadMachineEntries(selectedMachine);
+}
 
     async function deleteEntry() {
       if (!editingEntryId) return;
