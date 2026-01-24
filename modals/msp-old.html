@@ -1,0 +1,98 @@
+<div class="module-container msp-module">
+
+  <div class="module-header">
+    <h2>MSP Entry</h2>
+  </div>
+
+  <div class="module-container"> 
+    <div class="module-body msp-flex">
+
+    <!-- LEFT SIDE — 65% -->
+    <div class="module-left">
+      <!-- 1 Row 3 Column -->
+      <div class="row-3col">
+
+        <!-- Location -->
+        <div class="form-item">
+          <label>Location</label>
+          <select id="mspLocation" class="input"></select>
+        </div>
+
+        <!-- Date -->
+        <div class="form-item">
+          <label>Date</label>
+          <input id="mspDate" type="date" class="input" />
+        </div>
+
+        <!-- Daily Total -->
+        <div class="form-item">
+          <label>Total Amount</label>
+          <div id="mspDailyTotal" class="summary-value">$0.00</div>
+        </div>
+
+      </div>
+
+      <!-- TABLE -->
+      <table id="mspTable" class="striped">
+        <thead id="mspTableHead"></thead>
+        <tbody id="mspTableBody"></tbody>
+      </table>
+
+    </div>
+
+    <!-- RIGHT SIDE — 35% -->
+    <div class="module-right">
+
+      <!-- Row 1: Date + Machine No -->
+      <div class="row-2col">
+        <div class="form-item">
+          <label>Date</label>
+          <input id="formDate" type="date" class="input" />
+        </div>
+        <div class="form-item">
+           <label>Machine No</label>
+            <div class="input-with-btn">
+              <input id="formMachineNo" type="text" class="input" />
+              <button id="mspQRBtn" class="btn">Scan</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: MSP Type + Amount -->
+        <div class="row-2col">
+          <div class="form-item">
+            <label>MSP Type</label>
+            <select id="formType" class="input">
+              <option value="MSP">MSP</option>
+              <option value="EOD">EOD</option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>Amount</label>
+            <input id="formAmount" type="number" class="input" />
+          </div>
+        </div>
+
+        <!-- Row 3: Notes + Machine Total -->
+        <div class="row-2col">
+          <div class="form-item" style="flex: 0 0 60%;">
+            <label>Notes</label>
+            <input id="formNotes" type="text" class="input" />
+          </div>
+          <div class="form-item">
+            <label>Machine Total</label>
+            <div id="formMachineTotal" class="summary-value">$0.00</div>
+          </div>
+        </div>
+
+        <!-- Row 4: Save + Delete -->
+        <div class="form-actions">
+          <button id="mspSaveBtn" class="btn primary">Save</button>
+          <button id="mspDeleteBtn" class="btn danger">Delete</button>
+        </div>
+
+        <div id="mspStatus" class="status"></div>
+      </div>
+    </div> 
+</div>
+
