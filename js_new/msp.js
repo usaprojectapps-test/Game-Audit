@@ -329,6 +329,33 @@ async function initMSPModule() {
         return;
       }
 
+      // -------------------------------------------------------------
+      // MACHINE VALIDATION
+      // -------------------------------------------------------------
+      const { data: machineCheck, error: machineErr } = await supabase
+        .from("machines")
+        .select("machineid, location_id, healthstatus")
+        .eq("machineid", machine)
+        .single();
+
+      if (machineErr || !machineCheck) {
+        showToast("Machine number not found in machine list", "error");
+        return;
+      }
+
+      if (machineCheck.location_id !== locationSelect.value) {
+        showToast("Machine does not belong to the selected location", "error");
+        return;
+      }
+
+      if (machineCheck.healthstatus !== "Active") {
+        showToast("Machine is not active", "error");
+        return;
+      }
+
+      // -------------------------------------------------------------
+      // BUILD PAYLOAD
+      // -------------------------------------------------------------
       const { data: userData } = await supabase.auth.getUser();
 
       const payload = {
