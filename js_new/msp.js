@@ -1,3 +1,9 @@
+if (window.__MSP_SCRIPT_INCLUDED__) {
+  console.log("MSP.js was included twice — preventing duplicate execution");
+  throw new Error("Duplicate MSP.js load");
+}
+window.__MSP_SCRIPT_INCLUDED__ = true;
+
 // -------------------------------------------------------------
 // PREVENT DOUBLE LOAD
 // -------------------------------------------------------------
