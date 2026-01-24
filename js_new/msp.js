@@ -351,19 +351,25 @@ async function initMSPModule() {
       formMachineTotal.textContent = `$${total.toFixed(2)}`;
     }
 
-    async function saveEntry() {
-    if (!formMachineNo.value) {
+  async function saveEntry() {
+    const machine = formMachineNo.value?.trim();
+
+    if (!machine) {
       showToast("Enter or scan a machine number first", "error");
       return;
     }
 
+    // Build payload
+    const { data: userData } = await supabase.auth.getUser();
+
     const payload = {
+      machine_no: machine,
       entry_date: formDate.value,
-      machine_no: formMachineNo.value,
-      type: formType.value,
       amount: Number(formAmount.value),
+      type: formType.value,
       remarks: formNotes.value,
-      location_id: locationSelect.value
+      location_id: locationSelect.value,
+      created_by: userData.user.id
     };
 
     // UPDATE
@@ -398,7 +404,7 @@ async function initMSPModule() {
     }
 
     await loadTable();
-    await loadMachineEntries(formMachineNo.value);
+    await loadMachineEntries(machine);
   }
 
 
