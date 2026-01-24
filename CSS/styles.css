@@ -302,95 +302,51 @@ select option {
 /* ============================================================
    QR code + buttons+ NOTES
 ============================================================ */
-.notes-qr-inline-row {
+
+.form-grid-3 {
   display: flex;
-  flex-wrap: nowrap;
-  align-items: flex-start;
-  gap: 24px;
+  gap: 16px;
+  align-items: stretch;
   margin-top: 16px;
-  margin-bottom: 16px;
 }
-.notes-column {
+
+.form-grid-3 .form-group {
   flex: 1;
-  min-width: 280px;
-}
-
-.qr-column {
-  width: 160px;
-  flex-shrink: 0;
-}
-
-.qr-preview {
   display: flex;
   flex-direction: column;
-  align-items: center;     /* ⭐ Center horizontally */
-  justify-content: center; /* ⭐ Center vertically */
-  text-align: center;
-  position: relative;
+}
+
+.qr-preview.ticket-preview {
+  flex: 1;
+  min-height: 120px;
+  background: #f4f4f4;
+  border: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .qr-button-column {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  min-width: 140px;
-  flex-shrink: 0;
-}
-@media (max-width: 768px) {
-  .notes-qr-inline-row {
-    flex-direction: column;
-  }
-
-  .qr-button-column {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
+  justify-content: space-between;
+  height: 100%;
 }
 
-/* Mini Ticket Style */
-.ticket-preview {
-  width: 140px;                 /* slightly narrower */
-  padding: 8px 10px;            /* reduced padding */
-  border: 2px solid #000;
-  border-radius: 8px;
-  background: #fff;
+.qr-button-column button {
+  flex: 1;
+  margin-bottom: 8px;
+  min-height: 40px;
+}
+
+.qr-button-column button:last-child {
+  margin-bottom: 0;
+}
+
+.button-row {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 4px;                     /* reduced spacing */
-  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
-}
-
-
-/* Center QR image */
-#machines-qr-canvas img,
-#machines-qr-canvas canvas {
-  width: 100px !important; /* reduced from 120 */ 
-  height: 60px !important;
-  display: block !important;
-  margin: 0 auto !important;
-}
-
-/* Label under QR */
-.qr-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #333;
-  line-height: 1.2;
-}
-/* Grid rows */
-.row-2col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  justify-content: flex-end;
   gap: 12px;
-  margin-bottom: 12px;
-}
-
-.row-3col {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 12px;
+  margin-top: 16px;
 }
