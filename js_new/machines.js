@@ -64,11 +64,11 @@ window.addEventListener("machinesModuleLoaded", () => {
   }
 
   function getHealthIcon(status) {
-    return status === "Good"
+    return status === "Active"
       ? "🟢"
-      : status === "Warning"
+      : status === "Error"
       ? "🟡"
-      : status === "Critical"
+      : status === "Inactive"
       ? "🔴"
       : "—";
   }
@@ -197,7 +197,7 @@ window.addEventListener("machinesModuleLoaded", () => {
     nameInput.value = machine.machinename || "";
     vendorSelect.value = machine.vendorid || "";
     locationSelect.value = machine.location_id || "";
-    healthSelect.value = machine.healthstatus || "Good";
+    healthSelect.value = machine.healthstatus || "Active";
     lastServiceInput.value = formatDateInput(machine.lastservicedate);
     notesInput.value = machine.notes || "";
   }
@@ -208,7 +208,7 @@ window.addEventListener("machinesModuleLoaded", () => {
     nameInput.value = "";
     vendorSelect.value = "";
     locationSelect.value = "";
-    healthSelect.value = "Good";
+    healthSelect.value = "Active";
     lastServiceInput.value = "";
     notesInput.value = "";
   }
