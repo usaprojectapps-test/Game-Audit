@@ -126,35 +126,17 @@ async function initMSPModule() {
     saveBtn.addEventListener("click", saveEntry);
     deleteBtn.addEventListener("click", deleteEntry);
 
-    scanBtn.addEventListener("click", async () => {
-  try {
-    const video = document.getElementById("qrVideo");
-
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment" }
-    });
-
-    video.srcObject = stream;
-    await video.play();
-
-    qrScanner.open({
-      targetInputId: "formMachineNo",
-      videoElement: video,
-      onScan: (result) => {
-        formMachineNo.value = result;
-        selectedMachine = result;
-        loadMachineEntries(result);
-
-        // Stop camera
-        stream.getTracks().forEach(t => t.stop());
-      }
-    });
-
-  } catch (err) {
-    console.error("Camera error:", err);
-    showToast("Camera failed to open", "error");
-  }
+    scanBtn.addEventListener("click", () => {
+  qrScanner.open({
+    targetInputId: "formMachineNo",
+    onScan: (result) => {
+      formMachineNo.value = result;
+      selectedMachine = result;
+      loadMachineEntries(result);
+    }
+  });
 });
+
   // -------------------------------------------------------------
     // INITIAL LOAD
     // -------------------------------------------------------------
