@@ -333,32 +333,55 @@ async function initMSPModule() {
     }
 
     async function saveEntry() {
-  if (!selectedMachine || !editingEntryId) {
-    showToast("Select a machine first", "error");
-    return;
+    if (!formMachineNo.value) {
+      showToast("Enter or scan a machine number first", "error");
+      return;
+    }
+
+    const payload = {
+      entry_date: formDate.value,
+      machine_no: formMachineNo.value,
+      type: formType.value,
+      amount: Number(formAmount.value),
+      remarks: formNotes.value,
+      location_id: locationSelect.value
+    };
+
+    // UPDATE
+    if (editingEntryId) {
+      const { error } = await supabase
+        .from("msp")
+        .update(payload)
+        .eq("id", editingEntryId);
+
+      if (error) {
+        console.error("MSP update error:", error);
+        showToast("Update failed", "error");
+        return;
+      }
+
+      showToast("Updated", "success");
+    }
+
+    // INSERT
+    else {
+      const { error } = await supabase
+        .from("msp")
+        .insert(payload);
+
+      if (error) {
+        console.error("MSP insert error:", error);
+        showToast("Insert failed", "error");
+        return;
+      }
+
+      showToast("Saved", "success");
+    }
+
+    await loadTable();
+    await loadMachineEntries(formMachineNo.value);
   }
 
-  const payload = {
-    type: formType.value,
-    amount: Number(formAmount.value),
-    remarks: formNotes.value
-  };
-
-  const { error } = await supabase
-    .from("msp")
-    .update(payload)
-    .eq("id", editingEntryId);
-
-  if (error) {
-    console.error("MSP save error:", error);
-    showToast("Save failed", "error");
-    return;
-  }
-
-  showToast("Saved", "success");
-  await loadTable();
-  await loadMachineEntries(selectedMachine);
-}
 
     async function deleteEntry() {
       if (!editingEntryId) return;
