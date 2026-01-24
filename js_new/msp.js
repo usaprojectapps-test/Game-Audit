@@ -155,9 +155,7 @@ async function initMSPModule() {
     showToast("Camera failed to open", "error");
   }
 });
-
-
-    // -------------------------------------------------------------
+  // -------------------------------------------------------------
     // INITIAL LOAD
     // -------------------------------------------------------------
     await loadLocations();
@@ -170,6 +168,18 @@ async function initMSPModule() {
     // -------------------------------------------------------------
     // FUNCTIONS
     // -------------------------------------------------------------
+      function clearForm() {
+        formMachineNo.value = "";
+        formType.value = "MSP";
+        formAmount.value = "";
+        formNotes.value = "";
+        formMachineTotal.textContent = "₹0.00";
+        editingEntryId = null;
+        selectedMachine = null;
+      }
+
+
+
     async function loadLocations() {
   if (userRole === "SuperAdmin") {
     const { data, error } = await supabase
@@ -182,9 +192,9 @@ async function initMSPModule() {
       return;
     }
 
-    locationSelect.innerHTML = data
-      .map((l) => `<option value="${l.id}">${l.name}</option>`)
-      .join("");
+    locationSelect.innerHTML =
+    `<option value="">-- Select Location --</option>` +
+    data.map((l) => `<option value="${l.id}">${l.name}</option>`).join("");
 
     locationSelect.value = data?.[0]?.id || "";
     return;
@@ -352,6 +362,11 @@ async function initMSPModule() {
     }
 
   async function saveEntry() {
+      if (userRole === "SuperAdmin" && !locationSelect.value) {
+       showToast("Please select a location", "error");
+        return;
+      }
+
     const machine = formMachineNo.value?.trim();
 
     if (!machine) {
@@ -405,6 +420,7 @@ async function initMSPModule() {
 
     await loadTable();
     await loadMachineEntries(machine);
+    clearForm();
   }
 
 
