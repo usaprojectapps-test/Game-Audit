@@ -27,22 +27,12 @@ body {
   box-sizing: border-box;
 }
 
-.module-left {
-  flex: 0 0 65% !important;
-  max-width: 65% !important;
-  min-width: 0;
-  box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  padding: 20px;
-  overflow: hidden;
-}
-
-.module-right {
-  flex: 0 0 35% !important;
-  max-width: 35% !important;
+.module-left,
+.module-right,
+.vendor-left,
+.vendor-right {
+  flex: 0 0 50%;
+  max-width: 50%;
   min-width: 0;
   box-sizing: border-box;
   background: rgba(255, 255, 255, 0.06);
@@ -379,4 +369,396 @@ select option {
   font-weight: 600;
   color: #333;
   line-height: 1.2;
+}
+/* -------------------------------------------------------------
+   AUDIT MODULE — Custom Styling
+------------------------------------------------------------- */
+
+/* 65 / 35 layout */
+.audit-module .module-left {
+  flex: 0 0 65%;
+  max-width: 65%;
+}
+
+.audit-module .module-right {
+  flex: 0 0 35%;
+  max-width: 35%;
+}
+
+#qrModal {
+  display: none !important;
+}
+
+/* QR Scanner Modal */
+.qr-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.qr-overlay.show {
+  display: flex !important;
+}
+
+.qr-modal {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  width: 320px;
+}
+
+.qr-video {
+  width: 280px;
+  height: 280px;
+  border-radius: 10px;
+  background: #000;
+}
+
+.qr-close-btn {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: #d9534f;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Grid rows */
+.row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.row-3col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* Dark theme */
+.audit-module-container { color: #e6eef8; }
+
+/* Panels */
+.audit-module .module-left,
+.audit-module .module-right {
+  background: rgba(255,255,255,0.06);
+  color: #e6eef8;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+}
+
+/* Labels */
+.audit-module .form-item label {
+  color: #bcd3f7;
+  font-weight: 600;
+}
+
+/* Inputs */
+.audit-module .form-item input,
+.audit-module .form-item select,
+.audit-module .summary-value {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #e6eef8;
+}
+
+/* Summary */
+.audit-module .summary-value {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.12);
+  font-size: 14px;
+}
+
+/* Table */
+.audit-module table.striped th {
+  color: #9fbbe8;
+  background: rgba(255,255,255,0.06);
+}
+
+.audit-module table.striped td {
+  color: #dbeeff;
+}
+
+/* Buttons */
+.audit-module .btn {
+  background: transparent;
+  color: #dbeeff;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.audit-module .btn.primary {
+  background: linear-gradient(180deg,#1f6fff,#0b4fd6);
+  color: #fff;
+}
+
+/* Responsive */
+@media (max-width:720px) {
+  .audit-module .module-left,
+  .audit-module .module-right {
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .row-2col,
+  .row-3col {
+    grid-template-columns: 1fr;
+  }
+}
+/* Force 65 / 35 split for audit module */
+.audit-module-container .audit-module {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.audit-module-container .audit-module .module-left {
+  flex: 0 0 65% !important;
+  max-width: 65% !important;
+}
+
+.audit-module-container .audit-module .module-right {
+  flex: 0 0 35% !important;
+  max-width: 35% !important;
+}
+/* -------------------------------------------------------------
+   MSP MODULE — Final Combined Styling (Dark Theme)
+------------------------------------------------------------- */
+
+/* 65/35 Layout */
+.msp-flex {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.msp-flex .module-right {
+  flex: 0 0 35%;
+  max-width: 35%;
+}
+
+.msp-flex .module-left {
+  max-width: 700px;
+}
+
+.msp-flex .module-left {
+  flex: 0 0 65%;
+  max-width: 65%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;     /* centers table */
+  justify-content: flex-start;
+}
+
+@media (max-width:720px) {
+  .msp-flex {
+    flex-direction: column;
+  }
+  .msp-flex .module-left,
+  .msp-flex .module-right {
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+}
+
+/* Remove Backgrounds */
+.msp-module .module-body,
+.msp-module table,
+.msp-module .entry-card {
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+/* Labels */
+.msp-module .form-item label {
+  color: #bcd3f7;
+  font-weight: 600;
+}
+
+/* Inputs */
+.msp-module .input {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  color: #e6eef8;
+}
+
+/* QR Button */
+.msp-module .input-with-btn {
+  display: flex;
+  gap: 10px;
+}
+
+.msp-module .btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #dbeeff;
+  cursor: pointer;
+}
+
+.msp-module .btn.primary {
+  background: linear-gradient(180deg,#1f6fff,#0b4fd6);
+  color: #fff;
+}
+
+/* Notes + Total */
+.notes-with-total {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.total-box {
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 10px;
+  min-width: 80px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Entry List */
+.entry-list {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.entry-card strong {
+  color: #9fbbe8;
+}
+
+.entry-remarks {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.entry-time {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: 4px;
+}
+
+/* Save Button */
+.form-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* -------------------------------------------------------------
+   Professional Table Styling
+------------------------------------------------------------- */
+
+.msp-module table.striped {
+  width: 100%;
+  max-width: 600px;        /* keeps table centered and readable */
+  border-collapse: collapse;
+  font-size: 14px;
+  color: #dbeeff;
+}
+
+.msp-module table.striped th,
+.msp-module table.striped td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  text-align: left;
+}
+
+.msp-module table.striped th {
+  color: #9fbbe8;
+  font-weight: 600;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+}
+
+.msp-module table.striped tr:nth-child(even) {
+  background-color: rgba(255,255,255,0.02);
+}
+
+.msp-module table.striped tr:hover {
+  background-color: rgba(255,255,255,0.04);
+  cursor: pointer;
+}
+/* FORCE MSP LAYOUT TO BE 65–35 EXACTLY */
+.msp-module .module-body {
+  padding: 0 !important;
+  box-shadow: none !important;
+  background: none !important;
+}
+.msp-module .row-3col {
+  margin-bottom: 16px;
+}
+.module-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+  box-sizing: border-box;
+}
+
+/* LEFT PANEL — TRUE 65% */
+.msp-module .module-left {
+  width: 65% !important;
+  max-width: 65% !important;
+  flex: 0 0 65% !important;
+  display: block !important;
+  margin: 0 !important;
+  padding-right: 10px !important;
+}
+
+/* RIGHT PANEL — TRUE 35% */
+.msp-module .module-right {
+  width: 35% !important;
+  max-width: 35% !important;
+  flex: 0 0 35% !important;
+  margin: 0 !important;
+  padding-left: 10px !important;
+}
+
+/* TABLE CENTERING FIX */
+#mspTable {
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+.msp-module .module-left {
+  padding-left: 20px;
+  padding-right: 20px;
+  box-sizing: border-box;
+}
+#mspTable {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 600px;
+}
+.msp-module .module-left {
+  max-width: 780px;
+}
+.content-wrapper {
+  padding-left: 24px;
+  padding-right: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
