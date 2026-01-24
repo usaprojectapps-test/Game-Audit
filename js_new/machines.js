@@ -5,13 +5,11 @@ import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 
 console.log("MACHINES JS LOADED");
-console.log("✅ machines.js file is executing");
 
-
-// MAIN WRAPPER STARTS HERE
+// MAIN WRAPPER
 window.addEventListener("machinesModuleLoaded", () => {
   console.log("Machines module fully loaded");
-  
+
   // -------------------------------------------------------------
   // DOM ELEMENTS
   // -------------------------------------------------------------
@@ -65,11 +63,11 @@ window.addEventListener("machinesModuleLoaded", () => {
 
   function getHealthIcon(status) {
     return status === "Active"
-      ? "🟢"
-      : status === "Error"
-      ? "🟡"
+      ? "🟢 Active"
+      : status === "Issue"
+      ? "🟡 Issue"
       : status === "Inactive"
-      ? "🔴"
+      ? "🔴 Inactive"
       : "—";
   }
 
