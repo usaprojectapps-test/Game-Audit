@@ -1,220 +1,199 @@
-/* =========================
-   FINAL GLOBAL LAYOUT — MATCH IMAGE 1
-   Paste this at the end of your stylesheet (or replace old layout rules)
-   ========================= */
-
-:root{
-  --bg-1:#0f172a; --bg-2:#1e1b4b; --bg-3:#312e81;
-  --glass-bg: rgba(255,255,255,0.06);
-  --glass-border: rgba(255,255,255,0.15);
-  --muted:#cbd5e1; --text:#e2e8f0;
-  --accent-1:#4f8cff; --accent-2:#6a5cff;
-}
-
-/* Reset box sizing */
-* { box-sizing: border-box; }
-
-/* Page background & base */
 body {
+  font-family: "Segoe UI", Roboto, sans-serif;
+  background: #f5f7fa;
   margin: 0;
   padding: 0;
-  min-height: 100vh;
-  font-family: 'Inter', sans-serif;
-  color: var(--text);
-  background: linear-gradient(135deg,var(--bg-1),var(--bg-2),var(--bg-3));
-  -webkit-font-smoothing:antialiased;
 }
 
-/* Module wrapper: left flexible, right compact */
-.module-wrapper {
-  display: flex;
-  gap: 20px;
-  width: 100%;
-  max-width: 1280px;   /* narrower max width for the balanced look in Image 1 */
-  margin: 28px auto;
-  padding: 0 20px;
-  align-items: stretch;
-  justify-content: flex-start;
+.container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* Left panel: flexible, takes remaining space */
-.module-left {
-  flex: 1 1 auto;
-  min-width: 0;
-  background: var(--glass-bg);
-  border-radius: 14px;
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(10px);
-  padding: 18px;
+h2, h3 {
+  color: #2c3e50;
+  margin-bottom: 20px;
 }
 
-/* Right panel: compact and visually balanced (Image 1) */
-.module-right {
-  flex: 0 0 320px;      /* compact width that matches Image 1 */
-  width: 320px;
-  max-width: 320px;
-  min-width: 300px;
-  background: var(--glass-bg);
-  border-radius: 14px;
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(10px);
-  padding: 18px;
+.form-card, .table-card {
+  margin-bottom: 40px;
+  padding: 20px;
+  background: #ecf0f1;
+  border-radius: 10px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.form-row {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  align-items: stretch; /* critical: children fill the panel width */
-  justify-content: flex-start;
+  margin-bottom: 16px;
 }
 
-/* Responsive: stack on small screens */
-@media (max-width: 880px) {
-  .module-wrapper { flex-direction: column; padding: 0 12px; gap: 14px; }
-  .module-right { width: 100%; max-width: 100%; min-width: 0; }
-}
-
-/* Card header */
-.card-header {
-  font-family: 'Sora', sans-serif;
-  font-size: 18px;
+label {
   font-weight: 600;
-  color: #fff;
-  margin: 0 0 10px 0;
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 6px;
+  color: #34495e;
 }
 
-/* Filters row */
-.filters-row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-
-.filters-row input[type="text"] {
-  flex: 1 1 300px;
+input, select {
   padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
+  border: 1px solid #bdc3c7;
+  border-radius: 6px;
+  font-size: 15px;
+  background: #fff;
+  transition: border 0.2s ease;
 }
 
-/* Table wrapper */
-.table-wrapper {
-  width: 100%;
-  max-height: 440px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.03);
-  padding: 6px;
+input:focus, select:focus {
+  border-color: #3498db;
+  outline: none;
 }
 
-.table-wrapper table {
+button {
+  padding: 12px 20px;
+  background: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background: #2980b9;
+}
+
+.msg {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #e74c3c;
+}
+
+table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
-  font-size: 14px;
-  color: var(--text);
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.table-wrapper th,
-.table-wrapper td {
-  padding: 10px 12px;
+th, td {
+  padding: 12px 16px;
   text-align: left;
-  vertical-align: middle;
-  word-break: break-word;
+  border-bottom: 1px solid #dfe6e9;
+  font-size: 14px;
 }
 
-.table-wrapper th {
-  position: sticky;
-  top: 0;
-  background: rgba(255,255,255,0.04);
-  color: var(--muted);
+th {
+  background: #bdc3c7;
+  color: #2c3e50;
   font-weight: 600;
-  font-size: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
-/* Table sensible widths */
-.table-wrapper th:nth-child(1){ width:110px; }
-.table-wrapper th:nth-child(2){ width:200px; }
-.table-wrapper th:nth-child(3){ width:140px; }
-.table-wrapper th:nth-child(4){ width:90px; }
-.table-wrapper th:nth-child(5){ width:auto; }
-
-/* Footer / pagination */
-.table-footer {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-top:12px;
-  color:var(--muted);
-  font-size:13px;
+tr:hover {
+  background: #f0f4f8;
 }
 
-/* Universal form styles (right panel) */
-/* Make right-panel form single-column so fields fill the panel (Image 1) */
-.module-right .form-grid,
-.module-right .form-grid-2 {
-  display: grid;
-  grid-template-columns: 1fr;   /* single column to fill panel */
-  gap: 12px;
+.disableBtn {
+  padding: 6px 12px;
+  background: #e67e22;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.disableBtn:hover {
+  background: #d35400;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+  }
+
+  input, select, button {
+    width: 100%;
+  }
+
+  th, td {
+    font-size: 13px;
+  }
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  align-items: start;
+  height: 100%;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* If you want two columns on very wide screens, uncomment and adjust breakpoint:
-@media (min-width:1200px) {
-  .module-right .form-grid { grid-template-columns: 1fr 1fr; }
+.modal-content {
+  width: 420px;
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
-*/
+<div class="glass-card" style="padding: 20px; margin-top: 20px;">
+  <div class="card-header">User Management</div>
+  <div class="card-subtitle">Create User</div>
 
-/* Form group */
-.form-group { display:flex; flex-direction:column; gap:6px; width:100%; }
-.form-group label { font-size:13px; font-weight:600; color:var(--muted); }
+  <div class="form-group">
+    <label>Name</label>
+    <input type="text" id="userName" class="input" />
+  </div>
 
-/* Inputs */
-input[type="text"], input[type="tel"], select, textarea {
-  width:100%;
-  padding:10px 12px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
-  font-size:14px;
-  outline:none;
+  <div class="form-group">
+    <label>Email</label>
+    <input type="email" id="userEmail" class="input" />
+  </div>
+
+  <div class="form-group">
+    <label>Password</label>
+    <input type="password" id="userPassword" class="input" />
+  </div>
+
+  <div class="form-group">
+    <label>Role</label>
+    <select id="userRole" class="dropdown">
+      <option value="">Select Role</option>
+      <option value="Admin">Admin</option>
+      <option value="Manager">Manager</option>
+      <option value="Audit">Audit</option>
+      <!-- Add more roles as needed -->
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label>Location</label>
+    <select id="userLocation" class="dropdown">
+      <option value="">Select Location</option>
+      <!-- Populate dynamically from Supabase -->
+    </select>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn-danger">Delete</button>
+    <button class="btn btn-primary">Save</button>
+  </div>
+</div>
+
+.users-module .left-panel {
+  width: 50%;
 }
 
-/* Make notes larger so panel feels filled */
-.module-right textarea { min-height:120px; resize:vertical; }
-
-/* Focus states */
-input:focus, select:focus, textarea:focus {
-  border-color: rgba(255,255,255,0.22);
-  background: rgba(255,255,255,0.06);
-  box-shadow: 0 0 0 4px rgba(79,140,255,0.06);
+.users-module .right-panel {
+  width: 50%;
 }
-
-/* Buttons row */
-.form-actions, .button-row { display:flex; gap:10px; justify-content:flex-end; margin-top:8px; }
-
-/* Buttons */
-.btn { padding:10px 14px; border-radius:10px; cursor:pointer; font-family:'Poppins',sans-serif; font-size:14px; border:none; transition:all .14s ease; }
-.btn-primary { background: linear-gradient(135deg,var(--accent-1),var(--accent-2)); color:#fff; }
-.btn-secondary { background: rgba(255,255,255,0.08); color:var(--text); }
-.btn-danger { background:#ff4f4f; color:#fff; }
-
-/* Defensive: ensure right panel children fill width */
-.module-right > * { width:100%; max-width:100%; margin:0; box-sizing:border-box; }
-
-/* Remove accidental centering from inline styles */
-.module-right [style*="margin: auto"], .module-right [style*="margin:auto"] { margin:0 !important; }
-
-/* Images/canvas inside right panel should not be centered or narrow */
-.module-right img, .module-right canvas, .module-right svg { width:100%; max-width:100%; height:auto; }
-
-/* Small polish */
-.card-header + .filters-row { margin-top:6px; }
