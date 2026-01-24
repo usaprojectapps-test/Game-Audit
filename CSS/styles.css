@@ -1,220 +1,276 @@
-/* =========================
-   FINAL GLOBAL LAYOUT — MATCH IMAGE 1
-   Paste this at the end of your stylesheet (or replace old layout rules)
-   ========================= */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&family=Sora:wght@500;600&family=Inter:wght@400;500&family=Poppins:wght@500&display=swap');
 
-:root{
-  --bg-1:#0f172a; --bg-2:#1e1b4b; --bg-3:#312e81;
-  --glass-bg: rgba(255,255,255,0.06);
-  --glass-border: rgba(255,255,255,0.15);
-  --muted:#cbd5e1; --text:#e2e8f0;
-  --accent-1:#4f8cff; --accent-2:#6a5cff;
-}
-
-/* Reset box sizing */
-* { box-sizing: border-box; }
-
-/* Page background & base */
 body {
   margin: 0;
   padding: 0;
-  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a, #1e1b4b, #312e81);
   font-family: 'Inter', sans-serif;
-  color: var(--text);
-  background: linear-gradient(135deg,var(--bg-1),var(--bg-2),var(--bg-3));
-  -webkit-font-smoothing:antialiased;
+  color: #e2e8f0;
+  min-height: 100vh;
 }
 
-/* Module wrapper: left flexible, right compact */
-.module-wrapper {
-  display: flex;
-  gap: 20px;
-  width: 100%;
-  max-width: 1280px;   /* narrower max width for the balanced look in Image 1 */
-  margin: 28px auto;
-  padding: 0 20px;
-  align-items: stretch;
-  justify-content: flex-start;
+/* -------------------------------
+   MODULE LAYOUT: Left + Right
+-------------------------------- */
+/* FINAL OVERRIDE FOR ALL MODULES */
+.module-body {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 20px !important;
 }
 
-/* Left panel: flexible, takes remaining space */
-.module-left {
-  flex: 1 1 auto;
-  min-width: 0;
-  background: var(--glass-bg);
-  border-radius: 14px;
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(10px);
-  padding: 18px;
-}
-
-/* Right panel: compact and visually balanced (Image 1) */
+.module-left,
 .module-right {
-  flex: 0 0 320px;      /* compact width that matches Image 1 */
-  width: 320px;
-  max-width: 320px;
-  min-width: 300px;
-  background: var(--glass-bg);
-  border-radius: 14px;
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(10px);
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: stretch; /* critical: children fill the panel width */
-  justify-content: flex-start;
+  flex: 1;
+  min-width: 0;
 }
 
-/* Responsive: stack on small screens */
-@media (max-width: 880px) {
-  .module-wrapper { flex-direction: column; padding: 0 12px; gap: 14px; }
-  .module-right { width: 100%; max-width: 100%; min-width: 0; }
+
+@media (max-width: 768px) {
+  .module-body {
+    flex-direction: column;
+  }
+
+  .module-left,
+  .module-right {
+    width: 100%;
+  }
 }
 
-/* Card header */
-.card-header {
-  font-family: 'Sora', sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-  color: #fff;
-  margin: 0 0 10px 0;
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-
-/* Filters row */
+/* -------------------------------
+   HEADER: Search + Filters
+-------------------------------- */
 .filters-row {
   display: flex;
-  gap: 10px;
   align-items: center;
-  margin-bottom: 14px;
+  gap: 12px;
   flex-wrap: wrap;
+  margin-bottom: 12px;
 }
 
-.filters-row input[type="text"] {
-  flex: 1 1 300px;
+.filter-group {
+  display: flex;
+  align-items: center;
+}
+
+.filter-group.wide {
+  flex: 1;
+}
+
+.filter-group button {
+  margin-left: 6px;
+}
+
+/* -------------------------------
+   FORM GRID
+-------------------------------- */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group-full {
+  grid-column: 1 / -1;
+}
+
+/* -------------------------------
+   INPUTS + SELECTS + TEXTAREA
+-------------------------------- */
+.form-group input,
+.form-group select,
+.form-group textarea {
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: 0.2s ease;
 }
 
-/* Table wrapper */
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffffcc;
+}
+
+/* -------------------------------
+   TABLE STYLING
+-------------------------------- */
+
+.module-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Inter', sans-serif;
+  color: white;
+}
+
+.module-table th {
+  text-align: left;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.module-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 14px;
+}
+
+.module-table tr:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .table-wrapper {
   width: 100%;
-  max-height: 440px;
+  max-height: 400px;
   overflow-y: auto;
-  overflow-x: hidden;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.03);
-  padding: 6px;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.04);
 }
 
 .table-wrapper table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
+  font-family: 'Inter', sans-serif;
   font-size: 14px;
-  color: var(--text);
-}
-
-.table-wrapper th,
-.table-wrapper td {
-  padding: 10px 12px;
-  text-align: left;
-  vertical-align: middle;
-  word-break: break-word;
+  color: #e2e8f0;
 }
 
 .table-wrapper th {
   position: sticky;
   top: 0;
-  background: rgba(255,255,255,0.04);
-  color: var(--muted);
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
   font-weight: 600;
-  font-size: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  text-transform: uppercase;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1;
 }
 
-/* Table sensible widths */
-.table-wrapper th:nth-child(1){ width:110px; }
-.table-wrapper th:nth-child(2){ width:200px; }
-.table-wrapper th:nth-child(3){ width:140px; }
-.table-wrapper th:nth-child(4){ width:90px; }
-.table-wrapper th:nth-child(5){ width:auto; }
-
-/* Footer / pagination */
-.table-footer {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-top:12px;
-  color:var(--muted);
-  font-size:13px;
+.table-wrapper td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
 }
 
-/* Universal form styles (right panel) */
-/* Make right-panel form single-column so fields fill the panel (Image 1) */
-.module-right .form-grid,
-.module-right .form-grid-2 {
-  display: grid;
-  grid-template-columns: 1fr;   /* single column to fill panel */
+.table-wrapper tr:hover td {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* -------------------------------
+   BUTTONS
+-------------------------------- */
+.btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.btn-danger {
+  background: #ff4f4f;
+  color: white;
+}
+
+.btn-danger:hover {
+  opacity: 0.85;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4f8cff, #6a5cff);
+  color: white;
+}
+
+.btn-primary:hover {
+  opacity: 0.85;
+}
+
+.button-row {
+  display: flex;
+  justify-content: flex-end;
   gap: 12px;
+  margin-top: 16px;
+}
+
+/* -------------------------------
+   QR Layout (Notes + QR + Buttons)
+-------------------------------- */
+.notes-qr-inline-row {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.notes-column {
+  flex: 1;
+  min-width: 300px;
+}
+
+.qr-column {
+  width: 160px;
+}
+
+.qr-preview {
   width: 100%;
-  align-items: start;
+  height: 120px;
+  background: #f4f4f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ccc;
 }
 
-/* If you want two columns on very wide screens, uncomment and adjust breakpoint:
-@media (min-width:1200px) {
-  .module-right .form-grid { grid-template-columns: 1fr 1fr; }
-}
-*/
-
-/* Form group */
-.form-group { display:flex; flex-direction:column; gap:6px; width:100%; }
-.form-group label { font-size:13px; font-weight:600; color:var(--muted); }
-
-/* Inputs */
-input[type="text"], input[type="tel"], select, textarea {
-  width:100%;
-  padding:10px 12px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
-  font-size:14px;
-  outline:none;
+.qr-button-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 140px;
 }
 
-/* Make notes larger so panel feels filled */
-.module-right textarea { min-height:120px; resize:vertical; }
-
-/* Focus states */
-input:focus, select:focus, textarea:focus {
-  border-color: rgba(255,255,255,0.22);
-  background: rgba(255,255,255,0.06);
-  box-shadow: 0 0 0 4px rgba(79,140,255,0.06);
+/* -------------------------------
+   TOASTS
+-------------------------------- */
+.toast-container {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
-
-/* Buttons row */
-.form-actions, .button-row { display:flex; gap:10px; justify-content:flex-end; margin-top:8px; }
-
-/* Buttons */
-.btn { padding:10px 14px; border-radius:10px; cursor:pointer; font-family:'Poppins',sans-serif; font-size:14px; border:none; transition:all .14s ease; }
-.btn-primary { background: linear-gradient(135deg,var(--accent-1),var(--accent-2)); color:#fff; }
-.btn-secondary { background: rgba(255,255,255,0.08); color:var(--text); }
-.btn-danger { background:#ff4f4f; color:#fff; }
-
-/* Defensive: ensure right panel children fill width */
-.module-right > * { width:100%; max-width:100%; margin:0; box-sizing:border-box; }
-
-/* Remove accidental centering from inline styles */
-.module-right [style*="margin: auto"], .module-right [style*="margin:auto"] { margin:0 !important; }
-
-/* Images/canvas inside right panel should not be centered or narrow */
-.module-right img, .module-right canvas, .module-right svg { width:100%; max-width:100%; height:auto; }
-
-/* Small polish */
-.card-header + .filters-row { margin-top:6px; }
