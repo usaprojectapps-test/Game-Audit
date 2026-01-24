@@ -16,8 +16,7 @@ body {
 /* ============================================================
    UNIVERSAL MODULE LAYOUT — 50/50 LEFT TABLE + RIGHT FORM
 ============================================================ */
-.module-wrapper,
-.vendor-wrapper {
+.module-wrapper {
   display: flex;
   flex-wrap: nowrap;
   gap: 20px;
@@ -60,13 +59,8 @@ body {
     flex-direction: column;
   }
 
-  .module-left,
-  .module-right,
-  .vendor-left,
-  .vendor-right {
-    max-width: 100%;
-    flex: 0 0 100%;
-  }
+  .module-left, .module-right,.vendor-left,
+  .vendor-right {max-width: 100%;    flex: 0 0 100%; }
 }
 
 /* ============================================================
