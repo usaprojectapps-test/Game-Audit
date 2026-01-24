@@ -358,3 +358,23 @@ select option {
   gap: 12px;
   margin-bottom: 12px;
 }
+.qr-video {
+  width: 300px !important;
+  height: 300px !important;
+  background: #000;
+}
+.qr-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 9999;
+}
+
+.qr-modal {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+}
