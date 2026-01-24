@@ -344,3 +344,17 @@ select option {
   gap: 12px;
   margin-top: 16px;
 }
+/* Grid rows */
+.row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.row-3col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
