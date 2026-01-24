@@ -109,6 +109,7 @@ async function initMSPModule() {
     // -------------------------------------------------------------
     let selectedMachine = null;
     let editingEntryId = null;
+    let editMode = false; // NEW FLAG
 
     // -------------------------------------------------------------
     // DEFAULT DATE
@@ -136,7 +137,7 @@ async function initMSPModule() {
         onScan: (result) => {
           formMachineNo.value = result;
           selectedMachine = result;
-          loadMachineEntries(result);
+          loadMachineEntries(result, false); // NEW ENTRY MODE
         }
       });
     });
@@ -146,7 +147,7 @@ async function initMSPModule() {
       const machine = formMachineNo.value?.trim();
       if (machine) {
         selectedMachine = machine;
-        loadMachineEntries(machine);
+        loadMachineEntries(machine, false); // NEW ENTRY MODE
       }
     });
 
@@ -166,6 +167,7 @@ async function initMSPModule() {
       formNotes.value = "";
       formMachineTotal.textContent = "$0.00";
       editingEntryId = null;
+      editMode = false;
       selectedMachine = null;
     }
 
@@ -280,12 +282,12 @@ async function initMSPModule() {
       document.querySelectorAll(".msp-row").forEach(row => {
         row.addEventListener("click", () => {
           selectedMachine = row.dataset.machine;
-          loadMachineEntries(selectedMachine);
+          loadMachineEntries(selectedMachine, true); // EDIT MODE
         });
       });
     }
 
-    async function loadMachineEntries(machineNo) {
+    async function loadMachineEntries(machineNo, fromClick) {
       formMachineNo.value = machineNo;
 
       const { data, error } = await supabase
@@ -293,28 +295,30 @@ async function initMSPModule() {
         .select("*")
         .eq("machine_no", machineNo)
         .eq("entry_date", dateInput.value)
+        .eq("location_id", locationSelect.value) // FIXED
         .order("created_at");
 
       if (error) return;
 
-      if (!data || data.length === 0) {
+      const total = (data || []).reduce((sum, x) => sum + Number(x.amount), 0);
+      formMachineTotal.textContent = `$${total.toFixed(2)}`;
+
+      if (!fromClick || !data || data.length === 0) {
         editingEntryId = null;
+        editMode = false;
         formType.value = "MSP";
         formAmount.value = "";
         formNotes.value = "";
-        formMachineTotal.textContent = "$0.00";
         return;
       }
 
       const last = data[data.length - 1];
       editingEntryId = last.id;
+      editMode = true;
 
       formType.value = last.type;
       formAmount.value = last.amount;
       formNotes.value = last.remarks || "";
-
-      const total = data.reduce((sum, x) => sum + Number(x.amount), 0);
-      formMachineTotal.textContent = `$${total.toFixed(2)}`;
     }
 
     async function saveEntry() {
@@ -368,7 +372,7 @@ async function initMSPModule() {
         created_by: userData.user.id
       };
 
-      if (editingEntryId) {
+      if (editMode && editingEntryId) {
         const { error } = await supabase
           .from("msp")
           .update(payload)
@@ -394,8 +398,7 @@ async function initMSPModule() {
       }
 
       await loadTable();
-      await loadMachineEntries(machine);
-      clearForm();
+      clearForm(); // FIXED
     }
 
     async function deleteEntry() {
@@ -414,8 +417,7 @@ async function initMSPModule() {
 
       showToast("Deleted", "warning");
       await loadTable();
-      formMachineTotal.textContent = "$0.00";
-      editingEntryId = null;
+      clearForm();
     }
 
   } catch (err) {
