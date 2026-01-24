@@ -328,6 +328,14 @@ async function initMSPModule() {
 
     async function loadMachineEntries(machineNo) {
       formMachineNo.value = machineNo;
+        
+      formMachineNo.addEventListener("change", () => {
+        const machine = formMachineNo.value?.trim();
+        if (machine) {
+          selectedMachine = machine;
+          loadMachineEntries(machine);
+        }
+      });
 
       const { data, error } = await supabase
         .from("msp")
