@@ -17,21 +17,22 @@
 /* ============================================================
    MODULE WRAPPER — TRUE 65 / 35
 ============================================================ */
-.module-wrapper {
+.module-container .module-wrapper {
   display: grid;
   grid-template-columns: 65fr 35fr;
   gap: 20px;
-  width: 100%;
+  /*width: 100%;*/
   margin: 30px 0;
-  align-items: stretch;
+  align-items: start;
 }
 
 /* ============================================================
    LEFT PANEL — STRETCH
 ============================================================ */
-.module-left {
+.module-container .module-left {
   display: flex;
   flex-direction: column;
+  height: 100%;
   overflow: hidden;
   padding: 20px;
   background: rgba(255,255,255,0.06);
@@ -43,14 +44,15 @@
 /* ============================================================
    RIGHT PANEL — HEIGHT DRIVER
 ============================================================ */
-.module-right {
-  display: flex;
-  flex-direction: column;
+.module-container .module-right {
+  /* display: flex; */
+  height: fit-content;       /* right defines height */
   padding: 20px;
   background: rgba(255,255,255,0.06);
   border-radius: 16px;
   border: 1px solid rgba(255,255,255,0.15);
   backdrop-filter: blur(12px);
+  /* flex-direction: column;*/
 }
 
 /* ============================================================
@@ -94,10 +96,10 @@
 /* ============================================================
    INPUTS
 ============================================================ */
-input,
-select,
-textarea {
-  width: 100%;
+.module-container input,
+.module-container select,
+.module-container textarea {
+  /* width: 100%; */
   padding: 10px 14px;
   border-radius: 10px;
   border: 1px solid rgba(255,255,255,0.25);
@@ -155,12 +157,12 @@ select option {
 /* ============================================================
    TABLE — ONLY THIS SCROLLS
 ============================================================ */
-.full-width {
+.module-container .full-width {
   flex: 1;
   min-height: 0;
 }
 
-.table-wrapper {
+.module-container .table-wrapper {
   height: 100%;
   overflow-y: auto;
   border-radius: 12px;
@@ -196,7 +198,7 @@ select option {
 /* ============================================================
    BUTTONS
 ============================================================ */
-.btn {
+.module-container .btn {
   padding: 10px 18px;
   border-radius: 10px;
   border: none;
