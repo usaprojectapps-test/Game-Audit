@@ -37,7 +37,6 @@ async function loadUserProfile() {
     .single();
 
   if (error || !data) {
-    console.error("Profile load error:", error);
     showToast("Unable to load user profile.", "error");
     return;
   }
@@ -49,6 +48,7 @@ async function loadUserProfile() {
   document.getElementById("headerUserDept").textContent = currentRole;
 
   const locationEl = document.getElementById("headerLocationName");
+
   if (currentRole === "SuperAdmin") {
     locationEl.textContent = "All Locations";
   } else {
@@ -68,21 +68,19 @@ async function loadUserProfile() {
 }
 
 // -------------------------------------------------------------
-// HIDE TILES BASED ON ROLE
+// DASHBOARD TILE ACCESS
 // -------------------------------------------------------------
 function applyDashboardTileAccess() {
   const role = sessionStorage.getItem("role");
 
   document.querySelectorAll(".dashboard-tile").forEach(tile => {
     const allowed = tile.getAttribute("data-dept")?.split(",");
-    if (!allowed.includes(role)) {
-      tile.style.display = "none";
-    }
+    if (!allowed.includes(role)) tile.style.display = "none";
   });
 }
 
 // -------------------------------------------------------------
-// MODULE LOADER (FINAL FIXED VERSION)
+// MODULE LOADER (SAFE VERSION)
 // -------------------------------------------------------------
 async function loadModule(moduleName) {
   const container = document.getElementById("moduleContainer");
@@ -93,50 +91,37 @@ async function loadModule(moduleName) {
   try {
     const response = await fetch(`/modals/${moduleName}.html`);
     if (!response.ok) {
-      container.innerHTML = `<div class="error">Module not found: ${moduleName}</div>`;
+      container.innerHTML = `<div class="error">Module not found</div>`;
       return;
     }
 
     const html = await response.text();
     container.innerHTML = html;
 
-    // Load module JS and dispatch event only after it finishes loading
     const script = document.createElement("script");
     script.type = "module";
     script.src = `/js_new/${moduleName}.js?v=${Date.now()}`;
 
     script.onload = () => {
-      // Now the module script has executed and its listener is attached
-      window.dispatchEvent(new Event(moduleName + "ModuleLoaded"));
-    };
-
-    script.onerror = () => {
-      console.error("Failed to load module script:", script.src);
-      container.innerHTML = `<div class="error">Failed to load module script.</div>`;
+      window.dispatchEvent(new Event(`${moduleName}ModuleLoaded`));
     };
 
     document.body.appendChild(script);
 
   } catch (err) {
-    console.error("Module load error:", err);
-    container.innerHTML = `<div class="error">Failed to load module.</div>`;
+    container.innerHTML = `<div class="error">Failed to load module</div>`;
   }
 }
 
-
 // -------------------------------------------------------------
-// TILE NAVIGATION (DIRECT OPEN)
+// TILE NAVIGATION
 // -------------------------------------------------------------
 function setupTileNavigation() {
-  const tiles = document.querySelectorAll(".dashboard-tile");
-
-  tiles.forEach(tile => {
-    tile.style.cursor = "pointer";
-
-    tile.addEventListener("click", () => {
-      const moduleName = tile.getAttribute("data-module");
+  document.querySelectorAll(".dashboard-tile").forEach(tile => {
+    tile.onclick = () => {
+      const moduleName = tile.dataset.module;
       if (moduleName) loadModule(moduleName);
-    });
+    };
   });
 }
 
@@ -144,104 +129,76 @@ function setupTileNavigation() {
 // LOGOUT
 // -------------------------------------------------------------
 function setupLogout() {
-  const btnLogout = document.getElementById("btnLogout");
-  if (!btnLogout) return;
+  const btn = document.getElementById("btnLogout");
+  if (!btn) return;
 
-  btnLogout.addEventListener("click", async () => {
+  btn.onclick = async () => {
     await supabase.auth.signOut();
     sessionStorage.clear();
     window.location.href = "login.html";
-  });
+  };
 }
 
 // -------------------------------------------------------------
-// CHANGE PASSWORD BUTTON
+// CHANGE PASSWORD (USER)
 // -------------------------------------------------------------
 function setupChangePassword() {
   const btn = document.getElementById("btnChangePassword");
   if (!btn) return;
 
-  btn.addEventListener("click", async () => {
-    await loadChangePasswordModal();
-  });
+  btn.onclick = loadChangePasswordModal;
 }
 
-// -------------------------------------------------------------
-// LOAD CHANGE PASSWORD MODAL
-// -------------------------------------------------------------
 async function loadChangePasswordModal() {
   const container = document.getElementById("modalContainer");
   if (!container) return;
 
-  const response = await fetch("/modals/changePassword.html");
-  const html = await response.text();
-  container.innerHTML = html;
+  const res = await fetch("/modals/changePassword.html");
+  container.innerHTML = await res.text();
 
-  setTimeout(() => {
-    const modal = container.querySelector(".modal");
-    if (!modal) return;
+  const modal = container.querySelector(".modal");
+  const cancel = modal.querySelector("#cancelChangePassword");
+  const save = modal.querySelector("#saveChangePassword");
+  const status = modal.querySelector("#changePasswordStatus");
 
-    const closeBtn = modal.querySelector(".close");
-    const cancelBtn = modal.querySelector("#cancelChangePassword");
-    const saveBtn = modal.querySelector("#saveChangePassword");
-    const status = modal.querySelector("#changePasswordStatus");
+  cancel.onclick = () => modal.remove();
 
-    if (closeBtn) closeBtn.onclick = () => modal.remove();
-    if (cancelBtn) cancelBtn.onclick = () => modal.remove();
+  save.onclick = async () => {
+    const newPass = modal.querySelector("#newPassword").value;
+    const confirm = modal.querySelector("#confirmPassword").value;
 
-    if (saveBtn) {
-      saveBtn.onclick = async () => {
-        const oldPass = modal.querySelector("#oldPassword").value.trim();
-        const newPass = modal.querySelector("#newPassword").value.trim();
-        const confirmPass = modal.querySelector("#confirmPassword").value.trim();
-
-        if (!oldPass || !newPass || !confirmPass) {
-          status.textContent = "Fill all fields.";
-          status.className = "error-text";
-          return;
-        }
-
-        if (newPass !== confirmPass) {
-          status.textContent = "Passwords do not match.";
-          status.className = "error-text";
-          return;
-        }
-
-        const { error } = await supabase.auth.updateUser({ password: newPass });
-
-        if (error) {
-          status.textContent = "Password update failed.";
-          status.className = "error-text";
-        } else {
-          status.textContent = "Password updated successfully.";
-          status.className = "success-text";
-          setTimeout(() => modal.remove(), 1200);
-        }
-      };
+    if (newPass !== confirm) {
+      status.textContent = "Passwords do not match";
+      return;
     }
-  }, 50);
+
+    const { error } = await supabase.auth.updateUser({ password: newPass });
+
+    if (error) {
+      status.textContent = "Password update failed";
+    } else {
+      status.textContent = "Password updated successfully";
+      setTimeout(() => modal.remove(), 1200);
+    }
+  };
 }
 
 // -------------------------------------------------------------
-// LIVE DATE & TIME
+// LIVE CLOCK
 // -------------------------------------------------------------
 function startClock() {
-  const clockEl = document.getElementById("headerDateTime");
-  if (!clockEl) return;
+  const el = document.getElementById("headerDateTime");
+  if (!el) return;
 
-  function updateClock() {
-    const now = new Date();
-    clockEl.textContent = now.toLocaleString();
-  }
-
-  updateClock();
-  setInterval(updateClock, 1000);
+  setInterval(() => {
+    el.textContent = new Date().toLocaleString();
+  }, 1000);
 }
 
 // -------------------------------------------------------------
 // INIT
 // -------------------------------------------------------------
-async function initDashboard() {
+document.addEventListener("DOMContentLoaded", async () => {
   await validateSession();
   await loadUserProfile();
   applyDashboardTileAccess();
@@ -249,8 +206,4 @@ async function initDashboard() {
   setupLogout();
   setupChangePassword();
   startClock();
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  initDashboard();
 });
