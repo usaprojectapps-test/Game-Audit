@@ -108,12 +108,6 @@ async function validateMachine(machineNo, locationId) {
     showToast("Machine does not belong to the selected location", "error");
     return false;
   }
-
-  if (data.healthstatus !== "Active") {
-    showToast("Machine is not active", "error");
-    return false;
-  }
-
   return true;
 }
 
@@ -240,10 +234,22 @@ async function saveAudit() {
     if (!valid) return;
 
     // PREVIOUS VALUES
-    try {
-      await fetchPrevValuesWithWarning(machineNo, date);
-    } catch {
-      return; // user cancelled
+    let prevIn, prevOut;
+
+    if (editMode) {
+      // ✔ In edit mode, DO NOT fetch previous values
+      prevIn = Number(document.getElementById("auditPrevIn").value || 0);
+      prevOut = Number(document.getElementById("auditPrevOut").value || 0);
+    } else {
+      // ✔ In insert mode, fetch previous values
+      try {
+        await fetchPrevValuesWithWarning(machineNo, date);
+      } catch {
+        return; // user cancelled
+      }
+
+      prevIn = Number(document.getElementById("auditPrevIn").value || 0);
+      prevOut = Number(document.getElementById("auditPrevOut").value || 0);
     }
 
     const prevIn = Number(
@@ -362,6 +368,20 @@ async function deleteAudit(id) {
 // TOTALS RECALC
 // -------------------------------------------------------------
 function recalcTotals() {
+  const prevIn = Number(document.getElementById("auditPrevIn")?.value || 0);
+  const prevOut = Number(document.getElementById("auditPrevOut")?.value || 0);
+  const curIn = Number(document.getElementById("auditCurIn")?.value || 0);
+  const curOut = Number(document.getElementById("auditCurOut")?.value || 0);
+
+  const totalIn = curIn - prevIn;
+  const totalOut = curOut - prevOut;
+  const net = totalIn - totalOut;
+
+  document.getElementById("auditTotalIn").value = totalIn;
+  document.getElementById("auditTotalOut").value = totalOut;
+  document.getElementById("auditNet").value = net;
+}
+/*function recalcTotals() {
   const prevIn = Number(
     document.getElementById("auditPrevIn")?.value || 0
   );
@@ -388,7 +408,7 @@ function recalcTotals() {
   if (totalOutInput)
     totalOutInput.value = Number.isFinite(totalOut) ? totalOut : "";
   if (netInput) netInput.value = Number.isFinite(net) ? net : "";
-}
+}*/
 
 
 // -------------------------------------------------------------
