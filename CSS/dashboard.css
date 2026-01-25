@@ -149,9 +149,9 @@ body {
 
 #btnChangePassword:focus {outline: none; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);}
 #btnLogout {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #ef3137;
+  background: rgba(239, 68, 68, 0.884);
+  border: 1px solid rgba(255, 164, 164, 0.4);
+  color: #e19093;
 }
 
 #btnLogout:hover {
