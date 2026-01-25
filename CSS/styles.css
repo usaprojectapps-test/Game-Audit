@@ -15,10 +15,11 @@ body {
 
 /* ============================================================
    UNIVERSAL MODULE LAYOUT — 65% LEFT / 35% RIGHT
-   FIXED HEIGHT + PERFECT SCROLL
+   FIXED HEIGHT + LEFT SCROLL
 ============================================================ */
 
 /* Outer container defines the height for all modules */
+.module-container,
 .audit-module-container,
 .vendor-module-container,
 .msp-module-container,
@@ -28,25 +29,6 @@ body {
   height: calc(100vh - 80px); /* adjust if header differs */
   overflow: hidden;
 }
-
-
-.module-left,
-.module-right {
-  min-height: 0; /* ⭐ critical for flexbox to allow shrinking */
-}
-
-.module-left {
-  flex: 0 0 65%;
-  max-width: 65%;
-  overflow-y: auto; /* ⭐ left side scrolls */
-}
-
-.module-right {
-  flex: 0 0 35%;
-  max-width: 35%;
-  overflow-y: auto; /* optional: scroll if form grows */
-}
-
 
 /* Main wrapper: both sides same height */
 .module-wrapper {
@@ -58,7 +40,6 @@ body {
   max-width: 1400px;
   margin: 30px auto;
   box-sizing: border-box;
-  height: calc(100vh - 80px); /* adjust if header is taller */
   overflow: hidden; /* prevents right side from stretching */
 }
 
@@ -67,8 +48,9 @@ body {
   flex: 0 0 65%;
   max-width: 65%;
   min-width: 0;
-  min-height: 0;       /* ⭐ critical: allows scrolling */
-  overflow-y: auto;    /* ⭐ left side scrolls */
+  min-height: 0;       /* critical: allows scrolling */
+  overflow-y: auto;    /* left side scrolls */
+  padding-right: 8px;  /* space for scrollbar */
   background: rgba(255, 255, 255, 0.06);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -82,7 +64,7 @@ body {
   flex: 0 0 35%;
   max-width: 35%;
   min-width: 0;
-  min-height: 0;       /* ⭐ prevents height expansion */
+  min-height: 0;       /* prevents height expansion */
   overflow-y: auto;    /* scrolls only if form grows */
   background: rgba(255, 255, 255, 0.06);
   border-radius: 16px;
