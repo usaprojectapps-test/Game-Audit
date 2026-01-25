@@ -73,6 +73,17 @@ body {
 }
 
 /* ===============================
+   MODULE HOST (DASHBOARD SIDE)
+================================ */
+.module-host {
+  width: 92%;
+  max-width: 1400px;
+  margin: 30px auto;
+  clear: both;
+}
+
+
+/* ===============================
    REMOVE ALL MODULE OVERRIDES
    (THIS IS WHY IT WAS BROKEN)
 ================================ */

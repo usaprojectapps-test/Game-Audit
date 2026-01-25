@@ -17,7 +17,7 @@
 /* ============================================================
    MODULE WRAPPER — TRUE 65 / 35
 ============================================================ */
-.module-container .module-wrapper {
+.module-wrapper {
   display: grid;
   grid-template-columns: 65fr 35fr;
   gap: 20px;
@@ -29,7 +29,7 @@
 /* ============================================================
    LEFT PANEL — STRETCH
 ============================================================ */
-.module-container .module-left {
+.module-left {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -44,7 +44,7 @@
 /* ============================================================
    RIGHT PANEL — HEIGHT DRIVER
 ============================================================ */
-.module-container .module-right {
+.module-right {
   /* display: flex; */
   height: fit-content;       /* right defines height */
   padding: 20px;
@@ -96,9 +96,9 @@
 /* ============================================================
    INPUTS
 ============================================================ */
-.module-container input,
-.module-container select,
-.module-container textarea {
+input,
+select,
+textarea {
   /* width: 100%; */
   padding: 10px 14px;
   border-radius: 10px;
@@ -162,8 +162,8 @@ select option {
   min-height: 0;
 }
 
-.module-container .table-wrapper {
-  height: 100%;
+.table-wrapper {
+  max-height: 320px;
   overflow-y: auto;
   border-radius: 12px;
   background: rgba(255,255,255,0.04);
