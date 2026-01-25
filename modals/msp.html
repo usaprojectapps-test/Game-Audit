@@ -2,23 +2,25 @@
 
   <!-- LEFT: summary + table -->
   <div class="module-left">
-    <div class="card-header">MSP Entry</div>
+      <div class="row-4col" style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px;">
+        <div class="card-header" style="flex: 0 0 20%; font-size: 18px;">MSP Entry</div>
 
-    <!-- Location + Date + Total -->
-    <div class="row-3col" style="margin-top: 8px;">
-      <div class="form-item">
-        <label>Location</label>
-        <select id="mspLocation" class="input"></select>
+        <div class="form-item" style="flex: 0 0 25%;">
+          <label>Location</label>
+          <select id="mspLocation" class="input"></select>
+        </div>
+
+        <div class="form-item" style="flex: 0 0 25%;">
+         <label>Date</label>
+          <input id="mspDate" type="date" class="input" />
+        </div>
+
+        <div class="form-item" style="flex: 0 0 25%;">
+          <label>Total Amount</label>
+          <div id="mspDailyTotal" class="summary-value">$0.00</div>
+        </div>
       </div>
-      <div class="form-item">
-        <label>Date</label>
-        <input id="mspDate" type="date" class="input" />
-      </div>
-      <div class="form-item">
-        <label>Total Amount</label>
-        <div id="mspDailyTotal" class="summary-value">$0.00</div>
-      </div>
-    </div>
+
 
     <!-- TABLE -->
     <div class="table-wrapper">
