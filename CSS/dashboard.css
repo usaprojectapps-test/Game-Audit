@@ -56,20 +56,41 @@ body {
 .dashboard-grid {
   width: 92%;
   max-width: 1400px;
-  margin: 30px auto 60px;
+  margin: 40px auto 80px;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 22px;
+  gap: 28px;
 }
 
 /* tiles unchanged */
 .dashboard-tile {
-  padding: 26px 20px;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.18);
-  cursor: pointer;
+  padding: 32px 24px;
+  border-radius: 20px;
   text-align: center;
+  cursor: pointer;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:0 12px 28px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.dashboard-tile:hover {
+  transform: translateY(-6px);
+  box-shadow:0 20px 36px rgba(0, 0, 0, 0.45),inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.tile-icon {
+  font-size: 46px;        /* 🔥 BIGGER ICON */
+  margin-bottom: 14px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+}
+.tile-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 20px;        /* ⬆ bigger text */
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #ffffff;
 }
 
 /* ===============================
@@ -78,10 +99,19 @@ body {
 .module-host {
   width: 92%;
   max-width: 1400px;
-  margin: 30px auto;
+  margin: 30px uto;
   clear: both;
 }
 
+@media (min-width: 1400px) {
+  .tile-icon {
+    font-size: 52px;
+  }
+
+  .tile-title {
+    font-size: 22px;
+  }
+}
 
 /* ===============================
    REMOVE ALL MODULE OVERRIDES
