@@ -492,8 +492,6 @@ async function loadLocations() {
     console.error("loadLocations unexpected error:", err);
   }
 }
-
-
 // -------------------------------------------------------------
 // LOAD AUDITS TABLE
 // -------------------------------------------------------------
