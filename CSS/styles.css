@@ -14,69 +14,82 @@ body {
 }
 
 /* ============================================================
-   UNIVERSAL MODULE LAYOUT — 50/50 LEFT TABLE + RIGHT FORM
+   UNIVERSAL MODULE LAYOUT — 65% LEFT / 35% RIGHT
+   FIXED HEIGHT + PERFECT SCROLL
 ============================================================ */
+
+/* Outer container defines the height for all modules */
+.audit-module-container,
+.vendor-module-container,
+.msp-module-container,
+.silver-module-container,
+.agent-module-container,
+.purchase-module-container {
+  height: calc(100vh - 80px); /* adjust if header differs */
+  overflow: hidden;
+}
+
+/* Main wrapper: both sides same height */
 .module-wrapper {
   display: flex;
   flex-wrap: nowrap;
   gap: 20px;
   width: 100%;
-  height: 100%; /* ensures both sides stretch */
+  height: 100%;
   max-width: 1400px;
   margin: 30px auto;
   box-sizing: border-box;
+  overflow: hidden; /* prevents right side from stretching */
 }
 
+/* LEFT PANEL — 65% width */
 .module-left {
-  flex: 0 0 65% !important;
-  max-width: 65% !important;
+  flex: 0 0 65%;
+  max-width: 65%;
   min-width: 0;
-  box-sizing: border-box;
+  min-height: 0;       /* ⭐ critical: allows scrolling */
+  overflow-y: auto;    /* ⭐ left side scrolls */
   background: rgba(255, 255, 255, 0.06);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
   padding: 20px;
-  overflow: hidden;
+  box-sizing: border-box;
 }
 
+/* RIGHT PANEL — 35% width */
 .module-right {
-  flex: 0 0 35% !important;
-  max-width: 35% !important;
+  flex: 0 0 35%;
+  max-width: 35%;
   min-width: 0;
-  box-sizing: border-box;
+  min-height: 0;       /* ⭐ prevents height expansion */
+  overflow-y: auto;    /* scrolls only if form grows */
   background: rgba(255, 255, 255, 0.06);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
   padding: 20px;
-  overflow: hidden;
-}
-
-.module-left {
-  flex: 1;
-  overflow-y: auto;   /* ⭐ vertical scroll */
-  max-height: 100%;   /* ⭐ matches right side height */
-}
-
-.module-right {
-  width: 420px;       /* your fixed form width */
-  overflow-y: auto;   /* optional: scroll if form grows */
+  box-sizing: border-box;
 }
 
 /* MOBILE */
 @media (max-width: 768px) {
-  .module-wrapper,
-  .vendor-wrapper {
+  .module-wrapper {
     flex-direction: column;
+    height: auto;
   }
 
-  .module-left, .module-right,.vendor-left,
-  .vendor-right {max-width: 100%;    flex: 0 0 100%; }
+  .module-left,
+  .module-right {
+    max-width: 100%;
+    flex: 0 0 100%;
+    min-height: auto;
+    overflow-y: visible;
+  }
 }
 
 /* ============================================================
-   INPUTS + SELECTS + TEXTAREA (95% width)
+   INPUTS + SELECTS + TEXTAREA
 ============================================================ */
 input,
 select,
@@ -182,7 +195,7 @@ select option {
 }
 
 /* ============================================================
-   SEARCH BAR (Vendor + Users + Locations)
+   SEARCH BAR
 ============================================================ */
 .search-row {
   display: flex;
@@ -192,7 +205,7 @@ select option {
   margin-bottom: 16px;
 }
 
-.search-row input{
+.search-row input {
   flex: 1 1 auto;
   max-width: 300px;
 }
@@ -204,12 +217,13 @@ select option {
 
 .filters-row {
   display: flex;
-  flex-wrap: nowrap;       /* ⭐ Prevent wrapping */
+  flex-wrap: nowrap;
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
-  overflow-x: auto;        /* ⭐ Prevent clipping if screen is narrow */
+  overflow-x: auto;
 }
+
 .filters-row input {
   flex: 1 1 auto;
   max-width: 300px;
@@ -224,8 +238,6 @@ select option {
   flex: 0 0 auto;
   white-space: nowrap;
 }
-
-
 
 /* ============================================================
    CARD HEADER
@@ -298,10 +310,10 @@ select option {
 #logoutBtn:hover {
   background-color: #e65c00;
 }
-/* ============================================================
-   QR code + buttons+ NOTES
-============================================================ */
 
+/* ============================================================
+   QR + NOTES
+============================================================ */
 .form-grid-3 {
   display: flex;
   gap: 16px;
@@ -350,17 +362,45 @@ select option {
   margin-top: 16px;
 }
 
-.row-3col {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+/* ============================================================
+   AUDIT SUMMARY
+============================================================ */
+.audit-summary-row {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
-  margin-bottom: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.06);
 }
+
+.row-2col {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.summary-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-horizontal {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* ============================================================
+   QR MODAL
+============================================================ */
 .qr-video {
   width: 300px !important;
   height: 300px !important;
   background: #000;
 }
+
 .qr-overlay {
   display: flex;
   justify-content: center;
@@ -376,37 +416,10 @@ select option {
   padding: 20px;
   border-radius: 8px;
 }
+
 .toast-container {
   position: fixed;
   top: 20px;
   right: 20px;
   z-index: 9999;
-}
-.audit-summary-row {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  
-}
-
-.row-2col {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-
-.summary-vertical {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.summary-horizontal {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
 }
