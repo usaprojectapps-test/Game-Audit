@@ -55,6 +55,12 @@
   /* flex-direction: column;*/
 }
 
+.module-right .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 20px;
+}
+
 /* ============================================================
    CARD HEADER
 ============================================================ */
