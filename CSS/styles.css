@@ -375,7 +375,7 @@ select option {
   flex-direction: column;
   gap: 12px;
   padding: 12px;
-  background: #f17b7b;
+  background: rgba(255, 255, 255, 0.06);
   border-bottom: 1px solid #ccc;
 }
 
