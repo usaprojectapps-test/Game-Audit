@@ -375,7 +375,7 @@ select option {
   flex-direction: column;
   gap: 12px;
   padding: 12px;
-  background: #f8f8f8;
+  background: #f17b7b;
   border-bottom: 1px solid #ccc;
 }
 
@@ -386,13 +386,6 @@ select option {
   gap: 20px;
 }
 
-/* Grid rows */
-.row-2col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 12px;
-}
 
 .summary-vertical {
   display: flex;
