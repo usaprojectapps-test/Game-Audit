@@ -1,5 +1,5 @@
 /* ============================================================
-   GLOBAL BASE
+   GLOBAL BASE (MODULE SAFE)
 ============================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&family=Sora:wght@500;600&family=Inter:wght@400;500&family=Poppins:wght@500&display=swap');
 
@@ -7,19 +7,8 @@
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  background: linear-gradient(135deg, #0f172a, #1e1b4b, #312e81);
-  font-family: 'Inter', sans-serif;
-  color: #e2e8f0;
-  min-height: 100vh;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
 /* ============================================================
-   MODULE CONTAINER (MODULE, NOT PAGE)
+   MODULE CONTAINER
 ============================================================ */
 .module-container {
   width: 100%;
@@ -32,94 +21,53 @@ body {
   display: grid;
   grid-template-columns: 65fr 35fr;
   gap: 20px;
-
   width: 100%;
-  margin: 30px auto;
-
-  align-items: stretch; /* 🔑 force same height */
+  margin: 30px 0;
+  align-items: stretch;
 }
 
 /* ============================================================
-   LEFT PANEL — STRETCH, NO SCROLL
+   LEFT PANEL — STRETCH
 ============================================================ */
 .module-left {
   display: flex;
   flex-direction: column;
-  max-width: 65%;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-
-  height: 100%;
   overflow: hidden;
+  padding: 20px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.15);
+  backdrop-filter: blur(12px);
 }
 
 /* ============================================================
    RIGHT PANEL — HEIGHT DRIVER
 ============================================================ */
 .module-right {
+  display: flex;
+  flex-direction: column;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255,255,255,0.06);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255,255,255,0.15);
   backdrop-filter: blur(12px);
-  max-width: 35%;
-  height: auto;
-  overflow: visible;
 }
 
 /* ============================================================
    CARD HEADER
 ============================================================ */
 .card-header {
+  font-family: 'Sora', sans-serif;
   font-size: 22px;
   font-weight: 600;
-  font-family: 'Sora', sans-serif;
-  color: #ffffff;
-  margin-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 8px;
+  color: #fff;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+  padding-bottom: 6px;
 }
 
 /* ============================================================
-   INPUTS + SELECTS + TEXTAREA
-============================================================ */
-input,
-select,
-textarea {
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.25);
-  background: rgba(255,255,255,0.12);
-  color: white;
-  font-size: 14px;
-  font-family: 'Inter', sans-serif;
-  outline: none;
-  transition: 0.2s ease;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: rgba(255,255,255,0.6);
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: #ffffff;
-  background: rgba(255,255,255,0.18);
-}
-
-select option {
-  background-color: #1e1e1e;
-  color: white;
-}
-
-/* ============================================================
-   FORM ROWS
+   FORMS
 ============================================================ */
 .row-2col {
   display: grid;
@@ -144,25 +92,51 @@ select option {
 }
 
 /* ============================================================
+   INPUTS
+============================================================ */
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #fff;
+  background: rgba(255,255,255,0.18);
+}
+
+select option {
+  background: #1e1e1e;
+  color: white;
+}
+
+/* ============================================================
    FORM ACTIONS
 ============================================================ */
 .form-actions {
-  margin-top: 16px;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+  margin: 16px 0;
 }
 
 /* ============================================================
    AUDIT SUMMARY
 ============================================================ */
 .audit-summary-row {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
   padding: 12px;
   margin-bottom: 12px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255,255,255,0.06);
   border-radius: 12px;
 }
 
@@ -181,15 +155,17 @@ select option {
 /* ============================================================
    TABLE — ONLY THIS SCROLLS
 ============================================================ */
-.table-wrapper {
-  flex: 1;          /* 🔑 fills remaining height */
-  min-height: 0;    /* 🔑 enables scrolling */
-  overflow-y: auto;
+.full-width {
+  flex: 1;
+  min-height: 0;
+}
 
-  width: 100%;
+.table-wrapper {
+  height: 100%;
+  overflow-y: auto;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+  background: rgba(255,255,255,0.04);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
 }
 
 .table-wrapper table {
@@ -201,21 +177,20 @@ select option {
 .table-wrapper th {
   position: sticky;
   top: 0;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255,255,255,0.12);
   color: #cbd5e1;
-  font-weight: 600;
-  text-transform: uppercase;
   padding: 10px 14px;
+  text-transform: uppercase;
 }
 
 .table-wrapper td {
   padding: 10px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   white-space: nowrap;
 }
 
 .table-wrapper tr:hover td {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255,255,255,0.08);
 }
 
 /* ============================================================
@@ -227,7 +202,6 @@ select option {
   border: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 14px;
 }
 
 .btn-primary {
@@ -241,8 +215,34 @@ select option {
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255,255,255,0.15);
   color: #e2e8f0;
+}
+
+/* ============================================================
+   MACHINE HEALTH BADGES
+============================================================ */
+.machine-health {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.health-good {
+  background: #d4edda;
+  color: #155724;
+}
+
+.health-warn {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.health-bad {
+  background: #f8d7da;
+  color: #721c24;
 }
 
 /* ============================================================
@@ -261,12 +261,13 @@ select option {
 .qr-modal {
   background: #fff;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
 .qr-video {
   width: 300px;
   height: 300px;
+  background: #000;
 }
 
 /* ============================================================
@@ -280,7 +281,7 @@ select option {
 }
 
 /* ============================================================
-   MOBILE STACK
+   MOBILE
 ============================================================ */
 @media (max-width: 768px) {
   .module-wrapper {
@@ -290,29 +291,4 @@ select option {
   .table-wrapper {
     max-height: 300px;
   }
-}
-/* ============================================================
-   FORCE MODULE TO FULL WIDTH (BREAK OUT OF PARENT)
-============================================================ */
-.module-container {
-  position: relative;
-  left: 50%;
-  right: 50%;
-  width: 100vw;
-  margin-left: -50vw;
-  margin-right: -50vw;
-  padding-left: 30px;
-  padding-right: 30px;
-}
-.module-wrapper {
-  display: grid;
-  grid-template-columns: 65fr 35fr;
-  gap: 24px;
-  width: 100%;
-  margin: 30px auto;
-  align-items: stretch;
-}
-.module-left,
-.module-right {
-  min-width: 0;
 }
