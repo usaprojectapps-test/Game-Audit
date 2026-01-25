@@ -310,9 +310,11 @@ async function saveAudit() {
     }
 
     if (error) {
-      showToast("Save failed", "error");
+      console.error("SAVE ERROR:", error);
+      showToast("Save failed: " + (error.message || "DB error"), "error");
       return;
     }
+
 
     // UPDATE MACHINE HEALTH
     if (machineHealth) {
