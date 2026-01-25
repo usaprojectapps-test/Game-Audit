@@ -1,31 +1,105 @@
-<div class="silver-entry-module" style="max-width:900px; margin:auto;">
+<body>
+  <section class="vendor-module-container">
+    <div class="module-wrapper">
 
-  <h3>Silver Entry</h3>
+      <!-- LEFT: table with many rows -->
+      <div class="module-left">
+        <div class="card-header">Vendors</div>
 
-  <!-- Grand Total -->
-  <div id="seTotalSum" style="font-weight:600; margin-bottom:10px;">
-    Total Paid Amount: ₹0
-  </div>
+        <div class="search-row">
+          <input type="text" placeholder="Search vendors...">
+          <select>
+            <option>All Status</option>
+          </select>
+          <select>
+            <option>All Locations</option>
+          </select>
+          <button class="btn btn-secondary">Refresh</button>
+        </div>
 
-  <!-- Silver Entry List -->
-  <div style="max-height:400px; overflow-y:auto; background:#f8f9fb; padding:6px; border-radius:10px;">
-    <table style="width:100%; border-collapse:collapse; font-size:13px;">
-      <thead>
-        <tr>
-          <th>Slip ID</th>
-          <th>Date & Time</th>
-          <th>Agent</th>
-          <th>Machine</th>
-          <th>Amount</th>
-          <th>Paid By</th>
-          <th>Barcode</th>
-        </tr>
-      </thead>
-      <tbody id="seTableBody"></tbody>
-    </table>
-  </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>VENDOR ID</th>
+                <th>NAME</th>
+                <th>PHONE</th>
+                <th>STATUS</th>
+                <th>LOCATION</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- 20+ rows to force scroll -->
+              <!-- you can duplicate these as needed -->
+              <tr><td>V001</td><td>Vendor 1</td><td>123-456-0001</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V002</td><td>Vendor 2</td><td>123-456-0002</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V003</td><td>Vendor 3</td><td>123-456-0003</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V004</td><td>Vendor 4</td><td>123-456-0004</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V005</td><td>Vendor 5</td><td>123-456-0005</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V006</td><td>Vendor 6</td><td>123-456-0006</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V007</td><td>Vendor 7</td><td>123-456-0007</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V008</td><td>Vendor 8</td><td>123-456-0008</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V009</td><td>Vendor 9</td><td>123-456-0009</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V010</td><td>Vendor 10</td><td>123-456-0010</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V011</td><td>Vendor 11</td><td>123-456-0011</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V012</td><td>Vendor 12</td><td>123-456-0012</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V013</td><td>Vendor 13</td><td>123-456-0013</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V014</td><td>Vendor 14</td><td>123-456-0014</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V015</td><td>Vendor 15</td><td>123-456-0015</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V016</td><td>Vendor 16</td><td>123-456-0016</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V017</td><td>Vendor 17</td><td>123-456-0017</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V018</td><td>Vendor 18</td><td>123-456-0018</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V019</td><td>Vendor 19</td><td>123-456-0019</td><td>Active</td><td>PALACE</td></tr>
+              <tr><td>V020</td><td>Vendor 20</td><td>123-456-0020</td><td>Active</td><td>PALACE</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-</div>
+      <!-- RIGHT: form -->
+      <div class="module-right">
+        <div class="card-header">Vendor Details</div>
 
-<!-- Barcode library -->
-<script src="https://cdn.jsdelivr.net/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Vendor ID</label>
+            <input type="text">
+          </div>
+          <div class="form-group">
+            <label>Vendor Name</label>
+            <input type="text">
+          </div>
+          <div class="form-group">
+            <label>Contact Person</label>
+            <input type="text">
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="text" value="123-456-7890">
+          </div>
+          <div class="form-group">
+            <label>Address</label>
+            <textarea rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select>
+              <option>Active</option>
+              <option>Inactive</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label>Notes</label>
+            <textarea rows="4"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions" style="justify-content: flex-end; margin-top: 24px;">
+          <button class="btn btn-danger">Delete</button>
+          <button class="btn btn-primary">Save</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</body>
