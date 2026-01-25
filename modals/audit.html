@@ -4,17 +4,20 @@
 
     <!-- LEFT: summary + table -->
     <div class="module-left">
-        <div class="card-header">AUDIT Entry</div>
+      <div class="card-header">AUDIT Entry</div>
+
       <!-- Row 1: 3 columns -->
       <div class="row-3col">
         <div class="form-item">
           <label>Location</label>
           <select id="auditLocationSelect"></select>
         </div>
+
         <div class="form-item">
           <label>Date</label>
           <input type="date" id="auditFilterDate">
         </div>
+
         <div class="form-item">
           <label>Total Mach. Entered Today</label>
           <div id="summaryTotalMachines" class="summary-value">0</div>
@@ -27,10 +30,12 @@
           <label>Total IN</label>
           <div id="summaryTotalIn" class="summary-value">0</div>
         </div>
+
         <div class="form-item">
           <label>Total OUT</label>
           <div id="summaryTotalOut" class="summary-value">0</div>
         </div>
+
         <div class="form-item">
           <label>NET</label>
           <div id="summaryNet" class="summary-value">0</div>
@@ -39,7 +44,7 @@
 
       <!-- Table -->
       <div class="full-width">
-        <div class="table-wrapper"> 
+        <div class="table-wrapper">
           <table id="auditTable" class="striped">
             <thead>
               <tr>
@@ -63,13 +68,15 @@
 
     <!-- RIGHT: form -->
     <div class="module-right">
-        <div class="card-header">AUDIT Entry Form</div>
+      <div class="card-header">AUDIT Entry Form</div>
+
       <!-- Row 1: 2 columns -->
       <div class="row-2col">
         <div class="form-item">
           <label>Date</label>
           <input type="date" id="auditEntryDate">
         </div>
+
         <div class="form-item">
           <label>Machine No</label>
           <div style="display:flex; gap:8px;">
@@ -85,6 +92,7 @@
           <label>Prev IN</label>
           <input type="number" id="auditPrevIn" readonly>
         </div>
+
         <div class="form-item">
           <label>Prev OUT</label>
           <input type="number" id="auditPrevOut" readonly>
@@ -97,6 +105,7 @@
           <label>Cur IN</label>
           <input type="number" id="auditCurIn">
         </div>
+
         <div class="form-item">
           <label>Cur OUT</label>
           <input type="number" id="auditCurOut">
@@ -107,15 +116,16 @@
       <div class="row-2col">
         <div class="form-item">
           <label>Jackpot</label>
-          <input type="text" id="auditJackpot">
+          <input type="number" id="auditJackpot" placeholder="Optional">
         </div>
+
         <div class="form-item">
           <label>Machine Health</label>
           <select id="auditMachineHealth">
             <option value="">Select</option>
-            <option value="Good">Good</option>
-            <option value="Warning">Warning</option>
-            <option value="Critical">Critical</option>
+            <option value="Active">Active</option>
+            <option value="Issue">Issue</option>
+            <option value="Inactive">Inactive</option>
           </select>
         </div>
       </div>
@@ -126,10 +136,12 @@
           <label>Total IN</label>
           <input type="number" id="auditTotalIn" readonly>
         </div>
+
         <div class="form-item">
           <label>Total OUT</label>
           <input type="number" id="auditTotalOut" readonly>
         </div>
+
         <div class="form-item">
           <label>NET</label>
           <input type="number" id="auditNet" readonly>
@@ -147,7 +159,7 @@
   </div>
 </section>
 
-<!-- Predefined QR Modal -->
+<!-- QR Modal -->
 <div id="qrModal" class="qr-overlay" style="display:none;">
   <div class="qr-modal" role="dialog" aria-modal="true">
     <video id="qrVideo" class="qr-video"></video>
@@ -155,6 +167,7 @@
   </div>
 </div>
 
+<!-- QR Scanner -->
 <script type="module">
   import jsQR from "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js";
   window.jsQR = jsQR;
@@ -162,3 +175,8 @@
 
 <script src="/js_new/qr-scanner.js" defer></script>
 <script src="/js_new/audit.js" defer></script>
+
+<script>
+  // IMPORTANT: triggers audit.js initialization
+  window.dispatchEvent(new Event("auditModuleLoaded"));
+</script>

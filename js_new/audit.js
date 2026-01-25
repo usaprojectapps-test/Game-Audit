@@ -5,148 +5,429 @@ import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 
 console.log("AUDIT JS LOADED");
-window.supabase = supabase;
+
 
 // -------------------------------------------------------------
-// STATE
+// GLOBAL STATE
 // -------------------------------------------------------------
 let currentUser = null;
 let currentRole = null;
 let currentLocationId = null;
 
-// -------------------------------------------------------------
-// HELPERS
-// -------------------------------------------------------------
-const todayISO = () => new Date().toISOString().slice(0, 10);
+let editMode = false;          // NEW — matches MSP behavior
+let editingAuditId = null;     // NEW — ID of row being edited
 
-const toNumberOrNull = (v) => {
+
+// -------------------------------------------------------------
+// LOCAL DATE FIX (NO MORE 1-DAY AHEAD BUG)
+// -------------------------------------------------------------
+function today() {
+  return new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD in local timezone
+}
+
+
+// -------------------------------------------------------------
+// HELPER FUNCTIONS
+// -------------------------------------------------------------
+function toNumberOrNull(v) {
   if (v === null || v === undefined) return null;
   const s = String(v).trim();
   if (s === "") return null;
   const n = Number(s);
   return Number.isFinite(n) ? n : null;
-};
+}
+
+function highlightRow(machineNo) {
+  const rows = document.querySelectorAll("#auditTable tbody tr");
+  rows.forEach(r => r.classList.remove("highlight"));
+
+  const target = Array.from(rows).find(r => r.dataset.machine === machineNo);
+  if (target) {
+    target.classList.add("highlight");
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
 
 // -------------------------------------------------------------
-// SESSION / PROFILE
+// SESSION / PROFILE LOADING
 // -------------------------------------------------------------
 async function loadSessionInfo() {
   try {
     const { data } = await supabase.auth.getSession();
     const session = data?.session;
+
     if (!session) {
-      console.warn("No session available yet");
       showToast("Session expired. Please login again.", "error");
       return;
     }
+
     currentUser = session.user;
     currentRole = currentUser?.user_metadata?.role || null;
     currentLocationId = currentUser?.user_metadata?.location_id || null;
-    console.log("SESSION LOADED:", currentRole, currentLocationId);
+
+    console.log("SESSION LOADED:", { currentRole, currentLocationId });
+
   } catch (err) {
     console.error("loadSessionInfo error:", err);
   }
 }
 
-// -------------------------------------------------------------
-// LOAD MACHINE NUMBERS
-// -------------------------------------------------------------
-async function loadMachineNumbers() {
-  const select = document.getElementById("auditMachineNo");
-  if (!select) return;
 
-  let query = supabase.from("machines").select("machineid, location_id");
+// -------------------------------------------------------------
+// SUPERADMIN LOCATION RULE (same as MSP)
+// -------------------------------------------------------------
+function validateLocationSelection() {
+  const locSelect = document.getElementById("auditLocationSelect");
 
-  if (currentRole !== "SuperAdmin") {
-    query = query.eq("location_id", currentLocationId);
+  if (currentRole === "SuperAdmin") {
+    if (!locSelect.value) {
+      showToast("Please select a location", "error");
+      return false;
+    }
   }
 
-  const { data, error } = await query.order("machineid");
+  return true;
+}
+// -------------------------------------------------------------
+// MACHINE VALIDATION (same as MSP)
+// -------------------------------------------------------------
+async function validateMachine(machineNo, locationId) {
+  const { data, error } = await supabase
+    .from("machines")
+    .select("machineid, location_id, healthstatus")
+    .eq("machineid", machineNo)
+    .maybeSingle();
 
-  if (error) {
-    console.error("loadMachineNumbers error:", error);
+  if (error || !data) {
+    showToast("Machine number not found in machine list", "error");
+    return false;
+  }
+
+  if (data.location_id !== locationId) {
+    showToast("Machine does not belong to the selected location", "error");
+    return false;
+  }
+
+  if (data.healthstatus !== "Active") {
+    showToast("Machine is not active", "error");
+    return false;
+  }
+
+  return true;
+}
+
+
+// -------------------------------------------------------------
+// FETCH PREVIOUS IN/OUT + WARN IF OLD DATE
+// -------------------------------------------------------------
+async function fetchPrevValuesWithWarning(machineNo, entryDate) {
+  const prevInEl = document.getElementById("auditPrevIn");
+  const prevOutEl = document.getElementById("auditPrevOut");
+
+  const { data, error } = await supabase
+    .from("audit")
+    .select("cur_in, cur_out, date")
+    .eq("machine_no", machineNo)
+    .order("date", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) {
+    prevInEl.value = "";
+    prevOutEl.value = "";
     return;
   }
 
-  select.innerHTML = `<option value="">Select Machine</option>`;
-  (data || []).forEach((m) => {
-    const opt = document.createElement("option");
-    opt.value = m.machineid;
-    opt.textContent = m.machineid;
-    select.appendChild(opt);
-  });
+  prevInEl.value = data.cur_in ?? 0;
+  prevOutEl.value = data.cur_out ?? 0;
+
+  // Compare dates
+  const lastDate = data.date;
+  const yesterday = new Date(entryDate);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const lastISO = new Date(lastDate).toLocaleDateString("en-CA");
+  const yesterdayISO = yesterday.toLocaleDateString("en-CA");
+
+  if (lastISO !== yesterdayISO) {
+    const proceed = confirm(
+      `Previous IN/OUT loaded from ${lastISO} (not yesterday). Continue?`
+    );
+    if (!proceed) {
+      throw new Error("User cancelled due to old previous date");
+    }
+  }
 }
 
+
 // -------------------------------------------------------------
-// UI BINDINGS
+// LOAD ENTRY FOR EDIT MODE
 // -------------------------------------------------------------
-function bindUI() {
-  const saveBtn = document.getElementById("auditSaveBtn");
-  const resetBtn = document.getElementById("auditResetBtn");
-  const filterDate = document.getElementById("auditFilterDate");
-  const machineNo = document.getElementById("auditMachineNo");
-  const curIn = document.getElementById("auditCurIn");
-  const curOut = document.getElementById("auditCurOut");
-  const qrScanBtn = document.getElementById("qrScanBtn");
+async function loadAuditEntryForEdit(machineNo, date, locationId) {
+  const { data, error } = await supabase
+    .from("audit")
+    .select("*")
+    .eq("machine_no", machineNo)
+    .eq("date", date)
+    .eq("location_id", locationId)
+    .maybeSingle();
 
-  if (saveBtn) saveBtn.addEventListener("click", saveAudit);
-  if (resetBtn) resetBtn.addEventListener("click", resetAuditForm);
+  if (error || !data) return false;
 
-  if (filterDate) {
-    filterDate.addEventListener("change", async () => {
-      await loadAudits();
-      await refreshSummary();
-    });
-  }
+  editMode = true;
+  editingAuditId = data.id;
 
-  if (machineNo) {
-    machineNo.addEventListener("change", async () => {
-      await fetchAndSetPrevValues();
-      await loadAuditEntryForEdit();
-      recalcTotals();
-    });
-  }
+  document.getElementById("auditMachineNo").value = data.machine_no;
+  document.getElementById("auditMachineNo").readOnly = true;
 
-  if (curIn) curIn.addEventListener("input", recalcTotals);
-  if (curOut) curOut.addEventListener("input", recalcTotals);
+  document.getElementById("auditPrevIn").value = data.prev_in ?? "";
+  document.getElementById("auditPrevOut").value = data.prev_out ?? "";
+  document.getElementById("auditCurIn").value = data.cur_in ?? "";
+  document.getElementById("auditCurOut").value = data.cur_out ?? "";
+  document.getElementById("auditJackpot").value = data.jackpot ?? "";
+  document.getElementById("auditMachineHealth").value =
+    data.machine_health ?? "";
 
-  if (qrScanBtn) {
-    qrScanBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      if (!window.qrScanner || typeof window.qrScanner.open !== "function") {
-        showToast("QR scanner not available", "error");
+  recalcTotals();
+  highlightRow(machineNo);
+
+  return true;
+}
+
+
+// -------------------------------------------------------------
+// SAVE (INSERT OR UPDATE)
+// -------------------------------------------------------------
+async function saveAudit() {
+  try {
+    if (!validateLocationSelection()) return;
+
+    const date = document.getElementById("auditEntryDate").value || today();
+    const machineNoInput = document.getElementById("auditMachineNo");
+    const machineNo = machineNoInput.value.trim();
+    const locationId =
+      document.getElementById("auditLocationSelect").value ||
+      currentLocationId;
+
+    const curIn = toNumberOrNull(
+      document.getElementById("auditCurIn").value
+    );
+    const curOut = toNumberOrNull(
+      document.getElementById("auditCurOut").value
+    );
+
+    const jackpot = toNumberOrNull(
+      document.getElementById("auditJackpot").value
+    );
+
+    const machineHealth =
+      document.getElementById("auditMachineHealth").value || null;
+
+    // REQUIRED FIELDS
+    if (!machineNo) {
+      showToast("Machine No is required", "error");
+      return;
+    }
+
+    if (curIn === null || curOut === null) {
+      showToast("Please enter Cur IN and Cur OUT", "error");
+      return;
+    }
+
+    // MACHINE VALIDATION
+    const valid = await validateMachine(machineNo, locationId);
+    if (!valid) return;
+
+    // PREVIOUS VALUES
+    try {
+      await fetchPrevValuesWithWarning(machineNo, date);
+    } catch {
+      return; // user cancelled
+    }
+
+    const prevIn = Number(
+      document.getElementById("auditPrevIn").value || 0
+    );
+    const prevOut = Number(
+      document.getElementById("auditPrevOut").value || 0
+    );
+
+    // CUR >= PREV VALIDATION
+    if (curIn < prevIn) {
+      showToast("Cur IN cannot be less than Prev IN", "error");
+      return;
+    }
+
+    if (curOut < prevOut) {
+      showToast("Cur OUT cannot be less than Prev OUT", "error");
+      return;
+    }
+
+    // DUPLICATE CHECK (INSERT ONLY)
+    if (!editMode) {
+      const { data: dup } = await supabase
+        .from("audit")
+        .select("id")
+        .eq("machine_no", machineNo)
+        .eq("date", date)
+        .eq("location_id", locationId)
+        .maybeSingle();
+
+      if (dup) {
+        // LOAD INTO EDIT MODE INSTEAD OF INSERT
+        await loadAuditEntryForEdit(machineNo, date, locationId);
+        showToast("Entry already exists — loaded for editing", "warning");
         return;
       }
+    }
 
-      window.qrScanner.open({
-        targetInputId: "auditMachineNo",
-        onScan: async (value) => {
-          const input = document.getElementById("auditMachineNo");
-          if (input) {
-            input.value = (value || "").trim();
-            input.dispatchEvent(new Event("change", { bubbles: true }));
-          }
-          showToast("QR scanned: " + value, "success");
-        },
-        context: "Audit Machine Scan"
-      });
-    });
+    // PAYLOAD
+    const payload = {
+      date,
+      machine_no: machineNo,
+      prev_in: prevIn,
+      prev_out: prevOut,
+      cur_in: curIn,
+      cur_out: curOut,
+      jackpot: jackpot ?? null,
+      location_id: locationId,
+      user_id: currentUser?.id || null,
+      machine_health: machineHealth
+    };
+
+    let error;
+
+    if (editMode && editingAuditId) {
+      // UPDATE
+      ({ error } = await supabase
+        .from("audit")
+        .update(payload)
+        .eq("id", editingAuditId));
+    } else {
+      // INSERT
+      ({ error } = await supabase.from("audit").insert(payload));
+    }
+
+    if (error) {
+      showToast("Save failed", "error");
+      return;
+    }
+
+    // UPDATE MACHINE HEALTH
+    if (machineHealth) {
+      await supabase
+        .from("machines")
+        .update({ healthstatus: machineHealth })
+        .eq("machineid", machineNo);
+    }
+
+    showToast(editMode ? "Updated successfully" : "Saved successfully", "success");
+
+    editMode = false;
+    editingAuditId = null;
+
+    resetAuditForm();
+    await loadAudits();
+    await refreshSummary();
+    highlightRow(machineNo);
+
+  } catch (err) {
+    console.error("saveAudit error:", err);
+    showToast("Unexpected error while saving", "error");
   }
 }
 
-// -------------------------------------------------------------
-// DEFAULT DATES
-// -------------------------------------------------------------
-function setDefaultDates() {
-  const filterDate = document.getElementById("auditFilterDate");
-  const entryDate = document.getElementById("auditEntryDate");
-  const today = todayISO();
-  if (filterDate) filterDate.value = today;
-  if (entryDate) entryDate.value = today;
-}
 
 // -------------------------------------------------------------
-// LOAD LOCATIONS
+// DELETE ENTRY
+// -------------------------------------------------------------
+async function deleteAudit(id) {
+  if (!confirm("Delete this audit entry?")) return;
+
+  const { error } = await supabase.from("audit").delete().eq("id", id);
+
+  if (error) {
+    showToast("Delete failed", "error");
+    return;
+  }
+
+  showToast("Deleted successfully", "success");
+  await loadAudits();
+  await refreshSummary();
+}
+// -------------------------------------------------------------
+// TOTALS RECALC
+// -------------------------------------------------------------
+function recalcTotals() {
+  const prevIn = Number(
+    document.getElementById("auditPrevIn")?.value || 0
+  );
+  const prevOut = Number(
+    document.getElementById("auditPrevOut")?.value || 0
+  );
+  const curIn = Number(
+    document.getElementById("auditCurIn")?.value || 0
+  );
+  const curOut = Number(
+    document.getElementById("auditCurOut")?.value || 0
+  );
+
+  const totalIn = curIn - prevIn;
+  const totalOut = curOut - prevOut;
+  const net = totalIn - totalOut;
+
+  const totalInInput = document.getElementById("auditTotalIn");
+  const totalOutInput = document.getElementById("auditTotalOut");
+  const netInput = document.getElementById("auditNet");
+
+  if (totalInInput)
+    totalInInput.value = Number.isFinite(totalIn) ? totalIn : "";
+  if (totalOutInput)
+    totalOutInput.value = Number.isFinite(totalOut) ? totalOut : "";
+  if (netInput) netInput.value = Number.isFinite(net) ? net : "";
+}
+
+
+// -------------------------------------------------------------
+// RESET FORM
+// -------------------------------------------------------------
+function resetAuditForm() {
+  const entryDate = document.getElementById("auditEntryDate");
+  const machineNo = document.getElementById("auditMachineNo");
+  const prevIn = document.getElementById("auditPrevIn");
+  const prevOut = document.getElementById("auditPrevOut");
+  const curIn = document.getElementById("auditCurIn");
+  const curOut = document.getElementById("auditCurOut");
+  const jackpot = document.getElementById("auditJackpot");
+  const health = document.getElementById("auditMachineHealth");
+  const totalIn = document.getElementById("auditTotalIn");
+  const totalOut = document.getElementById("auditTotalOut");
+  const net = document.getElementById("auditNet");
+
+  editMode = false;
+  editingAuditId = null;
+
+  if (entryDate) entryDate.value = today();
+  if (machineNo) {
+    machineNo.value = "";
+    machineNo.readOnly = false;
+    machineNo.focus();
+  }
+  if (prevIn) prevIn.value = "";
+  if (prevOut) prevOut.value = "";
+  if (curIn) curIn.value = "";
+  if (curOut) curOut.value = "";
+  if (jackpot) jackpot.value = "";
+  if (health) health.value = "";
+  if (totalIn) totalIn.value = "";
+  if (totalOut) totalOut.value = "";
+  if (net) net.value = "";
+}
+
+
+// -------------------------------------------------------------
+// LOAD LOCATIONS (SuperAdmin vs others)
 // -------------------------------------------------------------
 async function loadLocations() {
   const select = document.getElementById("auditLocationSelect");
@@ -164,6 +445,7 @@ async function loadLocations() {
     }
 
     select.innerHTML = "";
+
     (data || []).forEach((loc) => {
       const opt = document.createElement("option");
       opt.value = loc.id;
@@ -171,11 +453,24 @@ async function loadLocations() {
       select.appendChild(opt);
     });
 
-    if (currentLocationId) select.value = currentLocationId;
+    if (currentRole === "SuperAdmin") {
+      // SuperAdmin must choose explicitly
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = "-- Select Location --";
+      placeholder.selected = true;
+      placeholder.disabled = true;
+      select.insertBefore(placeholder, select.firstChild);
+    } else if (currentLocationId) {
+      select.value = currentLocationId;
+      select.disabled = true;
+    }
+
   } catch (err) {
     console.error("loadLocations unexpected error:", err);
   }
 }
+
 
 // -------------------------------------------------------------
 // LOAD AUDITS TABLE
@@ -186,17 +481,15 @@ async function loadAudits() {
 
   try {
     const filterDate =
-      document.getElementById("auditFilterDate")?.value || todayISO();
-    /*const locationId =
-      document.getElementById("auditLocationSelect")?.value || null;*/
-      const locationId =
-        document.getElementById("auditLocationSelect")?.value ||
-        currentLocationId ||
-        null;
+      document.getElementById("auditFilterDate")?.value || today();
+    const locationId =
+      document.getElementById("auditLocationSelect")?.value ||
+      currentLocationId ||
+      null;
 
     let query = supabase
       .from("audit")
-      .select("id, machine_no, prev_in, prev_out, cur_in, cur_out")
+      .select("id, machine_no, prev_in, prev_out, cur_in, cur_out, jackpot, machine_health, location_id")
       .eq("date", filterDate)
       .order("machine_no", { ascending: true });
 
@@ -209,6 +502,7 @@ async function loadAudits() {
     }
 
     tbody.innerHTML = "";
+
     (data || []).forEach((row) => {
       const prevIn = Number(row.prev_in || 0);
       const prevOut = Number(row.prev_out || 0);
@@ -219,6 +513,9 @@ async function loadAudits() {
       const net = totalIn - totalOut;
 
       const tr = document.createElement("tr");
+      tr.dataset.id = row.id;
+      tr.dataset.machine = row.machine_no || "";
+
       tr.innerHTML = `
         <td>${row.machine_no ?? ""}</td>
         <td>${row.prev_in ?? ""}</td>
@@ -237,33 +534,41 @@ async function loadAudits() {
           }
         </td>
       `;
+
       tbody.appendChild(tr);
     });
 
-    document.querySelectorAll(".auditDeleteBtn").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const id = btn.dataset.id;
+    // Row click → edit mode
+    tbody.querySelectorAll("tr").forEach((tr) => {
+      tr.addEventListener("click", async () => {
+        const machineNo = tr.dataset.machine;
+        const date =
+          document.getElementById("auditFilterDate")?.value || today();
+        const locationId =
+          document.getElementById("auditLocationSelect")?.value ||
+          currentLocationId ||
+          null;
 
-        const { error } = await supabase
-          .from("audit")
-          .delete()
-          .eq("id", id);
+        if (!machineNo || !locationId) return;
 
-        if (error) {
-          console.error("Delete error:", error);
-          showToast("Delete failed", "error");
-          return;
-        }
-
-        showToast("Deleted successfully", "success");
-        await loadAudits();
-        await refreshSummary();
+        await loadAuditEntryForEdit(machineNo, date, locationId);
       });
     });
+
+    // Delete buttons
+    document.querySelectorAll(".auditDeleteBtn").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        await deleteAudit(id);
+      });
+    });
+
   } catch (err) {
     console.error("loadAudits unexpected error:", err);
   }
 }
+
 
 // -------------------------------------------------------------
 // SUMMARY
@@ -271,9 +576,11 @@ async function loadAudits() {
 async function refreshSummary() {
   try {
     const filterDate =
-      document.getElementById("auditFilterDate")?.value || todayISO();
+      document.getElementById("auditFilterDate")?.value || today();
     const locationId =
-      document.getElementById("auditLocationSelect")?.value || null;
+      document.getElementById("auditLocationSelect")?.value ||
+      currentLocationId ||
+      null;
 
     let base = supabase
       .from("audit")
@@ -314,314 +621,111 @@ async function refreshSummary() {
     if (elIn) elIn.textContent = totalIn || 0;
     if (elOut) elOut.textContent = totalOut || 0;
     if (elNet) elNet.textContent = net || 0;
+
   } catch (err) {
     console.error("refreshSummary unexpected error:", err);
   }
 }
 
-// -------------------------------------------------------------
-// LOAD AUDIT ENTRY FOR EDIT
-// -------------------------------------------------------------
-async function loadAuditEntryForEdit() {
-  const machineNo = document.getElementById("auditMachineNo")?.value?.trim();
-  const date = document.getElementById("auditEntryDate")?.value || todayISO();
-  if (!machineNo || !date) return;
-
-  const { data, error } = await supabase
-    .from("audit")
-    .select("*")
-    .eq("machine_no", machineNo)
-    .eq("date", date)
-    .maybeSingle();
-
-  if (error || !data) return;
-
-  const prevInEl = document.getElementById("auditPrevIn");
-  const prevOutEl = document.getElementById("auditPrevOut");
-  const curInEl = document.getElementById("auditCurIn");
-  const curOutEl = document.getElementById("auditCurOut");
-  const jackpotEl = document.getElementById("auditJackpot");
-  const healthEl = document.getElementById("auditMachineHealth");
-
-  if (prevInEl) prevInEl.value = data.prev_in ?? "";
-  if (prevOutEl) prevOutEl.value = data.prev_out ?? "";
-  if (curInEl) curInEl.value = data.cur_in ?? "";
-  if (curOutEl) curOutEl.value = data.cur_out ?? "";
-  if (jackpotEl) jackpotEl.value = data.jackpot ?? "";
-  if (healthEl) healthEl.value = data.machine_health ?? "";
-
-  recalcTotals();
-}
 
 // -------------------------------------------------------------
-// PREV IN/OUT FETCH
+// UI BINDINGS
 // -------------------------------------------------------------
-async function fetchAndSetPrevValues() {
-  const machineNo =
-    document.getElementById("auditMachineNo")?.value?.trim() || "";
-  const prevIn = document.getElementById("auditPrevIn");
-  const prevOut = document.getElementById("auditPrevOut");
-
-  if (!machineNo) {
-    if (prevIn) prevIn.value = "";
-    if (prevOut) prevOut.value = "";
-    return;
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from("audit")
-      .select("cur_in, cur_out, date")
-      .eq("machine_no", machineNo)
-      .order("date", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (error) {
-      console.error("fetchAndSetPrevValues error:", error);
-      if (prevIn) prevIn.value = "";
-      if (prevOut) prevOut.value = "";
-      return;
-    }
-
-    if (data) {
-      if (prevIn) prevIn.value = data.cur_in ?? 0;
-      if (prevOut) prevOut.value = data.cur_out ?? 0;
-    } else {
-      if (prevIn) prevIn.value = "";
-      if (prevOut) prevOut.value = "";
-    }
-  } catch (err) {
-    console.error("fetchAndSetPrevValues unexpected error:", err);
-    if (prevIn) prevIn.value = "";
-    if (prevOut) prevOut.value = "";
-  }
-}
-
-// -------------------------------------------------------------
-// TOTALS
-// -------------------------------------------------------------
-function recalcTotals() {
-  const prevIn = Number(
-    document.getElementById("auditPrevIn")?.value || 0
-  );
-  const prevOut = Number(
-    document.getElementById("auditPrevOut")?.value || 0
-  );
-  const curIn = Number(
-    document.getElementById("auditCurIn")?.value || 0
-  );
-  const curOut = Number(
-    document.getElementById("auditCurOut")?.value || 0
-  );
-
-  const totalIn = curIn - prevIn;
-  const totalOut = curOut - prevOut;
-  const net = totalIn - totalOut;
-
-  const totalInInput = document.getElementById("auditTotalIn");
-  const totalOutInput = document.getElementById("auditTotalOut");
-  const netInput = document.getElementById("auditNet");
-
-  if (totalInInput)
-    totalInInput.value = Number.isFinite(totalIn) ? totalIn : "";
-  if (totalOutInput)
-    totalOutInput.value = Number.isFinite(totalOut) ? totalOut : "";
-  if (netInput) netInput.value = Number.isFinite(net) ? net : "";
-}
-
-// -------------------------------------------------------------
-// RESET FORM
-// -------------------------------------------------------------
-function resetAuditForm() {
-  const entryDate = document.getElementById("auditEntryDate");
+function bindUI() {
+  const saveBtn = document.getElementById("auditSaveBtn");
+  const resetBtn = document.getElementById("auditResetBtn");
+  const filterDate = document.getElementById("auditFilterDate");
   const machineNo = document.getElementById("auditMachineNo");
-  const prevIn = document.getElementById("auditPrevIn");
-  const prevOut = document.getElementById("auditPrevOut");
   const curIn = document.getElementById("auditCurIn");
   const curOut = document.getElementById("auditCurOut");
-  const jackpot = document.getElementById("auditJackpot");
-  const health = document.getElementById("auditMachineHealth");
-  const totalIn = document.getElementById("auditTotalIn");
-  const totalOut = document.getElementById("auditTotalOut");
-  const net = document.getElementById("auditNet");
+  const qrScanBtn = document.getElementById("qrScanBtn");
+  const locSelect = document.getElementById("auditLocationSelect");
 
-  if (entryDate) entryDate.value = todayISO();
-  if (machineNo) machineNo.value = "";
-  if (prevIn) prevIn.value = "";
-  if (prevOut) prevOut.value = "";
-  if (curIn) curIn.value = "";
-  if (curOut) curOut.value = "";
-  if (jackpot) jackpot.value = "";
-  if (health) health.value = "";
-  if (totalIn) totalIn.value = "";
-  if (totalOut) totalOut.value = "";
-  if (net) net.value = "";
-}
+  if (saveBtn) saveBtn.addEventListener("click", saveAudit);
+  if (resetBtn) resetBtn.addEventListener("click", resetAuditForm);
 
-// -------------------------------------------------------------
-// SAVE
-// -------------------------------------------------------------
-async function saveAudit() {
-  try {
-    if (!currentUser) await loadSessionInfo();
+  if (filterDate) {
+    filterDate.addEventListener("change", async () => {
+      await loadAudits();
+      await refreshSummary();
+    });
+  }
 
-    const date =
-      document.getElementById("auditEntryDate")?.value || todayISO();
+  if (locSelect) {
+    locSelect.addEventListener("change", async () => {
+      await loadAudits();
+      await refreshSummary();
+    });
+  }
 
-    const machineNoRaw =
-      document.getElementById("auditMachineNo")?.value.trim() || "";
-
-    const match = machineNoRaw.match(/(\d{1,5}-\d{1,5})/);
-    const machineNo = match ? match[1] : machineNoRaw;
-
-    const locationId =
-      document.getElementById("auditLocationSelect")?.value ||
-      currentLocationId ||
-      null;
-
-    const prevInRaw = document.getElementById("auditPrevIn")?.value;
-    const prevOutRaw = document.getElementById("auditPrevOut")?.value;
-    const curIn =
-      toNumberOrNull(document.getElementById("auditCurIn")?.value) ?? 0;
-    const curOut =
-      toNumberOrNull(document.getElementById("auditCurOut")?.value) ?? 0;
-    const jackpot =
-      toNumberOrNull(document.getElementById("auditJackpot")?.value) ??
-      null;
-    const machineHealth =
-      document.getElementById("auditMachineHealth")?.value || null;
-
-    if (!machineNo) {
-      showToast("Machine No is required", "error");
-      return;
-    }
-
-    // Audit role date restriction: only today or yesterday
-    const entryDateObj = new Date(date);
-    const today = new Date(todayISO());
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-
-    const entryISO = entryDateObj.toISOString().slice(0, 10);
-    const todayStr = today.toISOString().slice(0, 10);
-    const yesterdayStr = yesterday.toISOString().slice(0, 10);
-
-    const isTodayOrYesterday =
-      entryISO === todayStr || entryISO === yesterdayStr;
-
-    if (currentRole === "Audit" && !isTodayOrYesterday) {
-      showToast("Audit role can only edit today or yesterday", "error");
-      return;
-    }
-
-    // Duplicate check (machine + date + location)
-    let dupQuery = supabase
-      .from("audit")
-      .select("id")
-      .eq("machine_no", machineNo)
-      .eq("date", date);
-
-    if (locationId) dupQuery = dupQuery.eq("location_id", locationId);
-
-    const { data: dupData, error: dupErr } = await dupQuery.maybeSingle();
-
-    if (dupErr) {
-      console.error("Duplicate check error:", dupErr);
-      showToast("Database error while checking duplicates", "error");
-      return;
-    }
-    if (dupData) {
-      showToast(
-        "Entry already exists for this machine and date",
-        "error"
-      );
-      return;
-    }
-
-    // Ensure prev values
-    if (prevInRaw === "" || prevOutRaw === "") {
-      await fetchAndSetPrevValues();
-    }
-
-    const finalPrevIn =
-      toNumberOrNull(document.getElementById("auditPrevIn")?.value) ?? 0;
-    const finalPrevOut =
-      toNumberOrNull(document.getElementById("auditPrevOut")?.value) ?? 0;
-
-    const totalIn = curIn - finalPrevIn;
-    const totalOut = curOut - finalPrevOut;
-    const net = totalIn - totalOut;
-
-    const payload = {
-      date,
-      machine_no: machineNo,
-      prev_in: finalPrevIn,
-      prev_out: finalPrevOut,
-      cur_in: curIn,
-      cur_out: curOut,
-      jackpot: jackpot ?? null,
-      location_id: locationId,
-      user_id: currentUser?.id || null,
-      machine_health: machineHealth || null
-    };
-
-    Object.keys(payload).forEach(
-      (k) => payload[k] === undefined && delete payload[k]
-    );
-
-    console.log("INSERT PAYLOAD:", payload);
-
-    const { error } = await supabase.from("audit").insert(payload);
-
-    if (!error && machineHealth) {
-      const { error: machineErr } = await supabase
-        .from("machines")
-        .update({ healthstatus: machineHealth })
-        .eq("machineid", machineNo);
-
-      if (machineErr) {
-        console.error("Machine health update error:", machineErr);
-        showToast("Audit saved, but machine health update failed", "error");
+  if (machineNo) {
+    machineNo.addEventListener("change", async () => {
+      const val = machineNo.value.trim();
+      if (!val) {
+        resetAuditForm();
+        return;
       }
-    }
 
-    if (error) {
-      console.error("Supabase insert error:", error);
-      showToast(
-        "Save failed: " + (error.message || "database error"),
-        "error"
-      );
-      return;
-    }
+      const date =
+        document.getElementById("auditEntryDate")?.value || today();
+      const locationId =
+        document.getElementById("auditLocationSelect")?.value ||
+        currentLocationId ||
+        null;
 
-    const totalInInput = document.getElementById("auditTotalIn");
-    const totalOutInput = document.getElementById("auditTotalOut");
-    const netInput = document.getElementById("auditNet");
-    if (totalInInput)
-      totalInInput.value = Number.isFinite(totalIn) ? totalIn : "";
-    if (totalOutInput)
-      totalOutInput.value = Number.isFinite(totalOut) ? totalOut : "";
-    if (netInput) netInput.value = Number.isFinite(net) ? net : "";
+      // Try load for edit first
+      const loaded = await loadAuditEntryForEdit(val, date, locationId);
+      if (!loaded) {
+        // New entry mode: fetch prev values
+        editMode = false;
+        editingAuditId = null;
+        document.getElementById("auditMachineNo").readOnly = false;
+        await fetchPrevValuesWithWarning(val, date).catch(() => {});
+        recalcTotals();
+      }
+    });
+  }
 
-    showToast("Audit saved successfully", "success");
-    resetAuditForm();
-    await loadAudits();
-    await refreshSummary();
-  } catch (err) {
-    console.error("Unexpected save error:", err);
-    showToast("Unexpected error while saving", "error");
+  if (curIn) curIn.addEventListener("input", recalcTotals);
+  if (curOut) curOut.addEventListener("input", recalcTotals);
+
+  if (qrScanBtn) {
+    qrScanBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (!window.qrScanner || typeof window.qrScanner.open !== "function") {
+        showToast("QR scanner not available", "error");
+        return;
+      }
+
+      window.qrScanner.open({
+        targetInputId: "auditMachineNo",
+        onScan: async (value) => {
+          const input = document.getElementById("auditMachineNo");
+          if (input) {
+            input.value = (value || "").trim();
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+          showToast("QR scanned: " + value, "success");
+        },
+        context: "Audit Machine Scan"
+      });
+    });
   }
 }
+
 
 // -------------------------------------------------------------
 // MODULE INIT
 // -------------------------------------------------------------
 async function initAuditModule() {
   await loadSessionInfo();
-  setDefaultDates();
+
+  const filterDate = document.getElementById("auditFilterDate");
+  const entryDate = document.getElementById("auditEntryDate");
+  if (filterDate) filterDate.value = today();
+  if (entryDate) entryDate.value = today();
+
   await loadLocations();
-  await loadMachineNumbers();
   bindUI();
   await loadAudits();
   await refreshSummary();
