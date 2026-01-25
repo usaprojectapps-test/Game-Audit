@@ -110,17 +110,31 @@
 
   </div>
 
-  <!-- RESET PASSWORD MODAL -->
-  <div id="resetModal" class="modal">
-    <div class="modal-content">
-      <h2>Reset Password</h2>
-      <input type="email" id="resetEmail" readonly />
-      <div class="button-group">
-        <button id="cancelReset" class="btn-secondary">Cancel</button>
-        <button id="confirmReset" class="btn-primary">Send Reset Link</button>
+    <!-- RESET PASSWORD MODAL (ADMIN USE ONLY) -->
+  <div id="resetPasswordModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card">
+
+      <h3 class="modal-title">Reset Password</h3>
+
+      <p class="modal-text">
+        A secure password reset link will be sent to the user’s email.
+      </p>
+
+      <input
+        type="email"
+        id="resetEmail"
+        class="modal-input"
+        readonly
+      />
+
+      <div class="modal-actions">
+        <button id="cancelReset" class="btn btn-secondary">Cancel</button>
+        <button id="confirmReset" class="btn btn-primary">Send Reset Link</button>
       </div>
+
     </div>
   </div>
+
 
   <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
