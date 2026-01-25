@@ -1,31 +1,45 @@
 <section class="audit-module-container">
   <div class="module-wrapper audit-module">
-    <!-- LEFT: summary + table -->
+
+    <!-- LEFT SIDE -->
     <div class="module-left">
-      <!-- Row 1: 3 columns -->
+
+      <!-- SUMMARY BLOCK -->
       <div class="audit-summary-row">
-         <div class="row-3col"> 
-            <div class="form-item">
-              <label>Location</label>
-              <select id="auditLocationSelect"></select>
-            </div>
 
-            <div class="form-item">
-              <label>Date</label>
-              <input type="date" id="auditFilterDate">
-            </div>
-            <span>Total Machines: <strong id="summaryTotalMachines">2</strong></span>
-            <span>Total Jackpot: <strong id="summaryTotalJackpot">$ 0.00</strong></span>
+        <!-- ROW 1 -->
+        <div class="row-2col">
 
-            <span>Total IN: <strong id="summaryTotalIn">$ 200.00</strong></span>
-        
-            <span>Total OUT: <strong id="summaryTotalOut">$ 70.00</strong></span>
-        
-            <span>NET: <strong id="summaryNet">$ 130.00</strong></span>
+          <!-- Location -->
+          <div class="form-item">
+            <label>Location</label>
+            <select id="auditLocationSelect"></select>
           </div>
+
+          <!-- Date -->
+          <div class="form-item">
+            <label>Date</label>
+            <input type="date" id="auditFilterDate">
+          </div>
+
+          <!-- Vertical summary (B1-B) -->
+          <div class="summary-vertical">
+            <span>Total Machines: <strong id="summaryTotalMachines">0</strong></span>
+            <span>Total Jackpot: <strong id="summaryTotalJackpot">$ 0.00</strong></span>
+          </div>
+
         </div>
-      
-      <!-- Table -->
+
+        <!-- ROW 2 -->
+        <div class="row-3col summary-horizontal">
+          <span>Total IN: <strong id="summaryTotalIn">$ 0.00</strong></span>
+          <span>Total OUT: <strong id="summaryTotalOut">$ 0.00</strong></span>
+          <span>NET: <strong id="summaryNet">$ 0.00</strong></span>
+        </div>
+
+      </div>
+
+      <!-- TABLE -->
       <div class="full-width">
         <div class="table-wrapper">
           <table id="auditTable" class="striped">
@@ -45,14 +59,15 @@
             <tbody></tbody>
           </table>
         </div>
-      </div>  
-    </div>  
-    
-    <!-- RIGHT: form -->
+      </div>
+
+    </div>
+
+    <!-- RIGHT SIDE FORM -->
     <div class="module-right">
+
       <div class="card-header">AUDIT Entry Form</div>
 
-      <!-- Row 1: 2 columns -->
       <div class="row-2col">
         <div class="form-item">
           <label>Date</label>
@@ -67,7 +82,7 @@
           </div>
         </div>
       </div>
-      <!-- Row 2: 2 columns -->
+
       <div class="row-2col">
         <div class="form-item">
           <label>Prev IN</label>
@@ -79,7 +94,7 @@
           <input type="number" id="auditPrevOut" readonly>
         </div>
       </div>
-      <!-- Row 3: 2 columns -->
+
       <div class="row-2col">
         <div class="form-item">
           <label>Cur IN</label>
@@ -91,7 +106,7 @@
           <input type="number" id="auditCurOut">
         </div>
       </div>
-<!-- Row 4: 2 columns -->
+
       <div class="row-2col">
         <div class="form-item">
           <label>Jackpot</label>
@@ -108,13 +123,12 @@
           </select>
         </div>
       </div>
-      <!-- Buttons -->
+
       <div class="full-width form-actions">
         <button id="auditSaveBtn" class="btn btn-primary">Save</button>
         <button id="auditResetBtn" class="btn">Reset</button>
       </div>
 
-      <!-- Row 5: 3 columns -->
       <div class="row-3col">
         <div class="form-item">
           <label>Total IN</label>
@@ -131,7 +145,9 @@
           <input type="number" id="auditNet" readonly>
         </div>
       </div>
+
     </div>
+
   </div>
 </section>
 
@@ -143,7 +159,6 @@
   </div>
 </div>
 
-<!-- QR Scanner -->
 <script type="module">
   import jsQR from "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js";
   window.jsQR = jsQR;
@@ -153,6 +168,5 @@
 <script src="/js_new/audit.js" defer></script>
 
 <script>
-  // IMPORTANT: triggers audit.js initialization
   window.dispatchEvent(new Event("auditModuleLoaded"));
 </script>
