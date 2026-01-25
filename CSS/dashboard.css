@@ -233,7 +233,8 @@ body {
   justify-content: center;
   z-index: 999;
 }
-#logoutBtn {
+#logoutBtn,
+.btn-danger {
   background-color: #cc5500; /* dark orange */
   color: white;
   border: none;
