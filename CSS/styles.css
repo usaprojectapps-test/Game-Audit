@@ -14,79 +14,60 @@ body {
   font-family: 'Inter', sans-serif;
   color: #e2e8f0;
   min-height: 100vh;
-
-  /* ✅ ALLOW PAGE SCROLL */
   overflow-x: hidden;
   overflow-y: auto;
 }
 
-
 /* ============================================================
-   MODULE CONTAINERS
+   MODULE CONTAINER (MODULE, NOT PAGE)
 ============================================================ */
-.module-container,
-.audit-module-container,
-.vendor-module-container,
-.msp-module-container,
-.silver-module-container,
-.agent-module-container,
-.purchase-module-container {
-  min-height: calc(100vh - 80px);
+.module-container {
+  width: 100%;
 }
 
 /* ============================================================
-   MAIN WRAPPER — GRID (TRUE 65 / 35)
+   MODULE WRAPPER — TRUE 65 / 35
 ============================================================ */
 .module-wrapper {
   display: grid;
-  grid-template-columns: 65% 35%;
+  grid-template-columns: 65fr 35fr;
   gap: 20px;
-  width: calc(100% - 60px);
+
+  width: 100%;
   margin: 30px auto;
+
+  align-items: stretch; /* 🔑 force same height */
 }
 
 /* ============================================================
-   LEFT PANEL — SCROLLABLE
+   LEFT PANEL — STRETCH, NO SCROLL
 ============================================================ */
 .module-left {
+  display: flex;
+  flex-direction: column;
+
   padding: 20px;
   background: rgba(255, 255, 255, 0.06);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
-  max-height: calc(100vh - 160px);
-  overflow-y: auto;
+
+  height: 100%;
+  overflow: hidden;
 }
 
-
 /* ============================================================
-   RIGHT PANEL — FIXED WIDTH
+   RIGHT PANEL — HEIGHT DRIVER
 ============================================================ */
 .module-right {
-  position: sticky;
-  top: 120px; /* below header */
-  height: fit-content;
-  overflow: visible;
   padding: 20px;
   background: rgba(255, 255, 255, 0.06);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
-}
-/* ============================================================
-   MOBILE STACK
-============================================================ */
-@media (max-width: 768px) {
-  .module-wrapper {
-    grid-template-columns: 1fr;
-    height: auto;
-  }
 
-  .module-left,
-  .module-right {
-    height: auto;
-    overflow: visible;
-  }
+  height: auto;
+  overflow: visible;
 }
 
 /* ============================================================
@@ -138,30 +119,34 @@ select option {
 }
 
 /* ============================================================
-   FORM GRID — 2 COLUMNS
+   FORM ROWS
 ============================================================ */
-.form-grid {
+.row-2col {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 14px 20px;
-  width: 100%;
 }
 
-.form-group {
+.row-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px 20px;
+}
+
+.form-item {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.form-group label {
+.form-item label {
   font-weight: 600;
 }
 
 /* ============================================================
    FORM ACTIONS
 ============================================================ */
-.form-actions,
-.button-row {
+.form-actions {
   margin-top: 16px;
   display: flex;
   justify-content: flex-end;
@@ -169,34 +154,39 @@ select option {
 }
 
 /* ============================================================
-   SEARCH / FILTER ROWS
+   AUDIT SUMMARY
 ============================================================ */
-.search-row,
-.filters-row {
+.audit-summary-row {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 12px;
-  margin-bottom: 16px;
-  overflow-x: auto;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
 }
 
-.search-row input,
-.filters-row input {
-  max-width: 300px;
+.summary-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.search-row select,
-.filters-row select {
-  width: 160px;
+.summary-horizontal {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
 }
 
 /* ============================================================
-   TABLE WRAPPER — STICKY HEADER
+   TABLE — ONLY THIS SCROLLS
 ============================================================ */
 .table-wrapper {
-  width: 100%;
-  max-height: 420px;
+  flex: 1;          /* 🔑 fills remaining height */
+  min-height: 0;    /* 🔑 enables scrolling */
   overflow-y: auto;
+
+  width: 100%;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
@@ -240,15 +230,6 @@ select option {
   font-size: 14px;
 }
 
-.btn-secondary {
-  background: rgba(255, 255, 255, 0.15);
-  color: #e2e8f0;
-}
-
-.btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
 .btn-primary {
   background: linear-gradient(135deg, #4f8cff, #6a5cff);
   color: white;
@@ -259,48 +240,9 @@ select option {
   color: white;
 }
 
-/* ============================================================
-   LOGOUT BUTTON
-============================================================ */
-#logoutBtn {
-  background-color: #cc5500;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-family: 'Poppins', sans-serif;
-  cursor: pointer;
-}
-
-/* ============================================================
-   QR + NOTES
-============================================================ */
-.form-grid-3 {
-  display: flex;
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.qr-preview.ticket-preview {
-  flex: 1;
-  min-height: 120px;
-  background: #f4f4f4;
-  border: 1px solid #ccc;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* ============================================================
-   AUDIT SUMMARY
-============================================================ */
-.audit-summary-row {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.06);
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
 }
 
 /* ============================================================
@@ -322,9 +264,30 @@ select option {
   border-radius: 8px;
 }
 
+.qr-video {
+  width: 300px;
+  height: 300px;
+}
+
+/* ============================================================
+   TOAST
+============================================================ */
 .toast-container {
   position: fixed;
   top: 20px;
   right: 20px;
   z-index: 9999;
+}
+
+/* ============================================================
+   MOBILE STACK
+============================================================ */
+@media (max-width: 768px) {
+  .module-wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .table-wrapper {
+    max-height: 300px;
+  }
 }
