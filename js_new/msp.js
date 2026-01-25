@@ -30,6 +30,13 @@ function dbg(...args) {
 dbg("msp.js loaded — waiting for mspModuleLoaded event");
 
 // -------------------------------------------------------------
+// LOCAL DATE FIX — PREVENT 1-DAY AHEAD BUG
+// -------------------------------------------------------------
+function today() {
+  return new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD in local timezone
+}
+
+// -------------------------------------------------------------
 // INITIALIZER — WAIT FOR FINAL DOM
 // -------------------------------------------------------------
 window.addEventListener("mspModuleLoaded", () => {
@@ -109,13 +116,13 @@ async function initMSPModule() {
     // -------------------------------------------------------------
     let selectedMachine = null;
     let editingEntryId = null;
-    let editMode = false; // NEW FLAG
+    let editMode = false;
 
     // -------------------------------------------------------------
-    // DEFAULT DATE
+    // DEFAULT DATE (PATCHED)
     // -------------------------------------------------------------
-    dateInput.value = new Date().toISOString().split("T")[0];
-    formDate.value = dateInput.value;
+    dateInput.value = today();
+    formDate.value = today();
 
     // -------------------------------------------------------------
     // EVENTS
