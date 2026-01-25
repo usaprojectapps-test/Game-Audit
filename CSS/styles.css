@@ -291,3 +291,28 @@ select option {
     max-height: 300px;
   }
 }
+/* ============================================================
+   FORCE MODULE TO FULL WIDTH (BREAK OUT OF PARENT)
+============================================================ */
+.module-container {
+  position: relative;
+  left: 50%;
+  right: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  padding-left: 30px;
+  padding-right: 30px;
+}
+.module-wrapper {
+  display: grid;
+  grid-template-columns: 65fr 35fr;
+  gap: 24px;
+  width: 100%;
+  margin: 30px auto;
+  align-items: stretch;
+}
+.module-left,
+.module-right {
+  min-width: 0;
+}
