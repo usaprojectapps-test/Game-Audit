@@ -469,6 +469,7 @@ async function loadAudits() {
           document.getElementById("auditLocationSelect")?.value ||
           currentLocationId ||
           null;
+          document.getElementById("auditEntryDate").value = date;
 
         if (!machineNo || !locationId) return;
 
