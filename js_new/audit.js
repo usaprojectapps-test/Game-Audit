@@ -444,6 +444,7 @@ async function loadAudits() {
         <td>${row.prev_out ?? ""}</td>
         <td>${row.cur_in ?? ""}</td>
         <td>${row.cur_out ?? ""}</td>
+        <td>${row.jackpot ?? 0}</td>   <!-- ⭐ SHOW JACKPOT -->
         <td>${Number.isFinite(totalIn) ? totalIn : ""}</td>
         <td>${Number.isFinite(totalOut) ? totalOut : ""}</td>
         <td>${Number.isFinite(net) ? net : ""}</td>
