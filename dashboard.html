@@ -1,31 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard</title>
 
   <!-- CSS -->
-  <link rel="stylesheet" href="/CSS/dashboard.css">
-  <link rel="stylesheet" href="/CSS/styles.css">
+  <link rel="stylesheet" href="/CSS/dashboard.css" />
+  <link rel="stylesheet" href="/CSS/styles.css" />
 
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&family=Sora:wght@500;600&family=Inter:wght@400;500&family=Poppins:wght@500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&family=Sora:wght@500;600&family=Inter:wght@400;500&family=Poppins:wght@500&display=swap"
+    rel="stylesheet"
+  />
 </head>
 
 <body>
+
+  <!-- TOASTS -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- MODAL CONTAINER -->
- <div id="moduleContainer"></div>
-
-  <!-- HEADER -->
-  <header class="glass-card dashboard-header" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px;">
+  <!-- HEADER (ALWAYS TOP) -->
+  <header
+    class="glass-card dashboard-header"
+    style="display:flex;align-items:center;justify-content:space-between;padding:16px 24px;"
+  >
 
     <!-- LEFT -->
     <div class="header-left">
       <div class="card-header">Dashboard</div>
       <div class="card-subtitle">
-        Welcome, <span id="headerUserName"></span> — <span id="headerUserDept"></span>
+        Welcome, <span id="headerUserName"></span> —
+        <span id="headerUserDept"></span>
       </div>
     </div>
 
@@ -39,20 +45,23 @@
       <div id="headerDateTime" class="header-clock"></div>
 
       <div class="header-actions">
-        <button id="btnChangePassword" class="btn btn-secondary">Change Password</button>
-        <button id="btnLogout" class="btn btn-danger">Logout</button>
+        <button id="btnChangePassword" class="btn btn-secondary">
+          Change Password
+        </button>
+        <button id="btnLogout" class="btn btn-danger">
+          Logout
+        </button>
       </div>
     </div>
 
   </header>
 
-  <!-- MODULE CONTAINER -->
+  <!-- MODULE CONTAINER (ONLY ONE, CORRECT PLACE) -->
   <div id="moduleContainer"></div>
 
-  <!-- DASHBOARD GRID -->
+  <!-- DASHBOARD TILES -->
   <div class="dashboard-grid">
 
-    <!-- ROW 1 -->
     <div class="dashboard-tile" id="tile-vendors" data-module="vendors" data-dept="SuperAdmin,LocationAdmin,Manager,Audit">
       <div class="tile-icon">🏪</div>
       <div class="tile-title">Vendors</div>
@@ -68,20 +77,16 @@
       <div class="tile-title">Users</div>
     </div>
 
-    <!-- AUDIT (direct open) -->
     <div class="dashboard-tile" id="tile-audit" data-module="audit" data-dept="Audit,SuperAdmin,LocationAdmin,Manager">
       <div class="tile-icon">📊</div>
       <div class="tile-title">Audit</div>
     </div>
 
-    <!-- MSP (direct open) -->
     <div class="dashboard-tile" id="tile-msp" data-module="msp" data-dept="MSP,SuperAdmin,LocationAdmin,Manager">
       <div class="tile-icon">💰</div>
       <div class="tile-title">MSP</div>
     </div>
 
-    <!-- ROW 2 -->
-    <!-- SILVER (direct open) -->
     <div class="dashboard-tile" id="tile-silver" data-module="silver" data-dept="Silver,SuperAdmin,LocationAdmin,Manager">
       <div class="tile-icon">🥈</div>
       <div class="tile-title">Silver</div>
@@ -97,8 +102,6 @@
       <div class="tile-title">Silver Purchase</div>
     </div>
 
-    <!-- REPORTS REMOVED -->
-
     <div class="dashboard-tile" id="tile-general" data-module="general" data-dept="SuperAdmin,LocationAdmin,Manager,Audit,MSP,Silver,SilverAgent">
       <div class="tile-icon">⚙️</div>
       <div class="tile-title">General</div>
@@ -109,32 +112,13 @@
       <div class="tile-title">Locations</div>
     </div>
 
-    <!-- PENDING REQUESTS WIDGET -->
-    <div class="dashboard-card" id="pendingRequestsCard">
-      <h3>
-        Pending Delete Requests
-        <span id="pendingBadge" class="pending-badge hidden"></span>
-      </h3>
-      <div class="count" id="pendingRequestsCount">0</div>
-    </div>
-
   </div>
 
   <!-- RESET PASSWORD MODAL -->
   <div id="resetModal" class="modal">
     <div class="modal-content">
-      <h2><i class="fa fa-lock"></i> Reset Password</h2>
-      <p class="modal-description">
-        We’ll send a secure password reset link to the email below.<br>
-        Please confirm the address before proceeding.
-      </p>
-
-      <input type="email" id="resetEmail" class="input-field" readonly />
-
-      <small class="footer-note">
-        If this email is incorrect, update the user profile before sending.
-      </small>
-
+      <h2>Reset Password</h2>
+      <input type="email" id="resetEmail" readonly />
       <div class="button-group">
         <button id="cancelReset" class="btn-secondary">Cancel</button>
         <button id="confirmReset" class="btn-primary">Send Reset Link</button>
@@ -143,18 +127,11 @@
   </div>
 
   <!-- SCRIPTS -->
-  <!-- Supabase JS v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- QR Code Generator -->
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
-
-  <!-- QR Scanner -->
- <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
- <!-- Dashboard Logic -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <script type="module" src="/js_new/dashboard.js?v=12"></script>
   <script src="/js_new/qr-scanner.js"></script>
-  
 
 </body>
 </html>
