@@ -462,12 +462,16 @@ async function refreshSummary() {
   const totalOut = rows.reduce((sum, r) => sum + (r.cur_out - r.prev_out), 0);
   const net = totalIn - totalOut;
 
-  document.getElementById("summaryTotalMachines").textContent = totalMachines;
-  document.getElementById("summaryTotalIn").textContent = totalIn;
-  document.getElementById("summaryTotalOut").textContent = totalOut;
-  document.getElementById("summaryNet").textContent = net;
-}
+ 
 
+    function formatCurrency(amount) {
+        return `$ ${Number(amount || 0).toFixed(2)}`;
+    }
+        document.getElementById("summaryTotalMachines").textContent = totalMachines;
+        document.getElementById("summaryTotalIn").textContent = formatCurrency(totalIn);
+        document.getElementById("summaryTotalOut").textContent = formatCurrency(totalOut);
+        document.getElementById("summaryNet").textContent = formatCurrency(net);
+}
 // -------------------------------------------------------------
 // UI BINDINGS
 // -------------------------------------------------------------
