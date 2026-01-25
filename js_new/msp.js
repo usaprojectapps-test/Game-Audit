@@ -340,6 +340,14 @@ async function initMSPModule() {
         return;
       }
 
+      // AMOUNT VALIDATION
+      if (!formAmount.value || Number(formAmount.value) <= 0) {
+        showToast("Please enter a valid amount", "error");
+        formAmount.focus();
+        return;
+      }
+
+
       // -------------------------------------------------------------
       // MACHINE VALIDATION
       // -------------------------------------------------------------
