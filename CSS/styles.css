@@ -486,6 +486,7 @@ select option {
   height: 42px;
   padding: 0 16px;
   white-space: nowrap;
+  color: white;
 }
 
 /* Prevent overflow on smaller screens */
