@@ -221,9 +221,13 @@ function updateSlipTypeUI() {
   document.getElementById("rowAmount").style.display = isBonus ? "none" : "";
 
   document.getElementById("rowBonusType").style.display = isBonus ? "" : "none";
-  document.getElementById("rowBonusAmount").style.display = isBonus
-    ? ""
-    : "none";
+  document.getElementById("rowBonusAmount").style.display = isBonus ? "" : "none";
+
+  // ⭐ FIX: Enable/disable amount correctly
+  const amountInput = document.getElementById("asAmount");
+  if (amountInput) {
+    amountInput.disabled = isBonus;   // Bonus → disabled, Regular → enabled
+  }
 }
 
 // -------------------------------------------------------------
@@ -234,21 +238,18 @@ function initFormDefaults() {
   if (dtInput) {
     dtInput.value = toLocalDateTimeInputValue(new Date());
   }
-}
 
-function toLocalDateTimeInputValue(date) {
-  const pad = (n) => String(n).padStart(2, "0");
-  return (
-    date.getFullYear() +
-    "-" +
-    pad(date.getMonth() + 1) +
-    "-" +
-    pad(date.getDate()) +
-    "T" +
-    pad(date.getHours()) +
-    ":" +
-    pad(date.getMinutes())
-  );
+  // ⭐ FIX: Load logged‑in user name into right‑side form
+  const agentNameInput = document.getElementById("asAgentName");
+  if (agentNameInput) {
+    agentNameInput.value = currentUser.name;
+  }
+
+  // Default amount
+  const amountInput = document.getElementById("asAmount");
+  if (amountInput) {
+    amountInput.value = "0.00";
+  }
 }
 
 // -------------------------------------------------------------
