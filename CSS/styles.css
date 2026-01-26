@@ -524,3 +524,80 @@ select option {
   font-size: 14px;
   font-weight: 600;
 }
+/* ============================================================
+   AUDIT SUMMARY BLOCK
+============================================================ */
+.audit-summary-row {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+}
+
+/* ==========================
+   FIRST ROW (Location / Date / Totals)
+========================== */
+.audit-summary-row .row-2col {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* Left inputs */
+.audit-summary-row .row-2col .form-item {
+  min-width: 220px;
+}
+
+/* Right totals (vertical) */
+.summary-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: right;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.summary-vertical strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ==========================
+   SECOND ROW (Totals IN / OUT / NET)
+========================== */
+.summary-horizontal {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  font-size: 15px;
+}
+
+.summary-horizontal strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ==========================
+   MOBILE ADJUSTMENT
+========================== */
+@media (max-width: 768px) {
+  .audit-summary-row .row-2col {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .summary-vertical {
+    text-align: left;
+  }
+
+  .summary-horizontal {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
