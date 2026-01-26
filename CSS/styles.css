@@ -398,6 +398,48 @@ select option {
     flex-direction: row;
   }
 }
+/* ===============================
+   QR VERTICAL BUTTON COLORS
+================================ */
+
+/* Generate QR – Primary */
+#machines-generate-qr-btn {
+  background: linear-gradient(135deg, #4f8cff, #6a5cff);
+  color: #fff;
+}
+
+#machines-generate-qr-btn:hover {
+  box-shadow: 0 6px 16px rgba(79, 140, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Print – Teal */
+#machines-print-qr-btn {
+  background: linear-gradient(135deg, #22c1c3, #2ecc71);
+  color: #fff;
+}
+
+#machines-print-qr-btn:hover {
+  box-shadow: 0 6px 16px rgba(34, 193, 195, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Download – Purple */
+#machines-download-qr-btn {
+  background: linear-gradient(135deg, #9b5cff, #c77dff);
+  color: #fff;
+}
+
+#machines-download-qr-btn:hover {
+  box-shadow: 0 6px 16px rgba(155, 92, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Ensure consistent button height */
+.qr-actions-column .btn {
+  height: 42px;
+  font-weight: 600;
+}
 
 /* ============================================================
    TOAST
