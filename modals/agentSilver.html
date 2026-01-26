@@ -52,87 +52,89 @@
 
     </div>
 
-<!-- ============================
-         RIGHT SIDE (35%)
-============================= -->
-<div class="module-right">
+    <!-- ============================
+        RIGHT SIDE (35%)
+    ============================= -->
+    <div class="module-right">
 
-  <!-- HEADER + AGENT INLINE -->
-  <div class="card-header" 
-       style="display:flex; justify-content:space-between; align-items:center;">
-    <div>Create Slip</div>
-    <input type="text" id="asAgentName" disabled style="max-width:160px;" />
-  </div>
+      <!-- HEADER + AGENT INLINE -->
+      <div class="card-header" 
+          style="display:flex; justify-content:space-between; align-items:center;">
+        <div>Create Slip</div>
+        <input type="text" id="asAgentName" disabled style="max-width:160px;" />
+      </div>
 
-  <div class="form-grid">
+      <div class="form-grid">
 
-    <!-- SLIP TYPE TOGGLE -->
-    <div class="form-span-2">
-      <label>Slip Type</label>
-      <div class="as-slip-type-buttons">
-        <button id="asBtnRegular" class="as-slip-btn active">Regular</button>
-        <button id="asBtnBonus" class="as-slip-btn">Bonus</button>
+        <!-- SLIP TYPE TOGGLE -->
+        <div class="form-span-2">
+          <label>Slip Type</label>
+          <div class="as-slip-type-buttons">
+            <button id="asBtnRegular" class="as-slip-btn active">Regular</button>
+            <button id="asBtnBonus" class="as-slip-btn">Bonus</button>
+          </div>
+        </div>
+
+        <!-- ROW 1: DATE -->
+        <div class="form-group" style="grid-column:1;">
+          <label>Date & Time</label>
+          <input type="datetime-local" id="asDateTime" />
+        </div>
+
+        <!-- EMPTY RIGHT CELL (keeps grid aligned) -->
+        <div class="form-group"></div>
+
+        <!-- ROW 2: MACHINE NO (REGULAR) -->
+        <div class="form-group" id="rowMachineNo" style="grid-column:1;">
+          <label>Machine No</label>
+          <div class="qr-input-group">
+            <input type="text" id="asMachineNo" />
+            <button id="asScanBtn">📷</button>
+          </div>
+        </div>
+
+        <!-- ROW 2: BONUS TYPE (BONUS MODE) -->
+        <div class="form-group" id="rowBonusType" style="grid-column:1; display:none;">
+          <label>Bonus Type</label>
+          <select id="asBonusType">
+            <option value="">Select Bonus</option>
+          </select>
+        </div>
+
+        <!-- QR PREVIEW (RIGHT SIDE) -->
+        <div class="form-group" style="grid-column:2; grid-row:2 / span 3;">
+          <label>Slip QR</label>
+          <div class="qr-preview-box">
+            <canvas id="asQrCanvas"></canvas>
+          </div>
+          <div id="asQrText"></div>
+        </div>
+
+        <!-- ROW 3: AMOUNT (REGULAR) -->
+        <div class="form-group" id="rowAmount" 
+            style="grid-column:1; margin-top:-6px;">
+          <label>Amount ($)</label>
+          <input type="number" id="asAmount" />
+        </div>
+
+        <!-- ROW 3: BONUS AMOUNT (BONUS MODE) -->
+        <div class="form-group" id="rowBonusAmount" 
+            style="grid-column:1; margin-top:-6px; display:none;">
+          <label>Bonus Amount ($)</label>
+          <input type="number" id="asBonusAmount" />
+        </div>
+
+        <!-- ROW 4: SAVE BUTTON (RIGHT UNDER QR) -->
+        <div class="form-group" style="grid-column:2; margin-top:-6px;">
+          <label>&nbsp;</label>
+          <div class="form-actions">
+            <button id="asSaveBtn" class="btn btn-primary">Save & Print</button>
+          </div>
+        </div>
+
       </div>
     </div>
 
-    <!-- ROW 1: DATE -->
-    <div class="form-group" style="grid-column:1;">
-      <label>Date & Time</label>
-      <input type="datetime-local" id="asDateTime" />
-    </div>
-
-    <!-- EMPTY RIGHT CELL (keeps grid aligned) -->
-    <div class="form-group"></div>
-
-    <!-- ROW 2: MACHINE NO (REGULAR) -->
-    <div class="form-group" id="rowMachineNo" style="grid-column:1;">
-      <label>Machine No</label>
-      <div class="qr-input-group">
-        <input type="text" id="asMachineNo" placeholder="Scan or enter manually">
-        <button id="asScanBtn" title="Scan QR">📷</button>
-      </div>
-    </div>
-    <!-- ROW 2: BONUS TYPE (BONUS MODE) -->
-    <div class="form-group" id="rowBonusType" style="grid-column:1; display:none;">
-      <label>Bonus Type</label>
-      <select id="asBonusType">
-        <option value="">Select Bonus</option>
-      </select>
-    </div>
-
-    <!-- QR PREVIEW (RIGHT SIDE) -->
-    <div class="form-group" style="grid-column:2; grid-row:2 / span 3;">
-      <label>Slip QR</label>
-      <div class="qr-preview-box">
-        <canvas id="asQrCanvas"></canvas>
-      </div>
-      <div id="asQrText"></div>
-    </div>
-
-    <!-- ROW 3: AMOUNT (REGULAR) -->
-    <div class="form-group" id="rowAmount" 
-         style="grid-column:1; margin-top:-6px;">
-      <label>Amount ($)</label>
-      <input type="number" id="asAmount" />
-    </div>
-
-    <!-- ROW 3: BONUS AMOUNT (BONUS MODE) -->
-    <div class="form-group" id="rowBonusAmount" 
-         style="grid-column:1; margin-top:-6px; display:none;">
-      <label>Bonus Amount ($)</label>
-      <input type="number" id="asBonusAmount" />
-    </div>
-
-    <!-- ROW 4: SAVE BUTTON (RIGHT UNDER QR) -->
-    <div class="form-group" style="grid-column:2; margin-top:-6px;">
-      <label>&nbsp;</label>
-      <div class="form-actions">
-        <button id="asSaveBtn" class="btn btn-primary">Save & Print</button>
-      </div>
-    </div>
-
-  </div>
-</div>
   </div>
 </div>
 
