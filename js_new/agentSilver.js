@@ -1,3 +1,4 @@
+console.log("FILE START");
 console.log("Agent Silver JS loaded");
 // -------------------------------------------------------------
 // IMPORTS
