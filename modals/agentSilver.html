@@ -105,17 +105,17 @@
         </div>
 
         <!-- ROW 3: Amount (Regular) / Bonus Amount (Bonus) -->
-        <div class="form-group" id="rowAmount">
-          <label>Amount ($)</label>
-          <input type="number" id="asAmount" />
-        </div>
+         <div class="form-group" id="rowAmount" style="grid-column:1; margin-top:-10px;">
+            <label>Amount ($)</label>
+            <input type="number" id="asAmount" />
+          </div>
 
-        <div class="form-group" id="rowBonusAmount" style="display:none;">
-          <label>Bonus Amount ($)</label>
-          <input type="number" id="asBonusAmount" />
-        </div>
+          <div class="form-group" id="rowBonusAmount" style="grid-column:1; margin-top:-10px; display:none;">
+            <label>Bonus Amount ($)</label>
+            <input type="number" id="asBonusAmount" />
+          </div>
 
-        <div class="form-group"></div>
+          <div class="form-group"></div>
 
         <!-- ROW 4: Save Button -->
         <div class="form-group"></div>
@@ -125,27 +125,8 @@
 
       </div>
 
-      </div>
-
-      <!-- ACTIONS -->
-      <div class="form-actions">
-        <button id="asSaveBtn" class="btn btn-primary">Save & Print</button>
-      </div>
-
-      <!-- QR PREVIEW -->
-      <div class="qr-preview-column">
-        <div class="qr-preview-box">
-          <canvas id="asQrCanvas" width="128" height="128"></canvas>
-        </div>
-        <div id="asQrText" style="font-size:12px; color:#ccc; text-align:center;">
-          QR will appear after saving
-        </div>
-      </div>
-
     </div>
-
   </div>
-
 </div>
 
 <!-- ============================
@@ -161,7 +142,7 @@
   z-index: 9999;
 ">
   <div id="asPrintModal" style="
-    background: #fff;
+    background: #ffffff00;
     padding: 15px;
     border-radius: 8px;
     width: 320px;
