@@ -29,21 +29,14 @@ let currentSlip = null;
 // -------------------------------------------------------------
 // INIT
 // -------------------------------------------------------------
-console.log("BEFORE DOM LISTENER");
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM LOADED");
-  initAgentSilver().catch((err) => {
-    console.error("INIT ERROR:", err);
-  });
+console.log("BEFORE INIT CALL");
+
+// Call init immediately because this module loads AFTER DOM is ready
+initAgentSilver().catch((err) => {
+  console.error("INIT ERROR:", err);
+  showToast("Error loading Agent Silver module", "error");
 });
 
-
-document.addEventListener("DOMContentLoaded", () => {
-  initAgentSilver().catch((err) => {
-    console.error("Error initializing Agent Silver:", err);
-    showToast("Error loading Agent Silver module", "error");
-  });
-});
 
 async function initAgentSilver() {
   console.log("INIT STARTED");
