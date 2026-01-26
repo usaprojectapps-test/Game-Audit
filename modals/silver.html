@@ -1,176 +1,31 @@
+<div class="silver-entry-module" style="max-width:900px; margin:auto;">
 
+  <h3>Silver Entry</h3>
 
-
-<section class="module-container">
-  <div class="module-wrapper audit-module">
-
-    <!-- LEFT SIDE -->
-    <div class="module-left">
-
-      <!-- SUMMARY BLOCK -->
-      <div class="audit-summary-row">
-
-        <!-- ROW 1 -->
-        <div class="row-2col">
-
-          <!-- Location -->
-          <div class="form-item">
-            <label>Location</label>
-            <select id="auditLocationSelect"></select>
-          </div>
-
-          <!-- Date -->
-          <div class="form-item">
-            <label>Date</label>
-            <input type="date" id="auditFilterDate">
-          </div>
-
-          <!-- Vertical summary (B1-B) -->
-          <div class="summary-vertical">
-            <span>Total Machines: <strong id="summaryTotalMachines">0</strong></span>
-            <span>Total Jackpot: <strong id="summaryTotalJackpot">$ 0.00</strong></span>
-          </div>
-
-        </div>
-
-        <!-- ROW 2 -->
-        <div class="row-3col summary-horizontal">
-          <span>Total IN: <strong id="summaryTotalIn">$ 0.00</strong></span>
-          <span>Total OUT: <strong id="summaryTotalOut">$ 0.00</strong></span>
-          <span>NET: <strong id="summaryNet">$ 0.00</strong></span>
-        </div>
-
-      </div>
-
-      <!-- TABLE -->
-      <div class="full-width">
-        <div class="table-wrapper">
-          <table id="auditTable" class="striped">
-            <thead>
-              <tr>
-                <th>Machine</th>
-                <th>Prev IN</th>
-                <th>Prev OUT</th>
-                <th>Cur IN</th>
-                <th>Cur OUT</th>
-                <th>Jackpot</th>
-                <th>Total IN</th>
-                <th>Total OUT</th>
-                <th>NET</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- RIGHT SIDE FORM -->
-    <div class="module-right">
-
-      <div class="card-header">AUDIT Entry Form</div>
-
-      <div class="row-2col">
-        <div class="form-item">
-          <label>Date</label>
-          <input type="date" id="auditEntryDate">
-        </div>
-
-        <div class="form-item">
-          <label>Machine No</label>
-          <div style="display:flex; gap:8px;">
-            <input type="text" id="auditMachineNo" placeholder="Scan or enter manually" style="flex:1;">
-            <button id="qrScanBtn" title="Scan QR" style="padding:6px 10px;">📷</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="row-2col">
-        <div class="form-item">
-          <label>Prev IN</label>
-          <input type="number" id="auditPrevIn" readonly>
-        </div>
-
-        <div class="form-item">
-          <label>Prev OUT</label>
-          <input type="number" id="auditPrevOut" readonly>
-        </div>
-      </div>
-
-      <div class="row-2col">
-        <div class="form-item">
-          <label>Cur IN</label>
-          <input type="number" id="auditCurIn">
-        </div>
-
-        <div class="form-item">
-          <label>Cur OUT</label>
-          <input type="number" id="auditCurOut">
-        </div>
-      </div>
-
-      <div class="row-2col">
-        <div class="form-item">
-          <label>Jackpot</label>
-          <input type="number" id="auditJackpot" placeholder="Optional">
-        </div>
-
-        <div class="form-item">
-          <label>Machine Health</label>
-          <select id="auditMachineHealth">
-            <option value="">Select</option>
-            <option value="Active">Active</option>
-            <option value="Issue">Issue</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="full-width form-actions">
-        <button id="auditSaveBtn" class="btn btn-primary">Save</button>
-        <button id="auditResetBtn" class="btn">Reset</button>
-      </div>
-
-      <div class="row-3col">
-        <div class="form-item">
-          <label>Total IN</label>
-          <input type="number" id="auditTotalIn" readonly>
-        </div>
-
-        <div class="form-item">
-          <label>Total OUT</label>
-          <input type="number" id="auditTotalOut" readonly>
-        </div>
-
-        <div class="form-item">
-          <label>NET</label>
-          <input type="number" id="auditNet" readonly>
-        </div>
-      </div>
-
-    </div>
-
+  <!-- Grand Total -->
+  <div id="seTotalSum" style="font-weight:600; margin-bottom:10px;">
+    Total Paid Amount: ₹0
   </div>
-</section>
 
-<!-- QR Modal -->
-<div id="qrModal" class="qr-overlay" style="display:none;">
-  <div class="qr-modal" role="dialog" aria-modal="true">
-    <video id="qrVideo" class="qr-video"></video>
-    <button id="qrCloseBtn" class="qr-close-btn">Close</button>
+  <!-- Silver Entry List -->
+  <div style="max-height:400px; overflow-y:auto; background:#f8f9fb; padding:6px; border-radius:10px;">
+    <table style="width:100%; border-collapse:collapse; font-size:13px;">
+      <thead>
+        <tr>
+          <th>Slip ID</th>
+          <th>Date & Time</th>
+          <th>Agent</th>
+          <th>Machine</th>
+          <th>Amount</th>
+          <th>Paid By</th>
+          <th>Barcode</th>
+        </tr>
+      </thead>
+      <tbody id="seTableBody"></tbody>
+    </table>
   </div>
+
 </div>
 
-<script type="module">
-  import jsQR from "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js";
-  window.jsQR = jsQR;
-</script>
-
-<script src="/js_new/qr-scanner.js" defer></script>
-<script src="/js_new/audit.js" defer></script>
-
-<script>
-  window.dispatchEvent(new Event("auditModuleLoaded"));
-</script>
+<!-- Barcode library -->
+<script src="https://cdn.jsdelivr.net/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
