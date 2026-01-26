@@ -36,6 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function initAgentSilver() {
+  console.log("INIT STARTED");
+
   await loadCurrentUser();
   initFilters();
   initSlipTypeButtons();
