@@ -431,7 +431,7 @@ select option {
 }
 
 #machines-download-qr-btn:hover {
-  box-shadow: 0 6px 16px rgba(155, 92, 255, 0.35);
+  box-shadow: 0 10px 16px rgba(155, 92, 255, 0.35);
   transform: translateY(-1px);
 }
 
