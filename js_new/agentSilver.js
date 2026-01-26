@@ -1,5 +1,3 @@
-console.log("FILE START");
-console.log("Agent Silver JS loaded");
 // -------------------------------------------------------------
 // IMPORTS
 // -------------------------------------------------------------
@@ -21,6 +19,14 @@ const PREFIX = {
   BONUS: "BS",
 };
 
+// ⭐ BONUS TYPES (Form-based, Option A)
+const BONUS_TYPES = [
+  "Raffle",
+  "Birthday Gift",
+  "Festival Bonus",
+  "Promo Bonus"
+];
+
 let currentUser = null;
 let currentLocation = null;
 let currentSlipType = SLIP_TYPE.REGULAR;
@@ -31,12 +37,10 @@ let currentSlip = null;
 // -------------------------------------------------------------
 console.log("BEFORE INIT CALL");
 
-// Call init immediately because this module loads AFTER DOM is ready
 initAgentSilver().catch((err) => {
   console.error("INIT ERROR:", err);
   showToast("Error loading Agent Silver module", "error");
 });
-
 
 async function initAgentSilver() {
   console.log("INIT STARTED");
@@ -50,9 +54,10 @@ async function initAgentSilver() {
   initPrintModal();
 
   await loadFilterOptions();
+  await loadBonusTypes();   // ⭐ NEW
   await loadSlipsTable();
 
-  // IMPORTANT: Trigger global scanner initializer
+  // Trigger global scanner initializer
   window.dispatchEvent(new Event("agentSilverModuleLoaded"));
 }
 
@@ -65,7 +70,6 @@ async function loadCurrentUser() {
 
   const email = data.user.email;
 
-  // Load from user_access
   const { data: accessRow, error: accessErr } = await supabase
     .from("user_access")
     .select("email, role, location_id")
@@ -76,18 +80,14 @@ async function loadCurrentUser() {
     throw new Error("User not found in user_access");
   }
 
-  // Build user object
   currentUser = {
     id: data.user.id,
     email,
     role: accessRow.role,
     location_id: accessRow.location_id,
-
-    // ⭐ FIX: Generate name from email
     name: email.split("@")[0],
   };
 
-  // ⭐ FIX: Override for SuperAdmin
   if (currentUser.role === "SuperAdmin") {
     currentUser.name = "Super Admin";
   }
@@ -116,7 +116,7 @@ async function loadFilterOptions() {
   const userSelect = document.getElementById("as_filter_user");
 
   // -------------------------------
-  // LOAD LOCATIONS
+  // LOAD LOCATIONS (FIXED)
   // -------------------------------
   if (locSelect) {
     locSelect.innerHTML = "";
@@ -129,28 +129,33 @@ async function loadFilterOptions() {
     if (locErr) {
       console.error("Error loading locations:", locErr);
     } else {
-      // SuperAdmin → default = "Select Location"
-      if (currentUser.role === "SuperAdmin") {
+      if (currentUser.role !== "SuperAdmin") {
+        // ⭐ Only show user's own location
+        const userLoc = locations.find(
+          (l) => l.id === currentUser.location_id
+        );
+
+        if (userLoc) {
+          const opt = document.createElement("option");
+          opt.value = userLoc.id;
+          opt.textContent = userLoc.name;
+          opt.selected = true;
+          locSelect.appendChild(opt);
+        }
+      } else {
+        // ⭐ SuperAdmin sees all
         const opt = document.createElement("option");
         opt.value = "";
         opt.textContent = "Select Location";
         locSelect.appendChild(opt);
+
+        locations.forEach((loc) => {
+          const opt = document.createElement("option");
+          opt.value = loc.id;
+          opt.textContent = loc.name;
+          locSelect.appendChild(opt);
+        });
       }
-
-      locations.forEach((loc) => {
-        const opt = document.createElement("option");
-        opt.value = loc.id;
-        opt.textContent = loc.name;
-
-        if (
-          currentUser.role !== "SuperAdmin" &&
-          loc.id === currentUser.location_id
-        ) {
-          opt.selected = true;
-        }
-
-        locSelect.appendChild(opt);
-      });
     }
   }
 
@@ -186,11 +191,24 @@ async function loadFilterOptions() {
       });
     }
 
-    // Default = current user
     userSelect.value = currentUser.id;
   }
 }
 
+// -------------------------------------------------------------
+// BONUS TYPE DROPDOWN (FORM-BASED)
+// -------------------------------------------------------------
+async function loadBonusTypes() {
+  const select = document.getElementById("asBonusType");
+  if (!select) return;
+
+  BONUS_TYPES.forEach((b) => {
+    const opt = document.createElement("option");
+    opt.value = b;
+    opt.textContent = b;
+    select.appendChild(opt);
+  });
+}
 // -------------------------------------------------------------
 // SLIP TYPE BUTTONS
 // -------------------------------------------------------------
@@ -223,14 +241,15 @@ function updateSlipTypeUI() {
   document.getElementById("rowBonusType").style.display = isBonus ? "" : "none";
   document.getElementById("rowBonusAmount").style.display = isBonus ? "" : "none";
 
-  // ⭐ FIX: Enable/disable amount correctly
   const amountInput = document.getElementById("asAmount");
   if (amountInput) {
-    amountInput.disabled = isBonus;   // Bonus → disabled, Regular → enabled
+    amountInput.disabled = isBonus;
   }
 }
-//load helper\\
 
+// -------------------------------------------------------------
+// FORM DEFAULTS
+// -------------------------------------------------------------
 function toLocalDateTimeInputValue(date) {
   const pad = (n) => String(n).padStart(2, "0");
   return (
@@ -246,23 +265,17 @@ function toLocalDateTimeInputValue(date) {
   );
 }
 
-
-// -------------------------------------------------------------
-// FORM DEFAULTS
-// -------------------------------------------------------------
 function initFormDefaults() {
   const dtInput = document.getElementById("asDateTime");
   if (dtInput) {
     dtInput.value = toLocalDateTimeInputValue(new Date());
   }
 
-  // ⭐ FIX: Load logged‑in user name into right‑side form
   const agentNameInput = document.getElementById("asAgentName");
   if (agentNameInput) {
     agentNameInput.value = currentUser.name;
   }
 
-  // Default amount
   const amountInput = document.getElementById("asAmount");
   if (amountInput) {
     amountInput.value = "0.00";
@@ -284,7 +297,7 @@ function initScanButton() {
 }
 
 // -------------------------------------------------------------
-// SAVE & PRINT
+// SAVE & UPDATE LOGIC
 // -------------------------------------------------------------
 function initSaveButton() {
   const saveBtn = document.getElementById("asSaveBtn");
@@ -294,28 +307,38 @@ function initSaveButton() {
       saveBtn.disabled = true;
 
       const slipData = await collectSlipFormData();
-      const saved = await saveSlipToSupabase(slipData);
+
+      let saved;
+      if (currentSlip) {
+        saved = await updateSlipInSupabase(slipData);
+        showToast("Slip updated successfully", "success");
+      } else {
+        saved = await saveSlipToSupabase(slipData);
+        showToast("Slip saved successfully", "success");
+      }
 
       currentSlip = saved;
       updateQrPreview(saved.slip_no);
-      showToast("Slip saved successfully", "success");
 
       await loadSlipsTable();
       showPrintModal(saved);
+
     } catch (err) {
       console.error("Save error:", err);
-      showToast("Error saving slip", "error");
+      showToast(err.message || "Error saving slip", "error");
     } finally {
       saveBtn.disabled = false;
     }
   });
 }
 
+// -------------------------------------------------------------
+// COLLECT FORM DATA (WITH MACHINE VALIDATION)
+// -------------------------------------------------------------
 async function collectSlipFormData() {
   const locSelect = document.getElementById("as_filter_location");
   const selectedLocationId = locSelect.value;
 
-  // SuperAdmin MUST select a location
   if (currentUser.role === "SuperAdmin" && !selectedLocationId) {
     showToast("Please select a location before saving", "error");
     throw new Error("Location not selected");
@@ -328,7 +351,9 @@ async function collectSlipFormData() {
   const bonusAmountInput = document.getElementById("asBonusAmount");
 
   const slip_category = currentSlipType;
-  const slip_no = await generateSlipNumber(
+
+  // ⭐ Slip number NEVER changes on update
+  const slip_no = currentSlip ? currentSlip.slip_no : await generateSlipNumber(
     slip_category,
     selectedLocationId || currentUser.location_id
   );
@@ -345,6 +370,34 @@ async function collectSlipFormData() {
   if (slip_category === SLIP_TYPE.REGULAR) {
     machine_no = machineInput.value.trim();
     amount = parseFloat(amountInput.value || "0");
+
+    // ⭐ MACHINE VALIDATION
+    if (!machine_no) {
+      showToast("Machine No is required", "error");
+      throw new Error("Machine No missing");
+    }
+
+    const { data: machineRow, error: machineErr } = await supabase
+      .from("machines")
+      .select("machineid, location_id, healthstatus")
+      .eq("machineid", machine_no)
+      .single();
+
+    if (machineErr || !machineRow) {
+      showToast("Invalid Machine No — not found", "error");
+      throw new Error("Machine not found");
+    }
+
+    if (machineRow.location_id !== (selectedLocationId || currentUser.location_id)) {
+      showToast("Machine does not belong to this location", "error");
+      throw new Error("Machine location mismatch");
+    }
+
+    if (machineRow.healthstatus !== "Active") {
+      showToast("Machine is not Active", "error");
+      throw new Error("Machine inactive");
+    }
+
   } else {
     bonus_type = bonusTypeInput.value;
     bonus_amount = parseFloat(bonusAmountInput.value || "0");
@@ -362,34 +415,13 @@ async function collectSlipFormData() {
     bonus_amount,
     location_id: selectedLocationId || currentUser.location_id,
     created_by: currentUser.id,
-    is_paid: false,
+    is_paid: currentSlip ? currentSlip.is_paid : false,
   };
 }
 
-async function generateSlipNumber(category, locationId) {
-  const prefix = category === SLIP_TYPE.BONUS ? PREFIX.BONUS : PREFIX.REGULAR;
-  const timestamp = Date.now();
-
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, "0");
-  const dd = String(today.getDate()).padStart(2, "0");
-
-  const dayStart = `${yyyy}-${mm}-${dd} 00:00:00`;
-  const dayEnd = `${yyyy}-${mm}-${dd} 23:59:59`;
-
-  const { count } = await supabase
-    .from(AGENT_SILVER_TABLE)
-    .select("id", { count: "exact", head: true })
-    .eq("location_id", locationId)
-    .eq("slip_category", category)
-    .gte("datetime", dayStart)
-    .lte("datetime", dayEnd);
-
-  const serial = String((count || 0) + 1).padStart(3, "0");
-  return `${prefix}-${timestamp}-${serial}`;
-}
-
+// -------------------------------------------------------------
+// INSERT NEW SLIP
+// -------------------------------------------------------------
 async function saveSlipToSupabase(slip) {
   const { data, error } = await supabase
     .from(AGENT_SILVER_TABLE)
@@ -401,6 +433,38 @@ async function saveSlipToSupabase(slip) {
   return data;
 }
 
+// -------------------------------------------------------------
+// UPDATE EXISTING SLIP
+// -------------------------------------------------------------
+async function updateSlipInSupabase(slip) {
+  const { data, error } = await supabase
+    .from(AGENT_SILVER_TABLE)
+    .update(slip)
+    .eq("slip_no", slip.slip_no)
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+// -------------------------------------------------------------
+// QR PREVIEW
+// -------------------------------------------------------------
+function updateQrPreview(slipNo) {
+  const canvas = document.getElementById("asQrCanvas");
+  const text = document.getElementById("asQrText");
+
+  if (!canvas || !window.QRious) return;
+
+  new QRious({
+    element: canvas,
+    size: 128,
+    value: slipNo,
+  });
+
+  text.textContent = slipNo;
+}
 // -------------------------------------------------------------
 // TABLE + SUMMARY
 // -------------------------------------------------------------
@@ -459,6 +523,7 @@ async function loadSlipsTable() {
     }
 
     const tr = document.createElement("tr");
+    tr.classList.add("as-slip-row");
 
     tr.innerHTML = `
       <td>${row.slip_no}</td>
@@ -481,25 +546,55 @@ async function loadSlipsTable() {
   document.getElementById("as_sum_grand").textContent = (
     totalAmount + totalBonus
   ).toFixed(2);
+
+  attachRowClickHandlers();
 }
 
 // -------------------------------------------------------------
-// QR PREVIEW
+// ROW CLICK → LOAD SLIP INTO RIGHT FORM
 // -------------------------------------------------------------
-function updateQrPreview(slipNo) {
-  const canvas = document.getElementById("asQrCanvas");
-  const text = document.getElementById("asQrText");
+function attachRowClickHandlers() {
+  const rows = document.querySelectorAll("#as_table_body tr");
 
-  if (!canvas || !window.QRious) return;
-
-  new QRious({
-    element: canvas,
-    size: 128,
-    value: slipNo,
+  rows.forEach((row) => {
+    row.addEventListener("click", () => {
+      const slipNo = row.children[0].textContent;
+      loadSlipIntoForm(slipNo);
+    });
   });
-
-  text.textContent = slipNo;
 }
+
+async function loadSlipIntoForm(slipNo) {
+  const { data: slip, error } = await supabase
+    .from(AGENT_SILVER_TABLE)
+    .select("*")
+    .eq("slip_no", slipNo)
+    .single();
+
+  if (error || !slip) {
+    showToast("Error loading slip", "error");
+    return;
+  }
+
+  currentSlip = slip;
+  currentSlipType = slip.slip_category;
+  updateSlipTypeUI();
+
+  document.getElementById("asDateTime").value =
+    toLocalDateTimeInputValue(new Date(slip.datetime));
+
+  if (slip.slip_category === SLIP_TYPE.REGULAR) {
+    document.getElementById("asMachineNo").value = slip.machine_no || "";
+    document.getElementById("asAmount").value = Number(slip.amount).toFixed(2);
+  } else {
+    document.getElementById("asBonusType").value = slip.bonus_type || "";
+    document.getElementById("asBonusAmount").value =
+      Number(slip.bonus_amount).toFixed(2);
+  }
+
+  updateQrPreview(slip.slip_no);
+}
+
 // -------------------------------------------------------------
 // PRINT MODAL
 // -------------------------------------------------------------
@@ -530,7 +625,6 @@ function showPrintModal(slip) {
 
   const isBonus = slip.slip_category === SLIP_TYPE.BONUS;
 
-  // Common fields
   document.getElementById("asModalSlipId").textContent = slip.slip_no;
   document.getElementById("asModalSlipDateTime").textContent = new Date(
     slip.datetime
@@ -538,44 +632,34 @@ function showPrintModal(slip) {
   document.getElementById("asModalSlipAgent").textContent =
     slip.agent_name || "";
 
-  // Rows
   const rowMachine = document.getElementById("asModalRowMachine");
   const rowAmount = document.getElementById("asModalRowAmount");
   const rowBonusType = document.getElementById("asModalRowBonusType");
   const rowBonusAmount = document.getElementById("asModalRowBonusAmount");
 
-  // Values
   const elMachine = document.getElementById("asModalSlipMachine");
   const elAmount = document.getElementById("asModalSlipAmount");
   const elBonusType = document.getElementById("asModalSlipBonusType");
   const elBonusAmount = document.getElementById("asModalSlipBonusAmount");
 
   if (isBonus) {
-    if (rowMachine) rowMachine.style.display = "none";
-    if (rowAmount) rowAmount.style.display = "none";
-    if (rowBonusType) rowBonusType.style.display = "";
-    if (rowBonusAmount) rowBonusAmount.style.display = "";
+    rowMachine.style.display = "none";
+    rowAmount.style.display = "none";
+    rowBonusType.style.display = "";
+    rowBonusAmount.style.display = "";
 
-    if (elMachine) elMachine.textContent = "";
-    if (elAmount) elAmount.textContent = "";
-    if (elBonusType) elBonusType.textContent = slip.bonus_type || "";
-    if (elBonusAmount)
-      elBonusAmount.textContent = Number(slip.bonus_amount || 0).toFixed(2);
+    elBonusType.textContent = slip.bonus_type || "";
+    elBonusAmount.textContent = Number(slip.bonus_amount || 0).toFixed(2);
   } else {
-    if (rowMachine) rowMachine.style.display = "";
-    if (rowAmount) rowAmount.style.display = "";
-    if (rowBonusType) rowBonusType.style.display = "none";
-    if (rowBonusAmount) rowBonusAmount.style.display = "none";
+    rowMachine.style.display = "";
+    rowAmount.style.display = "";
+    rowBonusType.style.display = "none";
+    rowBonusAmount.style.display = "none";
 
-    if (elMachine) elMachine.textContent = slip.machine_no || "";
-    if (elAmount)
-      elAmount.textContent = Number(slip.amount || 0).toFixed(2);
-    if (elBonusType) elBonusType.textContent = slip.bonus_type || "";
-    if (elBonusAmount)
-      elBonusAmount.textContent = Number(slip.bonus_amount || 0).toFixed(2);
+    elMachine.textContent = slip.machine_no || "";
+    elAmount.textContent = Number(slip.amount || 0).toFixed(2);
   }
 
-  // QR in modal
   const modalCanvas = document.getElementById("asModalQrCanvas");
   if (modalCanvas && window.QRious) {
     new QRious({
