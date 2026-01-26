@@ -213,6 +213,35 @@ select option {
 /* ============================================================
    FORM ACTIONS
 ============================================================ */
+/* ==============================
+   SAVE + RESET INLINE ROW
+================================ */
+
+.audit-action-row {
+  display: flex;
+  gap: 14px;
+  width: 100%;
+}
+
+.audit-action-row button {
+  flex: 1;                 /* equal width */
+  height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+/* Optional: stronger primary */
+.btn-primary {
+  background: linear-gradient(135deg, #4f8cff, #6a5cff);
+}
+
+/* Optional: softer reset */
+.btn-secondary {
+  background: rgba(255,255,255,0.18);
+  color: #e2e8f0;
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;
