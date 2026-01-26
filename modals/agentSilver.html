@@ -61,19 +61,29 @@
 
      <div class="form-grid">
 
-        <!-- ROW 1 -->
-        <div class="form-group">
+       <div class="form-grid">
+
+        <!-- SLIP TYPE TOGGLE -->
+        <div class="form-span-2">
+          <label>Slip Type</label>
+          <div class="as-slip-type-buttons">
+            <button id="asBtnRegular" class="as-slip-btn active">Regular</button>
+            <button id="asBtnBonus" class="as-slip-btn">Bonus</button>
+          </div>
+        </div>
+
+        <!-- ROW 1: Date & Agent Name -->
+        <div class="form-group" style="max-width: 220px;">
           <label>Date & Time</label>
           <input type="datetime-local" id="asDateTime" />
         </div>
 
-        <div class="form-group">
+        <div class="form-group" style="max-width: 220px;">
           <label>Agent Name</label>
           <input type="text" id="asAgentName" disabled />
         </div>
 
-        <!-- ROW 2 -->
-        <!-- LEFT: Machine No (Regular) / Bonus Type (Bonus) -->
+        <!-- ROW 2: Machine No (Regular) / Bonus Type (Bonus) | QR Preview -->
         <div class="form-group" id="rowMachineNo">
           <label>Machine No</label>
           <div class="qr-input-group">
@@ -89,7 +99,6 @@
           </select>
         </div>
 
-        <!-- RIGHT: QR Preview -->
         <div class="form-group">
           <label>Slip QR</label>
           <div class="qr-preview-box">
@@ -98,8 +107,7 @@
           <div id="asQrText"></div>
         </div>
 
-        <!-- ROW 3 -->
-        <!-- LEFT: Amount (Regular) / Bonus Amount (Bonus) -->
+        <!-- ROW 3: Amount (Regular) / Bonus Amount (Bonus) -->
         <div class="form-group" id="rowAmount">
           <label>Amount ($)</label>
           <input type="number" id="asAmount" />
@@ -110,10 +118,9 @@
           <input type="number" id="asBonusAmount" />
         </div>
 
-        <!-- RIGHT: EMPTY -->
         <div class="form-group"></div>
 
-        <!-- ROW 4 -->
+        <!-- ROW 4: Save Button -->
         <div class="form-group"></div>
         <div class="form-actions">
           <button id="asSaveBtn" class="btn btn-primary">Save & Print</button>
@@ -121,7 +128,7 @@
 
       </div>
 
-      </div>
+    </div>
 
       <!-- ACTIONS -->
       <div class="form-actions">
