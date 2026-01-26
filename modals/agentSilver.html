@@ -133,3 +133,110 @@
   </div>
 
 </div>
+
+<!-- ============================
+     PRINT MODAL (BOTTOM OF PAGE)
+============================= -->
+<div id="asPrintOverlay" style="
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+">
+  <div id="asPrintModal" style="
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    width: 320px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  ">
+    <div class="slip-container" style="width:300px;border:1px solid #333;padding:15px;border-radius:8px;font-family:Arial,sans-serif;">
+      <div style="text-align:center;font-weight:bold;margin-bottom:10px;">Agent Silver Slip</div>
+
+      <div style="display:flex;justify-content:space-between;margin:4px 0;">
+        <span>Slip ID:</span> <span id="asModalSlipId"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin:4px 0;">
+        <span>Date/Time:</span> <span id="asModalSlipDateTime"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin:4px 0;">
+        <span>Agent:</span> <span id="asModalSlipAgent"></span>
+      </div>
+
+      <div id="asModalRowMachine" style="display:flex;justify-content:space-between;margin:4px 0;">
+        <span>Machine:</span> <span id="asModalSlipMachine"></span>
+      </div>
+      <div id="asModalRowAmount" style="display:flex;justify-content:space-between;margin:4px 0;">
+        <span>Amount:</span> <span id="asModalSlipAmount"></span>
+      </div>
+
+      <div id="asModalRowBonusType" style="display:none;justify-content:space-between;margin:4px 0;">
+        <span>Bonus Type:</span> <span id="asModalSlipBonusType"></span>
+      </div>
+      <div id="asModalRowBonusAmount" style="display:none;justify-content:space-between;margin:4px 0;">
+        <span>Bonus Amount:</span> <span id="asModalSlipBonusAmount"></span>
+      </div>
+
+      <div style="text-align:center;margin-top:15px;">
+        <canvas id="asModalQrCanvas" width="128" height="128"></canvas>
+        <div style="font-size:12px;color:#666;">Scan to confirm payment</div>
+      </div>
+
+      <div style="text-align:center;font-size:12px;margin-top:10px;border-top:1px dashed #999;padding-top:5px;">
+        Game Audit System
+      </div>
+
+      <div style="margin-top:10px;display:flex;justify-content:space-between;">
+        <button id="asModalPrintBtn">Print</button>
+        <button id="asModalCloseBtn">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT CSS -->
+<style>
+  @media print {
+    body * {
+      visibility: hidden !important;
+    }
+    #asPrintOverlay, #asPrintOverlay * {
+      visibility: visible !important;
+    }
+    #asPrintOverlay {
+      position: fixed;
+      inset: 0;
+    }
+  }
+
+  .as-slip-type-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .as-slip-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #222;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .as-slip-btn.active {
+    background: #007bff;
+    border-color: #007bff;
+  }
+</style>
+
+<!-- QRious -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+
+<!-- Agent Silver JS -->
+<script type="module" src="/js_new/agentSilver.js"></script>
