@@ -34,10 +34,13 @@
       </table>
     </div>
 
-    <div class="pagination">
-      <button id="prevUsers" class="btn btn-secondary">Prev</button>
-      <button id="nextUsers" class="btn btn-secondary">Next</button>
-    </div>
+    <div class="table-footer">
+     <span id="machines-pagination-text">Showing 0 of 0</span>
+     <div class="pagination-controls">
+        <button id="prevUsers" class="btn btn-icon" disabled>&lt;</button>
+        <span id="machines-current-page" class="pagination-page">1</span>
+        <button id="nextUsers" class="btn btn-icon" disabled>&gt;</button>
+      </div>
   </div>
 
   <!-- RIGHT: USER FORM -->
@@ -110,18 +113,4 @@
     </form>
   </div>
 
-</div>
-
-<!-- RESET PASSWORD MODAL -->
-<div id="resetModal" class="modal">
-  <div class="modal-content glass-card">
-    <h3>Password Reset</h3>
-    <p>A reset link will be sent to:</p>
-    <input type="email" id="resetEmailUser" class="input" readonly />
-
-    <div class="modal-actions">
-      <button id="cancelReset" class="btn btn-secondary">Cancel</button>
-      <button id="confirmReset" class="btn btn-primary">Send Reset Link</button>
-    </div>
-  </div>
 </div>
