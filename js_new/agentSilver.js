@@ -65,7 +65,7 @@ async function loadCurrentUser() {
 
   const email = data.user.email;
 
-  // Load from user_access instead of users table
+  // Load from user_access
   const { data: accessRow, error: accessErr } = await supabase
     .from("user_access")
     .select("email, role, location_id")
@@ -76,15 +76,18 @@ async function loadCurrentUser() {
     throw new Error("User not found in user_access");
   }
 
+  // Build user object
   currentUser = {
     id: data.user.id,
     email,
-    name: email.split("@")[0], // fallback
     role: accessRow.role,
     location_id: accessRow.location_id,
+
+    // ⭐ FIX: Generate name from email
+    name: email.split("@")[0],
   };
 
-  // SuperAdmin name override
+  // ⭐ FIX: Override for SuperAdmin
   if (currentUser.role === "SuperAdmin") {
     currentUser.name = "Super Admin";
   }
