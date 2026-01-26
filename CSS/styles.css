@@ -176,6 +176,7 @@ select option {
 
 .table-wrapper {
   max-height: 320px;
+  position: relative;
   overflow-y: auto;
   border-radius: 12px;
   background: rgba(255,255,255,0.04);
@@ -206,6 +207,30 @@ select option {
 .table-wrapper tr:hover td {
   background: rgba(255,255,255,0.08);
 }
+
+/* ============================================================
+   FIX: TABLE HEADER OVERLAP ON SCROLL
+============================================================ */
+/* Sticky table header */
+.table-wrapper thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  /* SOLID background — this is key */
+  background: #3b3f5c;
+
+  /* Optional polish */
+  backdrop-filter: none;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+
+/* Ensure table rows never overlay header */
+.table-wrapper tbody td {
+  position: relative;
+  z-index: 1;
+}
+
 
 /* ============================================================
    BUTTONS
