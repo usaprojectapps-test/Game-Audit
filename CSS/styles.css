@@ -755,7 +755,7 @@ select option {
 }
 
 .as-slip-btn:active {
-  transform: scale(0.97);
+  transform: scale(0.50);
 }
 .as-summary-row {
   display: flex;
@@ -771,9 +771,4 @@ select option {
   border-radius: 4px;
   font-weight: bold;
   text-align: center;
-}
-.as-slip-btn {
-  padding: 6px 8px !important;
-  font-size: 12px !important;
-  border-radius: 4px !important;
 }
