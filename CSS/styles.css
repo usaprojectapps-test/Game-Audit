@@ -463,3 +463,67 @@ select option {
     max-height: 300px;
   }
 }
+/* ===============================
+   MACHINE FILTER ROW (ONE LINE)
+================================ */
+.filters-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+  margin-bottom: 16px;
+}
+
+/* Search input wider */
+.filters-row input {
+  flex: 1 1 260px;
+  min-width: 220px;
+}
+
+/* Dropdowns */
+.filters-row select {
+  flex: 0 0 160px;
+  height: 42px;
+}
+
+/* Buttons same height */
+.filters-row .btn {
+  height: 42px;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+/* Prevent overflow on smaller screens */
+.filters-row::-webkit-scrollbar {
+  height: 6px;
+}
+/* ===============================
+   TABLE FOOTER (ONE ROW)
+================================ */
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+/* Pagination group */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Pagination buttons */
+.pagination-controls .btn-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* Page number */
+.pagination-page {
+  font-size: 14px;
+  font-weight: 600;
+}
