@@ -766,7 +766,7 @@ select option {
 
 .as-summary-item {
   flex: 1;
-  background: #f8f8f8;
+  background: #f8f8f800;
   padding: 6px 10px;
   border-radius: 4px;
   font-weight: bold;
