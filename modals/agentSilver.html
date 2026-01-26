@@ -1,58 +1,91 @@
-<div class="agent-silver-module" style="max-width:900px; margin:auto;">
+<div class="module-container">
 
-  <!-- Create Slip -->
-  <h3>Agent Silver</h3>
+  <div class="module-wrapper">
 
-  <h4>Create Slip</h4>
+    <!-- ============================
+         LEFT SIDE (65%)
+    ============================= -->
+    <div class="module-left">
 
-  <div class="form-row">
-    <label>Date & Time</label>
-    <input id="asDateTime" type="datetime-local">
-  </div>
+      <!-- FILTER ROW -->
+      <div class="filters-row">
+        <select id="as_filter_location"></select>
+        <select id="as_filter_user"></select>
+      </div>
 
-  <div class="form-row">
-    <label>Agent Name</label>
-    <input id="asAgentName" type="text">
-  </div>
+      <!-- TABLE -->
+      <div class="table-wrapper full-width">
+        <table>
+          <thead>
+            <tr>
+              <th>Slip ID</th>
+              <th>Date</th>
+              <th>Agent</th>
+              <th>Machine</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody id="as_table_body"></tbody>
+        </table>
+      </div>
 
-  <div class="form-row">
-    <label>Machine No</label>
-    <input id="asMachineNo" type="text">
-  </div>
+    </div>
 
-  <div class="form-row">
-    <label>Amount ($)</label>
-    <input id="asAmount" type="number">
-  </div>
+    <!-- ============================
+         RIGHT SIDE (35%)
+    ============================= -->
+    <div class="module-right">
 
-  <div id="asFormStatus" style="margin-top:4px; font-size:13px;"></div>
+      <div class="card-header">Create Slip</div>
 
-  <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
-    <button id="asSaveBtn" class="btn btn-primary">Save & Print Slip</button>
-  </div>
+      <div class="form-grid">
 
-  <!-- QR Preview -->
-  <div style="margin-top:20px; text-align:center;">
-    <canvas id="asQrCanvas" width="128" height="128"></canvas>
-    <div id="asQrText" style="font-size:12px; color:#666;">QR will appear after saving</div>
-  </div>
+        <!-- Date -->
+        <div class="form-group">
+          <label>Date & Time</label>
+          <input id="asDateTime" type="datetime-local">
+        </div>
 
-  <!-- Slip List -->
-  <h4 style="margin-top:20px;">Slips</h4>
+        <!-- Agent Name (Auto-filled from login) -->
+        <div class="form-group">
+          <label>Agent Name</label>
+          <input id="asAgentName" type="text" disabled>
+        </div>
 
-  <div style="max-height:200px; overflow-y:auto; background:#f8f9fb; padding:6px; border-radius:10px;">
-    <table style="width:100%; border-collapse:collapse; font-size:13px;">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Agent</th>
-          <th>Machine</th>
-          <th>Amount</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="asTableBody"></tbody>
-    </table>
+        <!-- Machine No (Manual + QR) -->
+        <div class="form-group form-span-2">
+          <label>Machine No</label>
+          <div class="qr-input-group">
+            <input id="asMachineNo" type="text">
+            <button id="asScanBtn">Scan</button>
+          </div>
+        </div>
+
+        <!-- Amount (Always 0.00) -->
+        <div class="form-group form-span-2">
+          <label>Amount ($)</label>
+          <input id="asAmount" type="number" value="0.00" disabled>
+        </div>
+
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="form-actions">
+        <button id="asSaveBtn" class="btn btn-primary">Save & Print</button>
+      </div>
+
+      <!-- QR PREVIEW -->
+      <div class="qr-preview-column">
+        <div class="qr-preview-box">
+          <canvas id="asQrCanvas" width="128" height="128"></canvas>
+        </div>
+        <div id="asQrText" style="font-size:12px; color:#ccc; text-align:center;">
+          QR will appear after saving
+        </div>
+      </div>
+
+    </div>
+
   </div>
 
 </div>

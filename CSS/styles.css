@@ -1,91 +1,733 @@
-<div class="module-container">
+/* ============================================================
+   GLOBAL BASE (MODULE SAFE)
+============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&family=Sora:wght@500;600&family=Inter:wght@400;500&family=Poppins:wght@500&display=swap');
 
-  <div class="module-wrapper">
+* {
+  box-sizing: border-box;
+}
 
-    <!-- ============================
-         LEFT SIDE (65%)
-    ============================= -->
-    <div class="module-left">
+/* ============================================================
+   MODULE CONTAINER
+============================================================ */
+.module-container {
+  width: 100%;
+}
 
-      <!-- FILTER ROW -->
-      <div class="filters-row">
-        <select id="as_filter_location"></select>
-        <select id="as_filter_user"></select>
-      </div>
+/* ============================================================
+   MODULE WRAPPER — TRUE 65 / 35
+============================================================ */
+.module-wrapper {
+  display: grid;
+  grid-template-columns: 65fr 35fr;
+  gap: 20px;
+  /*width: 100%;*/
+  margin: 30px 0;
+  align-items: start;
+}
 
-      <!-- TABLE -->
-      <div class="table-wrapper full-width">
-        <table>
-          <thead>
-            <tr>
-              <th>Slip ID</th>
-              <th>Date</th>
-              <th>Agent</th>
-              <th>Machine</th>
-              <th>Amount</th>
-            </tr>
-          </thead>
-          <tbody id="as_table_body"></tbody>
-        </table>
-      </div>
+/* ============================================================
+   LEFT PANEL — STRETCH
+============================================================ */
+.module-left {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  padding: 20px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.15);
+  backdrop-filter: blur(12px);
+}
 
-    </div>
+/* ============================================================
+   RIGHT PANEL — HEIGHT DRIVER
+============================================================ */
+.module-right {
+  display: flex; 
+  height: fit-content;       /* right defines height */
+  padding: 20px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.15);
+  backdrop-filter: blur(12px);
+  flex-direction: column;
+}
 
-    <!-- ============================
-         RIGHT SIDE (35%)
-    ============================= -->
-    <div class="module-right">
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 20px;
+}
 
-      <div class="card-header">Create Slip</div>
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+/* ============================================================
+   AUDIT RIGHT FORM LAYOUT FIXES
+============================================================ */
 
-      <div class="form-grid">
+/* Force 2-column grid always */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 20px;
+}
 
-        <!-- Date -->
-        <div class="form-group">
-          <label>Date & Time</label>
-          <input id="asDateTime" type="datetime-local">
-        </div>
+/* Span full width */
+.form-span-2 {
+  grid-column: 1 / -1;
+}
 
-        <!-- Agent Name (Auto-filled from login) -->
-        <div class="form-group">
-          <label>Agent Name</label>
-          <input id="asAgentName" type="text" disabled>
-        </div>
+/* ---------- TOP ROW (Date + Machine No) ---------- */
+.audit-top-row {
+  display: flex;
+  gap: 20px;
+}
 
-        <!-- Machine No (Manual + QR) -->
-        <div class="form-group form-span-2">
-          <label>Machine No</label>
-          <div class="qr-input-group">
-            <input id="asMachineNo" type="text">
-            <button id="asScanBtn">Scan</button>
-          </div>
-        </div>
+.audit-date,
+.audit-machine {
+  flex: 1;
+}
 
-        <!-- Amount (Always 0.00) -->
-        <div class="form-group form-span-2">
-          <label>Amount ($)</label>
-          <input id="asAmount" type="number" value="0.00" disabled>
-        </div>
+/* QR input */
+.qr-input-group {
+  display: flex;
+  gap: 8px;
+}
 
-      </div>
+.qr-input-group button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.18);
+  cursor: pointer;
+}
 
-      <!-- ACTIONS -->
-      <div class="form-actions">
-        <button id="asSaveBtn" class="btn btn-primary">Save & Print</button>
-      </div>
+/* ---------- SAVE / RESET ---------- */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+}
 
-      <!-- QR PREVIEW -->
-      <div class="qr-preview-column">
-        <div class="qr-preview-box">
-          <canvas id="asQrCanvas" width="128" height="128"></canvas>
-        </div>
-        <div id="asQrText" style="font-size:12px; color:#ccc; text-align:center;">
-          QR will appear after saving
-        </div>
-      </div>
+/* ---------- FINAL TOTALS ROW ---------- */
+.audit-totals-row {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  padding-top: 14px;
+  margin-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  font-size: 15px;
+}
 
-    </div>
+.audit-totals-row strong {
+  color: #ffffff;
+  font-weight: 600;
+}
 
-  </div>
+/* ---------- MOBILE ---------- */
+@media (max-width: 768px) {
+  .audit-top-row {
+    flex-direction: column;
+  }
 
-</div>
+  .audit-totals-row {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
+
+/* ============================================================
+   CARD HEADER
+============================================================ */
+.card-header {
+  font-family: 'Sora', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+  padding-bottom: 6px;
+}
+
+/* ============================================================
+   FORMS
+============================================================ */
+.row-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 20px;
+}
+
+.row-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px 20px;
+}
+
+.form-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-item label {
+  font-weight: 600;
+}
+
+/* ============================================================
+   INPUTS
+============================================================ */
+input,
+select,
+textarea {
+  /* width: 100%; */
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #fff;
+  background: rgba(255,255,255,0.18);
+}
+
+select option {
+  background: #1e1e1e;
+  color: white;
+}
+
+/* ============================================================
+   FORM ACTIONS
+============================================================ */
+/* ==============================
+   SAVE + RESET INLINE ROW
+================================ */
+
+.audit-action-row {
+  display: flex;
+  gap: 14px;
+  width: 100%;
+}
+
+.audit-action-row button {
+  flex: 1;                 /* equal width */
+  height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+/* Optional: stronger primary */
+.btn-primary {
+  background: linear-gradient(135deg, #4f8cff, #6a5cff);
+}
+
+/* Optional: softer reset */
+.btn-secondary {
+  background: rgba(255,255,255,0.18);
+  color: #e2e8f0;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+/* ============================================================
+   AUDIT SUMMARY
+============================================================ */
+.audit-summary-row {
+  padding: 12px;
+  margin-bottom: 12px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+}
+
+.summary-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-horizontal {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* ============================================================
+   TABLE — ONLY THIS SCROLLS
+============================================================ */
+.module-container .full-width {
+  flex: 1;
+  min-height: 0;
+}
+
+.table-wrapper {
+  max-height: 320px;
+  position: relative;
+  overflow-y: auto;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
+}
+
+.table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table-wrapper th {
+  position: sticky;
+  top: 0;
+  background: rgba(255,255,255,0.12);
+  color: #cbd5e1;
+  padding: 10px 14px;
+  text-transform: uppercase;
+}
+
+.table-wrapper td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  white-space: nowrap;
+}
+
+.table-wrapper tr:hover td {
+  background: rgba(255,255,255,0.08);
+}
+
+/* ============================================================
+   FIX: TABLE HEADER OVERLAP ON SCROLL
+============================================================ */
+/* Sticky table header */
+.table-wrapper thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  /* SOLID background — this is key */
+  background: #3b3f5c;
+
+  /* Optional polish */
+  backdrop-filter: none;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+
+/* Ensure table rows never overlay header */
+.table-wrapper tbody td {
+  position: relative;
+  z-index: 1;
+}
+
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+.module-container .btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4f8cff, #6a5cff);
+  color: white;
+}
+
+.btn-danger {
+  background: #ff4f4f;
+  color: white;
+}
+
+/* Secondary buttons polish */
+.btn-secondary {
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.22);
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.24);
+  color: white;
+}
+
+/* ============================================================
+   MACHINE HEALTH BADGES
+============================================================ */
+.machine-health {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.health-good {
+  background: #d4edda;
+  color: #155724;
+}
+
+.health-warn {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.health-bad {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* ============================================================
+   QR MODAL
+============================================================ */
+.qr-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.qr-modal {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.qr-video {
+  width: 300px;
+  height: 300px;
+  background: #000;
+}
+/* ===============================
+   NOTES + QR SINGLE ROW LAYOUT
+================================ */
+.notes-qr-row {
+  display: grid;
+  grid-template-columns: 2.2fr 1.2fr 0.8fr;
+  gap: 20px;
+  align-items: stretch;
+  margin-top: 20px;
+}
+
+/* NOTES */
+.notes-column textarea {
+  height: 120px;
+  resize: none;
+}
+
+/* QR PREVIEW */
+.qr-preview-column {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.qr-preview-box {
+  flex: 1;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  border: 1px dashed rgba(255,255,255,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+
+/* QR ACTION BUTTONS */
+.qr-actions-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* ===============================
+   BUTTON VISUAL UPGRADE
+================================ */
+.btn {
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.25s ease;
+}
+
+/* PRIMARY */
+.btn-primary {
+  background: linear-gradient(135deg, #4f8cff, #6a5cff);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(79,140,255,0.35);
+}
+
+/* OUTLINE */
+.btn-outline {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.35);
+  color: #e2e8f0;
+}
+
+.btn-outline:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+/* DANGER */
+.btn-danger {
+  background: linear-gradient(135deg, #ff4f4f, #ff6b6b);
+  color: #fff;
+}
+
+.btn-danger:hover {
+  box-shadow: 0 6px 16px rgba(255,79,79,0.35);
+}
+
+/* ===============================
+   MOBILE STACK
+================================ */
+@media (max-width: 768px) {
+  .notes-qr-row {
+    grid-template-columns: 1fr;
+  }
+
+  .qr-actions-column {
+    flex-direction: row;
+  }
+}
+/* ===============================
+   QR VERTICAL BUTTON COLORS
+================================ */
+
+/* Generate QR – Primary */
+#machines-generate-qr-btn {
+  background: linear-gradient(135deg, #4f8cff, #6a5cff);
+  color: #fff;
+}
+
+#machines-generate-qr-btn:hover {
+  box-shadow: 0 6px 16px rgba(79, 140, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Print – Teal */
+#machines-print-qr-btn {
+  background: linear-gradient(135deg, #22c1c3, #2ecc71);
+  color: #fff;
+}
+
+#machines-print-qr-btn:hover {
+  box-shadow: 0 6px 16px rgba(34, 193, 195, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Download – Purple */
+#machines-download-qr-btn {
+  background: linear-gradient(135deg, #9b5cff, #c77dff);
+  color: #fff;
+}
+
+#machines-download-qr-btn:hover {
+  box-shadow: 0 10px 16px rgba(155, 92, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Ensure consistent button height */
+.qr-actions-column .btn {
+  height: 42px;
+  font-weight: 600;
+}
+
+/* ============================================================
+   TOAST
+============================================================ */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+
+/* ============================================================
+   MOBILE
+============================================================ */
+@media (max-width: 768px) {
+  .module-wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .table-wrapper {
+    max-height: 300px;
+  }
+}
+/* ===============================
+   MACHINE FILTER ROW (ONE LINE)
+================================ */
+.filters-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+  margin-bottom: 16px;
+}
+
+/* Search input wider */
+.filters-row input {
+  flex: 1 1 260px;
+  min-width: 220px;
+}
+
+/* Dropdowns */
+.filters-row select {
+  flex: 0 0 160px;
+  height: 42px;
+}
+
+/* Buttons same height */
+.filters-row .btn {
+  height: 42px;
+  padding: 0 16px;
+  white-space: nowrap;
+  color: white;
+}
+
+/* Prevent overflow on smaller screens */
+.filters-row::-webkit-scrollbar {
+  height: 6px;
+}
+/* ===============================
+   TABLE FOOTER (ONE ROW)
+================================ */
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+/* Pagination group */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Pagination buttons */
+.pagination-controls .btn-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* Page number */
+.pagination-page {
+  font-size: 14px;
+  font-weight: 600;
+}
+/* ============================================================
+   AUDIT SUMMARY BLOCK
+============================================================ */
+.audit-summary-row {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+}
+
+/* ==========================
+   FIRST ROW (Location / Date / Totals)
+========================== */
+.audit-summary-row .row-2col {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* Left inputs */
+.audit-summary-row .row-2col .form-item {
+  min-width: 220px;
+}
+
+/* Right totals (vertical) */
+.summary-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: right;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.summary-vertical strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ==========================
+   SECOND ROW (Totals IN / OUT / NET)
+========================== */
+.summary-horizontal {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  font-size: 15px;
+}
+
+.summary-horizontal strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ==========================
+   MOBILE ADJUSTMENT
+========================== */
+@media (max-width: 768px) {
+  .audit-summary-row .row-2col {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .summary-vertical {
+    text-align: left;
+  }
+
+  .summary-horizontal {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
