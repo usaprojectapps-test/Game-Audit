@@ -59,62 +59,67 @@
 
       <div class="card-header">Create Slip</div>
 
-      <!-- SLIP TYPE BUTTON TOGGLE -->
-      <div class="form-group form-span-2">
-        <label>Slip Type</label>
+     <div class="form-grid">
 
-        <div class="as-slip-type-buttons">
-          <button id="asBtnRegular" class="as-slip-btn active">Regular</button>
-          <button id="asBtnBonus" class="as-slip-btn">Bonus</button>
-        </div>
-      </div>
-
-      <div class="form-grid">
-
-        <!-- Date -->
+        <!-- ROW 1 -->
         <div class="form-group">
           <label>Date & Time</label>
-          <input id="asDateTime" type="datetime-local">
+          <input type="datetime-local" id="asDateTime" />
         </div>
 
-        <!-- Agent Name -->
         <div class="form-group">
           <label>Agent Name</label>
-          <input id="asAgentName" type="text" disabled>
+          <input type="text" id="asAgentName" disabled />
         </div>
 
-        <!-- Machine No (Regular Only) -->
-        <div class="form-group form-span-2" id="rowMachineNo">
+        <!-- ROW 2 -->
+        <!-- LEFT: Machine No (Regular) / Bonus Type (Bonus) -->
+        <div class="form-group" id="rowMachineNo">
           <label>Machine No</label>
           <div class="qr-input-group">
-            <input id="asMachineNo" type="text">
+            <input type="text" id="asMachineNo" />
             <button id="asScanBtn">Scan</button>
           </div>
         </div>
 
-        <!-- Amount (Regular Only) -->
-        <div class="form-group form-span-2" id="rowAmount">
-          <label>Amount ($)</label>
-          <input id="asAmount" type="number" value="0.00" disabled>
-        </div>
-
-        <!-- Bonus Type (Bonus Only) -->
-        <div class="form-group form-span-2" id="rowBonusType" style="display:none;">
+        <div class="form-group" id="rowBonusType" style="display:none;">
           <label>Bonus Type</label>
           <select id="asBonusType">
             <option value="">Select Bonus</option>
-            <option value="Raffle">Raffle</option>
-            <option value="Birthday Gift">Birthday Gift</option>
-            <option value="Festival Bonus">Festival Bonus</option>
-            <option value="Promo Bonus">Promo Bonus</option>
           </select>
         </div>
 
-        <!-- Bonus Amount (Bonus Only) -->
-        <div class="form-group form-span-2" id="rowBonusAmount" style="display:none;">
-          <label>Bonus Amount ($)</label>
-          <input id="asBonusAmount" type="number" value="0.00">
+        <!-- RIGHT: QR Preview -->
+        <div class="form-group">
+          <label>Slip QR</label>
+          <div class="qr-preview-box">
+            <canvas id="asQrCanvas"></canvas>
+          </div>
+          <div id="asQrText"></div>
         </div>
+
+        <!-- ROW 3 -->
+        <!-- LEFT: Amount (Regular) / Bonus Amount (Bonus) -->
+        <div class="form-group" id="rowAmount">
+          <label>Amount ($)</label>
+          <input type="number" id="asAmount" />
+        </div>
+
+        <div class="form-group" id="rowBonusAmount" style="display:none;">
+          <label>Bonus Amount ($)</label>
+          <input type="number" id="asBonusAmount" />
+        </div>
+
+        <!-- RIGHT: EMPTY -->
+        <div class="form-group"></div>
+
+        <!-- ROW 4 -->
+        <div class="form-group"></div>
+        <div class="form-actions">
+          <button id="asSaveBtn" class="btn btn-primary">Save & Print</button>
+        </div>
+
+      </div>
 
       </div>
 
