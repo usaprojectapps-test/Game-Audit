@@ -54,69 +54,72 @@
 
     <!-- ============================
          RIGHT SIDE (35%)
-    ============================= -->
-    <div class="module-right">
+      ============================= -->
+      <div class="module-right">
 
-      <div class="card-header">Create Slip</div>
+        <div class="card-header">Create Slip</div>
 
-     <div class="form-grid">
-        <!-- SLIP TYPE TOGGLE -->
-        <div class="form-span-2">
-          <label>Slip Type</label>
-          <div class="as-slip-type-buttons">
-            <button id="asBtnRegular" class="as-slip-btn active">Regular</button>
-            <button id="asBtnBonus" class="as-slip-btn">Bonus</button>
+        <div class="form-grid">
+
+          <!-- SLIP TYPE TOGGLE -->
+          <div class="form-span-2">
+            <label>Slip Type</label>
+            <div class="as-slip-type-buttons">
+              <button id="asBtnRegular" class="as-slip-btn active">Regular</button>
+              <button id="asBtnBonus" class="as-slip-btn">Bonus</button>
+            </div>
           </div>
-        </div>
 
-        <!-- ROW 1: Date & Agent Name -->
-        <div class="form-group" style="max-width: 220px;">
-          <label>Date & Time</label>
-          <input type="datetime-local" id="asDateTime" />
-        </div>
-
-        <div class="form-group" style="max-width: 220px;">
-          <label>Agent Name</label>
-          <input type="text" id="asAgentName" disabled />
-        </div>
-
-        <!-- ROW 2: Machine No (Regular) / Bonus Type (Bonus) | QR Preview -->
-        <div class="form-group" id="rowMachineNo">
-          <label>Machine No</label>
-          <div class="qr-input-group">
-            <input type="text" id="asMachineNo" />
-            <button id="asScanBtn">Scan</button>
+          <!-- ROW 1: Date & Agent Name -->
+          <div class="form-group" style="max-width:220px;">
+            <label>Date & Time</label>
+            <input type="datetime-local" id="asDateTime" />
           </div>
-        </div>
 
-        <div class="form-group" id="rowBonusType" style="display:none;">
-          <label>Bonus Type</label>
-          <select id="asBonusType">
-            <option value="">Select Bonus</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Slip QR</label>
-          <div class="qr-preview-box">
-            <canvas id="asQrCanvas"></canvas>
+          <div class="form-group" style="max-width:220px;">
+            <label>Agent Name</label>
+            <input type="text" id="asAgentName" disabled />
           </div>
-          <div id="asQrText"></div>
-        </div>
 
-        <!-- ROW 3: Amount (Regular) / Bonus Amount (Bonus) -->
+          <!-- ROW 2: Machine No (Regular) / Bonus Type (Bonus) -->
+          <div class="form-group" id="rowMachineNo" style="grid-column:1;">
+            <label>Machine No</label>
+            <div class="qr-input-group">
+              <input type="text" id="asMachineNo" />
+              <button id="asScanBtn">Scan</button>
+            </div>
+          </div>
 
-        <div class="form-group" id="rowAmount"
-            style="grid-column: 1 / 2; grid-row: 3; margin-top:-6px;">
+          <div class="form-group" id="rowBonusType" style="grid-column:1; display:none;">
+            <label>Bonus Type</label>
+            <select id="asBonusType">
+              <option value="">Select Bonus</option>
+            </select>
+          </div>
+
+          <!-- QR PREVIEW (Right side of Row 2) -->
+          <div class="form-group" style="grid-column:2; grid-row:2 / span 2;">
+            <label>Slip QR</label>
+            <div class="qr-preview-box">
+              <canvas id="asQrCanvas"></canvas>
+            </div>
+            <div id="asQrText"></div>
+          </div>
+
+          <!-- ROW 3: Amount (Regular) / Bonus Amount (Bonus) -->
+          <div class="form-group" id="rowAmount"
+              style="grid-column:1; margin-top:-8px;">
             <label>Amount ($)</label>
             <input type="number" id="asAmount" />
           </div>
+
           <div class="form-group" id="rowBonusAmount"
-            style="grid-column: 1 / 2; grid-row: 3; margin-top:-6px; display:none;">
+              style="grid-column:1; margin-top:-8px; display:none;">
             <label>Bonus Amount ($)</label>
             <input type="number" id="asBonusAmount" />
           </div>
-          
+
+          <!-- EMPTY RIGHT SIDE OF ROW 3 -->
           <div class="form-group"></div>
 
           <!-- ROW 4: Save Button -->
