@@ -11,7 +11,11 @@
       <div class="filters-row">
 
         <!-- Date -->
-        <input id="as_filter_date" type="date">
+        <div class="as-filter-row">
+          <label for="as_filter_date">Date</label>
+          <input type="date" id="as_filter_date" class="as-filter-input" />
+        </div>
+
 
         <!-- Location Filter -->
         <select id="as_filter_location"></select>
@@ -22,12 +26,13 @@
       </div>
 
       <!-- DAILY SUMMARY -->
-      <div class="summary-row" id="as_summary_row">
-        <div>Total Slips: <span id="as_sum_slips">0</span></div>
-        <div>Total Amount: <span id="as_sum_amount">0.00</span></div>
-        <div>Total Bonus: <span id="as_sum_bonus">0.00</span></div>
-        <div>Grand Total: <span id="as_sum_grand">0.00</span></div>
+      <div class="as-summary-row">
+        <div class="as-summary-item">Slips: <span id="as_sum_slips">0</span></div>
+        <div class="as-summary-item">Amount: <span id="as_sum_amount">0.00</span></div>
+        <div class="as-summary-item">Bonus: <span id="as_sum_bonus">0.00</span></div>
+        <div class="as-summary-item">Grand: <span id="as_sum_grand">0.00</span></div>
       </div>
+
 
       <!-- TABLE -->
       <div class="table-wrapper full-width">
