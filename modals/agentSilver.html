@@ -9,8 +9,24 @@
 
       <!-- FILTER ROW -->
       <div class="filters-row">
+
+        <!-- Date -->
+        <input id="as_filter_date" type="date">
+
+        <!-- Location Filter -->
         <select id="as_filter_location"></select>
+
+        <!-- User Filter -->
         <select id="as_filter_user"></select>
+
+      </div>
+
+      <!-- DAILY SUMMARY -->
+      <div class="summary-row" id="as_summary_row">
+        <div>Total Slips: <span id="as_sum_slips">0</span></div>
+        <div>Total Amount: <span id="as_sum_amount">0.00</span></div>
+        <div>Total Bonus: <span id="as_sum_bonus">0.00</span></div>
+        <div>Grand Total: <span id="as_sum_grand">0.00</span></div>
       </div>
 
       <!-- TABLE -->
@@ -38,6 +54,15 @@
 
       <div class="card-header">Create Slip</div>
 
+      <!-- SLIP TYPE TOGGLE -->
+      <div class="form-group form-span-2">
+        <label>Slip Type</label>
+        <div class="toggle-row">
+          <label><input type="radio" name="asSlipType" id="asSlipTypeRegular" checked> Regular</label>
+          <label><input type="radio" name="asSlipType" id="asSlipTypeBonus"> Bonus</label>
+        </div>
+      </div>
+
       <div class="form-grid">
 
         <!-- Date -->
@@ -46,14 +71,14 @@
           <input id="asDateTime" type="datetime-local">
         </div>
 
-        <!-- Agent Name (Auto-filled from login) -->
+        <!-- Agent Name -->
         <div class="form-group">
           <label>Agent Name</label>
           <input id="asAgentName" type="text" disabled>
         </div>
 
-        <!-- Machine No (Manual + QR) -->
-        <div class="form-group form-span-2">
+        <!-- Machine No (Regular Only) -->
+        <div class="form-group form-span-2" id="rowMachineNo">
           <label>Machine No</label>
           <div class="qr-input-group">
             <input id="asMachineNo" type="text">
@@ -61,10 +86,28 @@
           </div>
         </div>
 
-        <!-- Amount (Always 0.00) -->
-        <div class="form-group form-span-2">
+        <!-- Amount (Regular Only) -->
+        <div class="form-group form-span-2" id="rowAmount">
           <label>Amount ($)</label>
           <input id="asAmount" type="number" value="0.00" disabled>
+        </div>
+
+        <!-- Bonus Type (Bonus Only) -->
+        <div class="form-group form-span-2" id="rowBonusType" style="display:none;">
+          <label>Bonus Type</label>
+          <select id="asBonusType">
+            <option value="">Select Bonus</option>
+            <option value="Raffle">Raffle</option>
+            <option value="Birthday Gift">Birthday Gift</option>
+            <option value="Festival Bonus">Festival Bonus</option>
+            <option value="Promo Bonus">Promo Bonus</option>
+          </select>
+        </div>
+
+        <!-- Bonus Amount (Bonus Only) -->
+        <div class="form-group form-span-2" id="rowBonusAmount" style="display:none;">
+          <label>Bonus Amount ($)</label>
+          <input id="asBonusAmount" type="number" value="0.00">
         </div>
 
       </div>
