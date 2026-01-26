@@ -731,3 +731,29 @@ select option {
     gap: 6px;
   }
 }
+.as-slip-type-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.as-slip-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #222;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.as-slip-btn.active {
+  background: #007bff;
+  border-color: #007bff;
+  color: #fff;
+}
+
+.as-slip-btn:active {
+  transform: scale(0.97);
+}
