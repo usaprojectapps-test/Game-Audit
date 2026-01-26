@@ -228,9 +228,14 @@ select option {
   color: white;
 }
 
+/* Secondary buttons polish */
 .btn-secondary {
-  background: rgba(255,255,255,0.15);
-  color: #e2e8f0;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.22);
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.24);
 }
 
 /* ============================================================
@@ -353,16 +358,6 @@ select option {
 .btn-primary:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(79,140,255,0.35);
-}
-
-/* SECONDARY */
-.btn-secondary {
-  background: rgba(255,255,255,0.15);
-  color: #e2e8f0;
-}
-
-.btn-secondary:hover {
-  background: rgba(255,255,255,0.25);
 }
 
 /* OUTLINE */
