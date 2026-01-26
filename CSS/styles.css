@@ -66,6 +66,82 @@
   flex-direction: column;
   gap: 6px;
 }
+/* ============================================================
+   AUDIT RIGHT FORM LAYOUT FIXES
+============================================================ */
+
+/* Force 2-column grid always */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 20px;
+}
+
+/* Span full width */
+.form-span-2 {
+  grid-column: 1 / -1;
+}
+
+/* ---------- TOP ROW (Date + Machine No) ---------- */
+.audit-top-row {
+  display: flex;
+  gap: 20px;
+}
+
+.audit-date,
+.audit-machine {
+  flex: 1;
+}
+
+/* QR input */
+.qr-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.qr-input-group button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.18);
+  cursor: pointer;
+}
+
+/* ---------- SAVE / RESET ---------- */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+}
+
+/* ---------- FINAL TOTALS ROW ---------- */
+.audit-totals-row {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  padding-top: 14px;
+  margin-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  font-size: 15px;
+}
+
+.audit-totals-row strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ---------- MOBILE ---------- */
+@media (max-width: 768px) {
+  .audit-top-row {
+    flex-direction: column;
+  }
+
+  .audit-totals-row {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
 
 /* ============================================================
    CARD HEADER

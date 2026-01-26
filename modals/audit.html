@@ -70,16 +70,20 @@
       <!-- FORM GRID (2 COLUMNS ALWAYS) -->
       <div class="form-grid">
 
-        <div class="form-group">
-          <label>Date</label>
-          <input type="date" id="auditEntryDate">
-        </div>
+       <div class="form-group form-span-2">
+          <div class="audit-top-row">
+            <div class="audit-date">
+              <label>Date</label>
+              <input type="date" id="auditEntryDate">
+            </div>
 
-        <div class="form-group">
-          <label>Machine No</label>
-          <div class="qr-input-group">
-            <input type="text" id="auditMachineNo" placeholder="Scan or enter manually">
-            <button id="qrScanBtn" title="Scan QR">📷</button>
+            <div class="audit-machine">
+              <label>Machine No</label>
+              <div class="qr-input-group">
+                <input type="text" id="auditMachineNo" placeholder="Scan or enter manually">
+                <button id="qrScanBtn" title="Scan QR">📷</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -124,21 +128,11 @@
           <button id="auditResetBtn" class="btn btn-secondary">Reset</button>
         </div>
 
-        <div class="form-group">
-          <label>Total IN</label>
-          <input type="number" id="auditTotalIn" readonly>
+        <div class="audit-totals-row">
+          <span>Total IN: <strong id="auditTotalIn">$ 0.00</strong></span>
+          <span>Total OUT: <strong id="auditTotalOut">$ 0.00</strong></span>
+          <span>NET: <strong id="auditNet">$ 0.00</strong></span>
         </div>
-
-        <div class="form-group">
-          <label>Total OUT</label>
-          <input type="number" id="auditTotalOut" readonly>
-        </div>
-
-        <div class="form-group">
-          <label>NET</label>
-          <input type="number" id="auditNet" readonly>
-        </div>
-
       </div>
     </div>
 
