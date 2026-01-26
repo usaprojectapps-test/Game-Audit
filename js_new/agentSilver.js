@@ -29,6 +29,15 @@ let currentSlip = null;
 // -------------------------------------------------------------
 // INIT
 // -------------------------------------------------------------
+console.log("BEFORE DOM LISTENER");
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM LOADED");
+  initAgentSilver().catch((err) => {
+    console.error("INIT ERROR:", err);
+  });
+});
+
+
 document.addEventListener("DOMContentLoaded", () => {
   initAgentSilver().catch((err) => {
     console.error("Error initializing Agent Silver:", err);
