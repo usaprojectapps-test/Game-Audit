@@ -757,3 +757,18 @@ select option {
 .as-slip-btn:active {
   transform: scale(0.97);
 }
+.as-summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.as-summary-item {
+  flex: 1;
+  background: #f8f8f8;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  text-align: center;
+}
