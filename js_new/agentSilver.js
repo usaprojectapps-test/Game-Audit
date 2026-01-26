@@ -58,41 +58,30 @@ async function loadCurrentUser() {
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) throw new Error("Not logged in");
 
-  const userId = data.user.id;
+  const email = data.user.email;
 
-  const { data: userRow, error: userErr } = await supabase
-    .from("users")
-    .select("id, name, role, location_id")
-    .eq("id", userId)
+  // Load from user_access instead of users table
+  const { data: accessRow, error: accessErr } = await supabase
+    .from("user_access")
+    .select("email, role, location_id")
+    .eq("email", email)
     .single();
 
-  if (userErr || !userRow) throw new Error("User profile not found");
-
-  currentUser = {
-    id: userRow.id,
-    name: userRow.name,
-    role: userRow.role,
-    location_id: userRow.location_id,
-  };
-
-  // Load location only for non-SuperAdmin
-  if (currentUser.role !== "SuperAdmin") {
-    const { data: locRow } = await supabase
-      .from("locations")
-      .select("id, name")
-      .eq("id", currentUser.location_id)
-      .single();
-
-    currentLocation = locRow || null;
+  if (accessErr || !accessRow) {
+    throw new Error("User not found in user_access");
   }
 
-  // Set Agent Name
-  const agentNameInput = document.getElementById("asAgentName");
-  if (agentNameInput) {
-    agentNameInput.value =
-      currentUser.role === "SuperAdmin"
-        ? "Super Admin"
-        : currentUser.name || "";
+  currentUser = {
+    id: data.user.id,
+    email,
+    name: email.split("@")[0], // fallback
+    role: accessRow.role,
+    location_id: accessRow.location_id,
+  };
+
+  // SuperAdmin name override
+  if (currentUser.role === "SuperAdmin") {
+    currentUser.name = "Super Admin";
   }
 }
 
