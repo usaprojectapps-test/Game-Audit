@@ -95,36 +95,81 @@
     </div>
 
     <!-- NOTES + QR PREVIEW + QR BUTTONS IN 3 COLUMNS -->
-    <div class="form-grid-3" style="margin-top: 16px;">
-      <div class="form-group">
-        <label>Notes</label>
-        <textarea id="machines-notes-input" class="textarea" rows="2" style="resize: vertical;"></textarea>
-      </div>
+    <div class="notes-qr-row" style="margin-top:16px;">
 
-      <div class="form-group">
-        <label>Machine QR Code</label>
-        <div id="machines-qr-preview" class="qr-preview ticket-preview">
-          <div id="machines-qr-canvas"></div>
-          <div id="machines-qr-label" class="qr-label"></div>
-        </div>
-      </div>
+    <!-- NOTES -->
+    <div class="notes-column">
+      <label>Notes</label>
+      <textarea
+        id="machines-notes-input"
+        class="textarea"
+        rows="5"
+        placeholder="Enter notes here..."
+      ></textarea>
+    </div>
 
-      <div class="form-group">
-        <label>&nbsp;</label>
-        <div class="qr-button-column">
-          <button id="machines-generate-qr-btn" class="btn btn-secondary">Generate QR</button>
-          <button id="machines-print-qr-btn" class="btn btn-secondary">Print</button>
-          <button id="machines-download-qr-btn" class="btn btn-secondary">Download</button>
-        </div>
+    <!-- QR PREVIEW -->
+    <div class="qr-preview-column">
+      <label>Machine QR Code</label>
+      <div
+        id="machines-qr-preview"
+        class="qr-preview-box"
+      >
+        <div id="machines-qr-canvas"></div>
+        <div id="machines-qr-label" class="qr-label"></div>
       </div>
     </div>
 
-    <div class="form-actions button-row">
-      <button id="machines-reset-btn" class="btn btn-secondary">Clear</button>
-      <button id="machines-delete-btn" class="btn btn-danger">Delete</button>
-      <button id="machines-save-btn" class="btn btn-primary">Save</button>
+    <!-- QR ACTION BUTTONS (VERTICAL) -->
+    <div class="qr-actions-column">
+      <button
+        id="machines-generate-qr-btn"
+        class="btn btn-secondary"
+      >
+        Generate QR
+      </button>
+
+      <button
+        id="machines-print-qr-btn"
+        class="btn btn-outline"
+      >
+        Print
+      </button>
+
+      <button
+        id="machines-download-qr-btn"
+        class="btn btn-outline"
+      >
+        Download
+      </button>
     </div>
+
   </div>
+
+  <!-- FORM ACTION BUTTONS -->
+  <div class="form-actions button-row">
+    <button
+      id="machines-reset-btn"
+      class="btn btn-secondary"
+    >
+      Clear
+    </button>
+
+    <button
+      id="machines-delete-btn"
+      class="btn btn-danger"
+    >
+      Delete
+    </button>
+
+    <button
+      id="machines-save-btn"
+      class="btn btn-primary"
+    >
+      Save
+    </button>
+  </div>
+
 
   <!-- TOASTS -->
   <div id="machines-toast-container" class="toast-container"></div>
