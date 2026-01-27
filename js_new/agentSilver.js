@@ -619,18 +619,6 @@ function initPrintModal() {
 // -------------------------------------------------------------
 // QR RENDERING (IMAGE VERSION)
 // -------------------------------------------------------------
-/*function renderModalQr(slipNo) {
-  const img = document.getElementById("asModalQrImage");
-  if (!img || !window.QRious) return;
-
-  const qr = new QRious({
-    value: slipNo,
-    size: 128,
-  });
-
-  img.src = qr.toDataURL();
-}*/
-
 function renderModalQr(slipNo) {
   const img = document.getElementById("asModalQrImage");
   if (!img || !window.QRious) {
