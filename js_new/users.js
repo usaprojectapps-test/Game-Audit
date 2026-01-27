@@ -194,18 +194,19 @@ async function loadUsers() {
 // -------------------------------------------------------------
 // PAGINATION
 // -------------------------------------------------------------
-function renderPaginatedTable() {
+function renderPaginatedTable(data = fullUserList) {
   const start = (currentPage - 1) * pageSize;
   const end = start + pageSize;
+
   const pageRows = data.slice(start, end);
 
   renderTable(pageRows);
 
   document.getElementById("prevUsers").disabled = currentPage === 1;
-  document.getElementById("nextUsers").disabled = end >= fullUserList.length;
+  document.getElementById("nextUsers").disabled = end >= data.length;
 
   document.getElementById("machines-pagination-text").textContent =
-    `Showing ${pageRows.length} of ${fullUserList.length}`;
+    `Showing ${pageRows.length} of ${data.length}`;
 
   document.getElementById("machines-current-page").textContent = currentPage;
 }
@@ -624,7 +625,6 @@ function searchUsers() {
     filtered = filtered.filter(u => String(u.location_id) === String(currentLocation));
   }
 
-  fullUserList = filtered;
   currentPage = 1;
   renderPaginatedTable(filtered);
 }
