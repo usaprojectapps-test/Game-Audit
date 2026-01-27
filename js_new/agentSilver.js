@@ -587,8 +587,6 @@ function initPrintModal() {
         renderModalQr(currentSlip.slip_no);
       }
       setTimeout(() => { window.print(); }, 300); // Delay ensures QR loads
-         
-      window.print();
     });
   }
 }
