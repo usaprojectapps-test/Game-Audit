@@ -16,7 +16,6 @@
           <input type="date" id="as_filter_date" class="as-filter-input" />
         </div>
 
-
         <!-- Location Filter -->
         <select id="as_filter_location"></select>
 
@@ -32,7 +31,6 @@
         <div class="as-summary-item">Bonus: <span id="as_sum_bonus">0.00</span></div>
         <div class="as-summary-item">Grand: <span id="as_sum_grand">0.00</span></div>
       </div>
-
 
       <!-- TABLE -->
       <div class="table-wrapper full-width">
@@ -100,6 +98,7 @@
             <option value="">Select Bonus</option>
           </select>
         </div>
+
         <!-- QR PREVIEW (RIGHT SIDE) -->
         <div class="form-group" style="grid-column:2; grid-row:2 / span 3;">
           <label>Slip QR</label>
@@ -108,6 +107,7 @@
           </div>
           <div id="asQrText"></div>
         </div>
+
         <!-- ROW 3: AMOUNT (REGULAR) -->
         <div class="form-group" id="rowAmount" 
             style="grid-column:1; margin-top:-6px;">
@@ -201,25 +201,21 @@
 
 <!-- PRINT CSS -->
 <style>
-@media print {
+ @media print {
   body * {
     display: none !important;
-    visibility: hidden !important;
   }
-
   #asPrintOverlay, #asPrintOverlay * {
     display: block !important;
-    visibility: visible !important;
   }
-
   #asPrintOverlay {
     position: fixed;
     inset: 0;
     background: white !important;
-    color: black !important;
     z-index: 9999;
   }
 }
+
   .as-slip-type-buttons {
     display: flex;
     gap: 10px;
