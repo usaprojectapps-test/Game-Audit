@@ -65,6 +65,11 @@
   flex-direction: column;
   gap: 6px;
 }
+.form-group input,
+.form-group select {
+  width: 100%;
+  max-width: 160px;
+}
 
 /* ============================================================
    AUDIT RIGHT FORM LAYOUT FIXES
@@ -516,22 +521,6 @@ select option {
 /* ===============================
    QR VERTICAL BUTTON COLORS
 ================================ */
-/*@media print {
-  body * {
-    display: none !important;
-  }
-  #asPrintOverlay, #asPrintOverlay * {
-    display: block !important;
-  }
-  #asPrintOverlay {
-    position: fixed;
-    inset: 0;
-    background: white !important;
-    color: black !important;
-    z-index: 9999;
-  }
-} */
-
 @media print {
   body * {
     visibility: hidden !important;
