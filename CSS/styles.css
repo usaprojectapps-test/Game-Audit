@@ -527,6 +527,18 @@ select option {
 /* ===============================
    QR VERTICAL BUTTON COLORS
 ================================ */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #asPrintOverlay, #asPrintOverlay * {
+    visibility: visible !important;
+  }
+  #asPrintOverlay {
+    position: fixed;
+    inset: 0;
+  }
+}
 
 /* Generate QR – Primary */
 #machines-generate-qr-btn {
