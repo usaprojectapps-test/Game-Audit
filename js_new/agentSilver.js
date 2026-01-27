@@ -338,7 +338,7 @@ function initSaveButton() {
         .insert(slipData)
         .select()
         .single();
-
+        console.log("INSERT RESULT:", { data, error });
       if (error) throw error;
 
       currentSlip = data;
@@ -352,10 +352,11 @@ function initSaveButton() {
 
       // ⭐ Open print modal
       showPrintModal(data);
-    } catch (err) {
-      console.error(err);
-      showToast("Error saving slip", "error");
-    }
+    }   catch (err) {
+    console.error("SAVE SLIP ERROR:", err);
+    showToast(`Error saving slip: ${err.message || err}`, "error");
+  }
+
   });
 }
 
