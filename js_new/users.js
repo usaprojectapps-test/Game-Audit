@@ -197,8 +197,7 @@ async function loadUsers() {
 function renderPaginatedTable() {
   const start = (currentPage - 1) * pageSize;
   const end = start + pageSize;
-
-  const pageRows = fullUserList.slice(start, end);
+  const pageRows = data.slice(start, end);
 
   renderTable(pageRows);
 
@@ -627,7 +626,7 @@ function searchUsers() {
 
   fullUserList = filtered;
   currentPage = 1;
-  renderPaginatedTable();
+  renderPaginatedTable(filtered);
 }
 // -------------------------------------------------------------
 // CLEAR FORM
