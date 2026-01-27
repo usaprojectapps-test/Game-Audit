@@ -596,7 +596,7 @@ async function loadSlipIntoForm(slipNo) {
 }
 
 // -------------------------------------------------------------
-// PRINT MODAL
+// PRINT MODAL INITIALIZATION + QR FIX
 // -------------------------------------------------------------
 let asPrintOverlay = null;
 
@@ -616,7 +616,18 @@ function initPrintModal() {
   }
 
   if (printBtn) {
-    printBtn.addEventListener("click", () => window.print());
+    printBtn.addEventListener("click", () => {
+      // ⭐ Ensure QR is rendered before print
+      const modalCanvas = document.getElementById("asModalQrCanvas");
+      if (modalCanvas && window.QRious && currentSlip?.slip_no) {
+        new QRious({
+          element: modalCanvas,
+          size: 128,
+          value: currentSlip.slip_no,
+        });
+      }
+      window.print();
+    });
   }
 }
 
@@ -660,6 +671,7 @@ function showPrintModal(slip) {
     elAmount.textContent = Number(slip.amount || 0).toFixed(2);
   }
 
+  // ⭐ Render QR code
   const modalCanvas = document.getElementById("asModalQrCanvas");
   if (modalCanvas && window.QRious) {
     new QRious({
