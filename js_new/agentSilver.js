@@ -587,6 +587,7 @@ function initPrintModal() {
         renderModalQr(currentSlip.slip_no);
       }
       setTimeout(() => { window.print(); }, 300); // Delay ensures QR loads
+         
       window.print();
     });
   }
@@ -646,6 +647,7 @@ function showPrintModal(slip) {
 
   // Render QR image for this slip
   renderModalQr(slip.slip_no);
+        console.log("QR src:", document.getElementById("asModalQrImage").src);
 
   // Footer: Game-Audit System + Location Name (2-line block with separator)
   const footerEl = document.getElementById("asModalFooterText");
