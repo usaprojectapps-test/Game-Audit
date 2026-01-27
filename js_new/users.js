@@ -17,7 +17,6 @@ let locationSelect, statusSelect, phoneInput;
 let btnSave, btnDelete, btnClear, btnResetPassword;
 
 let selectedId = null;
-
 let fullUserList = [];
 let currentPage = 1;
 const pageSize = 10;
@@ -26,6 +25,29 @@ const pageSize = 10;
 const loggedInUserId = sessionStorage.getItem("userId");
 const loggedInRole = sessionStorage.getItem("role");
 const currentLocation = sessionStorage.getItem("locationId");
+
+// -------------------------------------------------------------
+// ROLE CREATION RULES (FINAL)
+// -------------------------------------------------------------
+//
+// SuperAdmin → can create all roles
+// LocationAdmin → can create: Manager, AsstManager, Audit, MSP, Silver, SilverAgent
+// Manager → can create: AsstManager, Audit, MSP, Silver, SilverAgent
+// AsstManager → cannot create anyone
+// Audit/MSP/Silver/SilverAgent → cannot create anyone
+//
+// -------------------------------------------------------------
+
+const ROLE_HIERARCHY = {
+  SuperAdmin: ["SuperAdmin", "LocationAdmin", "Manager", "AsstManager", "Audit", "MSP", "Silver", "SilverAgent"],
+  LocationAdmin: ["Manager", "AsstManager", "Audit", "MSP", "Silver", "SilverAgent"],
+  Manager: ["AsstManager", "Audit", "MSP", "Silver", "SilverAgent"],
+  AsstManager: [],
+  Audit: [],
+  MSP: [],
+  Silver: [],
+  SilverAgent: []
+};
 
 // -------------------------------------------------------------
 // INIT MODULE
@@ -71,6 +93,7 @@ function initUsersModule() {
 
   searchInput?.addEventListener("input", searchUsers);
   document.getElementById("filterRole")?.addEventListener("change", searchUsers);
+  document.getElementById("filterLocation")?.addEventListener("change", searchUsers);
 
   document.getElementById("prevUsers")?.addEventListener("click", () => {
     if (currentPage > 1) {
@@ -107,6 +130,13 @@ function validateForm(payload, isNew) {
   if (!payload.role) return "Role is required.";
   if (!payload.status) return "Status is required.";
 
+  // SuperAdmin must select a location for non-SuperAdmin users
+  if (loggedInRole === "SuperAdmin") {
+    if (payload.role !== "SuperAdmin" && !payload.location_id) {
+      return "Please select a location.";
+    }
+  }
+
   if (isNew && !payload.password) return "Password is required for new users.";
 
   const phoneRegex = /^\d{3}-\d{3}-\d{4}$/;
@@ -118,17 +148,36 @@ function validateForm(payload, isNew) {
 }
 
 // -------------------------------------------------------------
-// LOAD USERS
+// ROLE PERMISSION CHECK
+// -------------------------------------------------------------
+function canCreateRole(selectedRole) {
+  const allowed = ROLE_HIERARCHY[loggedInRole] || [];
+  return allowed.includes(selectedRole);
+}
+// -------------------------------------------------------------
+// LOAD USERS (with SuperAdmin location filter)
 // -------------------------------------------------------------
 async function loadUsers() {
+  const roleFilter = document.getElementById("filterRole").value;
+  const locationFilter = document.getElementById("filterLocation").value;
+
   let query = supabase.from("users").select("*");
 
-  if (loggedInRole !== "SuperAdmin") {
+  // SuperAdmin → can filter by any location
+  if (loggedInRole === "SuperAdmin") {
+    if (locationFilter) {
+      query = query.eq("location_id", locationFilter);
+    }
+  }
+
+  // Other roles → always restricted to their own location
+  else {
     query = query.eq("location_id", currentLocation);
   }
 
-  const roleFilter = document.getElementById("filterRole").value;
-  if (roleFilter) query = query.eq("role", roleFilter);
+  if (roleFilter) {
+    query = query.eq("role", roleFilter);
+  }
 
   const { data, error } = await query;
 
@@ -163,7 +212,7 @@ function renderPaginatedTable() {
 }
 
 // -------------------------------------------------------------
-// LOAD LOCATIONS
+// LOAD LOCATIONS (SuperAdmin sees all, others locked)
 // -------------------------------------------------------------
 async function loadLocations() {
   const { data, error } = await supabase
@@ -173,6 +222,7 @@ async function loadLocations() {
 
   if (error) return;
 
+  // Populate form dropdown
   locationSelect.innerHTML = "";
 
   data.forEach(loc => {
@@ -182,9 +232,30 @@ async function loadLocations() {
     locationSelect.appendChild(option);
   });
 
+  // Populate left-side filter dropdown
+  const filterLocation = document.getElementById("filterLocation");
+  if (filterLocation) {
+    filterLocation.innerHTML = `<option value="">All Locations</option>`;
+    data.forEach(loc => {
+      const opt = document.createElement("option");
+      opt.value = loc.id;
+      opt.textContent = loc.name;
+      filterLocation.appendChild(opt);
+    });
+
+    // Only SuperAdmin can use the filter
+    if (loggedInRole !== "SuperAdmin") {
+      filterLocation.value = currentLocation;
+      filterLocation.disabled = true;
+    }
+  }
+
+  // Form dropdown behavior
   if (loggedInRole !== "SuperAdmin") {
     locationSelect.value = currentLocation;
     locationSelect.disabled = true;
+  } else {
+    locationSelect.disabled = false;
   }
 }
 
@@ -213,9 +284,8 @@ async function renderTable(rows) {
     tableBody.appendChild(tr);
   }
 }
-
 // -------------------------------------------------------------
-// LOAD FORM
+// LOAD FORM WHEN ROW CLICKED
 // -------------------------------------------------------------
 function loadForm(row) {
   selectedId = row.id;
@@ -224,94 +294,104 @@ function loadForm(row) {
   emailInput.value = row.email;
   roleSelect.value = row.role;
   departmentInput.value = row.department || "";
-  locationSelect.value = row.location_id;
   statusSelect.value = row.status;
   phoneInput.value = row.phone || "";
-  passwordInput.value = "";
 
-  if (loggedInRole !== "SuperAdmin") {
+  // Location handling
+  if (row.role === "SuperAdmin") {
+    locationSelect.value = "";
     locationSelect.disabled = true;
-  }
-
-  passwordInput.disabled = row.id !== loggedInUserId;
-
-  if (
-    (loggedInRole === "LocationAdmin" || loggedInRole === "Manager") &&
-    row.id !== loggedInUserId
-  ) {
-    btnResetPassword.style.display = "inline-block";
   } else {
-    btnResetPassword.style.display = "none";
+    locationSelect.value = row.location_id || "";
+    locationSelect.disabled = loggedInRole !== "SuperAdmin";
   }
+
+  btnDelete.style.display = "inline-block";
+  btnResetPassword.style.display = "inline-block";
+
+  applyRoleRestrictions(row.role);
 }
 
 // -------------------------------------------------------------
-// CLEAR FORM
+// APPLY ROLE RESTRICTIONS WHEN SELECTING ROLE
 // -------------------------------------------------------------
-function clearForm() {
-  selectedId = null;
-  nameInput.value = "";
-  emailInput.value = "";
-  passwordInput.value = "";
-  roleSelect.value = "";
-  departmentInput.value = "";
-  statusSelect.value = "Active";
-  phoneInput.value = "";
+roleSelect?.addEventListener("change", () => {
+  const selectedRole = roleSelect.value;
 
+  // If logged-in user cannot create this role
+  if (!canCreateRole(selectedRole)) {
+    showToast("You are not allowed to create this role.", "warning");
+    roleSelect.value = "";
+    return;
+  }
+
+  // SuperAdmin creating SuperAdmin → location disabled
+  if (loggedInRole === "SuperAdmin" && selectedRole === "SuperAdmin") {
+    locationSelect.value = "";
+    locationSelect.disabled = true;
+  }
+
+  // SuperAdmin creating other roles → must choose location
+  if (loggedInRole === "SuperAdmin" && selectedRole !== "SuperAdmin") {
+    locationSelect.disabled = false;
+  }
+
+  // Non-SuperAdmin → location always locked
   if (loggedInRole !== "SuperAdmin") {
     locationSelect.value = currentLocation;
     locationSelect.disabled = true;
-  } else {
-    locationSelect.disabled = false;
-    locationSelect.value = "";
+  }
+});
+
+// -------------------------------------------------------------
+// APPLY EDIT RESTRICTIONS
+// -------------------------------------------------------------
+function applyRoleRestrictions(targetRole) {
+  // SuperAdmin can edit anyone
+  if (loggedInRole === "SuperAdmin") return;
+
+  // Manager can edit only: Audit, MSP, Silver, SilverAgent
+  if (loggedInRole === "Manager") {
+    if (["Audit", "MSP", "Silver", "SilverAgent"].includes(targetRole)) return;
+    disableFormEditing();
+    return;
   }
 
-  passwordInput.disabled = false;
+  // LocationAdmin can edit: Manager, AsstManager, Audit, MSP, Silver, SilverAgent
+  if (loggedInRole === "LocationAdmin") {
+    if (["Manager", "AsstManager", "Audit", "MSP", "Silver", "SilverAgent"].includes(targetRole)) return;
+    disableFormEditing();
+    return;
+  }
+
+  // AsstManager can edit: Audit, MSP, Silver, SilverAgent
+  if (loggedInRole === "AsstManager") {
+    if (["Audit", "MSP", "Silver", "SilverAgent"].includes(targetRole)) return;
+    disableFormEditing();
+    return;
+  }
+
+  // Lower roles cannot edit anyone
+  disableFormEditing();
+}
+
+function disableFormEditing() {
+  nameInput.disabled = true;
+  emailInput.disabled = true;
+  passwordInput.disabled = true;
+  roleSelect.disabled = true;
+  departmentInput.disabled = true;
+  locationSelect.disabled = true;
+  statusSelect.disabled = true;
+  phoneInput.disabled = true;
+
+  btnSave.style.display = "none";
+  btnDelete.style.display = "none";
   btnResetPassword.style.display = "none";
 }
 
 // -------------------------------------------------------------
-// CREATE USER (AUTH + DB)
-// -------------------------------------------------------------
-async function createUser(payload) {
-  const result = await callEdgeFunction("create_user", payload);
-
-  if (result?.error) {
-    console.error(result.error);
-    return { error: true };
-  }
-
-  const authUserId = result?.data?.user?.id;
-  if (!authUserId) return { error: true };
-
-  // Insert into users table
-  const { error: userErr } = await supabase.from("users").insert({
-    id: authUserId,
-    name: payload.name,
-    email: payload.email,
-    role: payload.role,
-    department: payload.department,
-    phone: payload.phone,
-    location_id: payload.location_id,
-    status: payload.status
-  });
-
-  if (userErr) return { error: true };
-
-  // Insert into user_access table
-  const { error: accessErr } = await supabase.from("user_access").insert({
-    email: payload.email,
-    role: payload.role,
-    location_id: payload.location_id
-  });
-
-  if (accessErr) return { error: true };
-
-  return { success: true };
-}
-
-// -------------------------------------------------------------
-// SAVE USER
+// SAVE USER (CREATE OR UPDATE)
 // -------------------------------------------------------------
 async function saveUser() {
   const isNew = !selectedId;
@@ -322,130 +402,156 @@ async function saveUser() {
     password: passwordInput.value.trim(),
     role: roleSelect.value,
     department: departmentInput.value.trim(),
-    phone: phoneInput.value.trim(),
-    location_id: roleSelect.value === "SuperAdmin" ? null : currentLocation,
-    status: statusSelect.value
+    location_id: locationSelect.value || null,
+    status: statusSelect.value,
+    phone: phoneInput.value.trim()
   };
 
+  // Validate
   const validationError = validateForm(payload, isNew);
   if (validationError) {
     showToast(validationError, "warning");
     return;
   }
 
-  // CREATE NEW USER
-  if (isNew) {
-    const result = await createUser(payload);
-
-    if (result.error) {
-      showToast("Failed to create user.", "error");
-      return;
-    }
-
-    showToast("User created successfully.", "success");
+  // Check role creation permission
+  if (!canCreateRole(payload.role)) {
+    showToast("You are not allowed to create this role.", "warning");
+    return;
   }
 
-  // UPDATE EXISTING USER
-  else {
-    const { error } = await supabase
-      .from("users")
-      .update({
-        name: payload.name,
-        email: payload.email,
-        role: payload.role,
-        department: payload.department,
-        phone: payload.phone,
-        location_id: payload.location_id,
-        status: payload.status
-      })
-      .eq("id", selectedId);
+  // Non-SuperAdmin → force location
+  if (loggedInRole !== "SuperAdmin") {
+    payload.location_id = currentLocation;
+  }
 
-    if (error) {
-      showToast("Failed to update user.", "error");
-      return;
-    }
+  // SuperAdmin creating SuperAdmin → location null
+  if (loggedInRole === "SuperAdmin" && payload.role === "SuperAdmin") {
+    payload.location_id = null;
+  }
 
-    if (payload.password) {
-      if (selectedId === loggedInUserId) {
-        const result = await callEdgeFunction("update_password", {
-          id: selectedId,
-          newPassword: payload.password,
-          email: payload.email
-        });
-
-        if (result?.error) {
-          showToast("Password update failed.", "error");
-        } else {
-          showToast("Your password has been updated.", "success");
-        }
-      } else {
-        showToast("Use Reset Password to update another user's password.", "warning");
-      }
-    } else {
-      showToast("User updated successfully.", "success");
-    }
+  if (isNew) {
+    await createUser(payload);
+  } else {
+    await updateUser(payload);
   }
 
   clearForm();
   loadUsers();
 }
 
+// -------------------------------------------------------------
+// CREATE USER (AUTH + users table + user_access)
+// -------------------------------------------------------------
+async function createUser(payload) {
+  // 1. Create Auth user
+  const { data: authUser, error: authError } = await supabase.auth.signUp({
+    email: payload.email,
+    password: payload.password
+  });
+
+  if (authError) {
+    showToast("Failed to create auth user.", "error");
+    return;
+  }
+
+  const newUserId = authUser.user.id;
+
+  // 2. Insert into users table
+  const { error: insertError } = await supabase.from("users").insert({
+    id: newUserId,
+    name: payload.name,
+    email: payload.email,
+    role: payload.role,
+    department: payload.department,
+    location_id: payload.location_id,
+    status: payload.status,
+    phone: payload.phone
+  });
+
+  if (insertError) {
+    showToast("Failed to save user.", "error");
+    return;
+  }
+
+  // 3. Insert into user_access table
+  await supabase.from("user_access").insert({
+    user_id: newUserId,
+    role: payload.role,
+    location_id: payload.location_id
+  });
+
+  showToast("User created successfully.", "success");
+}
+
+// -------------------------------------------------------------
+// UPDATE USER
+// -------------------------------------------------------------
+async function updateUser(payload) {
+  const { error } = await supabase
+    .from("users")
+    .update({
+      name: payload.name,
+      role: payload.role,
+      department: payload.department,
+      location_id: payload.location_id,
+      status: payload.status,
+      phone: payload.phone
+    })
+    .eq("id", selectedId);
+
+  if (error) {
+    showToast("Failed to update user.", "error");
+    return;
+  }
+
+  // Update user_access
+  await supabase
+    .from("user_access")
+    .update({
+      role: payload.role,
+      location_id: payload.location_id
+    })
+    .eq("user_id", selectedId);
+
+  showToast("User updated successfully.", "success");
+}
 // -------------------------------------------------------------
 // DELETE USER
 // -------------------------------------------------------------
 async function deleteUser() {
   if (!selectedId) {
-    showToast("Select a user first.", "warning");
+    showToast("No user selected.", "warning");
     return;
   }
 
-  const result = await callEdgeFunction("delete_user", { id: selectedId });
+  if (selectedId === loggedInUserId) {
+    showToast("You cannot delete your own account.", "warning");
+    return;
+  }
 
-  if (result.error) {
+  const confirmDelete = confirm("Are you sure you want to delete this user?");
+  if (!confirmDelete) return;
+
+  // 1. Delete from user_access
+  await supabase.from("user_access").delete().eq("user_id", selectedId);
+
+  // 2. Delete from users table
+  const { error } = await supabase.from("users").delete().eq("id", selectedId);
+
+  if (error) {
     showToast("Failed to delete user.", "error");
     return;
   }
 
-  showToast("User deleted.", "success");
+  showToast("User deleted successfully.", "success");
+
   clearForm();
   loadUsers();
 }
 
 // -------------------------------------------------------------
-// SEARCH USERS
-// -------------------------------------------------------------
-async function searchUsers() {
-  const term = searchInput.value.toLowerCase();
-  const roleFilter = document.getElementById("filterRole").value;
-
-  let query = supabase.from("users").select("*");
-
-  if (loggedInRole !== "SuperAdmin") {
-    query = query.eq("location_id", currentLocation);
-  }
-
-  const { data } = await query;
-
-  let filtered = data;
-
-  if (term) {
-    filtered = filtered.filter(row =>
-      row.name.toLowerCase().includes(term) ||
-      row.email.toLowerCase().includes(term)
-    );
-  }
-
-  if (roleFilter) {
-    filtered = filtered.filter(row => row.role === roleFilter);
-  }
-
-  fullUserList = filtered;
-  currentPage = 1;
-  renderPaginatedTable();
-}
-
-// -------------------------------------------------------------
-// RESET PASSWORD MODAL
+// RESET PASSWORD (OPEN MODAL)
 // -------------------------------------------------------------
 function openResetModal() {
   if (!selectedId) {
@@ -453,44 +559,164 @@ function openResetModal() {
     return;
   }
 
-  if (selectedId === loggedInUserId) {
-    showToast("Use Change Password to update your own password.", "info");
-    return;
-  }
-
-  if (loggedInRole !== "LocationAdmin" && loggedInRole !== "Manager") {
-    showToast("You are not authorized to reset passwords.", "warning");
-    return;
-  }
-
-  document.getElementById("resetEmailUser").value = emailInput.value;
-  document.getElementById("resetModal").style.display = "flex";
+  document.getElementById("resetPasswordModal").style.display = "flex";
 }
 
+// -------------------------------------------------------------
+// CLOSE RESET MODAL
+// -------------------------------------------------------------
 function closeResetModal() {
-  document.getElementById("resetModal").style.display = "none";
+  document.getElementById("resetPasswordModal").style.display = "none";
+  document.getElementById("newPassword").value = "";
 }
 
+// -------------------------------------------------------------
+// CONFIRM RESET PASSWORD
+// -------------------------------------------------------------
 async function confirmResetPassword() {
-  const email = document.getElementById("resetEmailUser").value;
+  const newPass = document.getElementById("newPassword").value.trim();
 
-  const { error } = await supabase.functions.invoke("reset_password", {
-    body: { email }
+  if (!newPass) {
+    showToast("Password cannot be empty.", "warning");
+    return;
+  }
+
+  const { data, error } = await callEdgeFunction("reset-password", {
+    user_id: selectedId,
+    new_password: newPass
   });
 
   if (error) {
-    showToast("Failed to send reset email.", "error");
+    showToast("Failed to reset password.", "error");
     return;
   }
 
-  showToast("Password reset email sent.", "success");
+  showToast("Password reset successfully.", "success");
   closeResetModal();
 }
 
 // -------------------------------------------------------------
-// FORM ACCESS CONTROL
+// SEARCH USERS
 // -------------------------------------------------------------
-function setupFormAccess() {
-  applyModuleAccess(loggedInRole, "Users", document.getElementById("userForm"));
+function searchUsers() {
+  const term = searchInput.value.toLowerCase();
+  const roleFilter = document.getElementById("filterRole").value;
+  const locationFilter = document.getElementById("filterLocation").value;
+
+  let filtered = fullUserList;
+
+  if (term) {
+    filtered = filtered.filter(u =>
+      u.name.toLowerCase().includes(term) ||
+      u.email.toLowerCase().includes(term) ||
+      u.role.toLowerCase().includes(term)
+    );
+  }
+
+  if (roleFilter) {
+    filtered = filtered.filter(u => u.role === roleFilter);
+  }
+
+  if (loggedInRole === "SuperAdmin" && locationFilter) {
+    filtered = filtered.filter(u => String(u.location_id) === String(locationFilter));
+  }
+
+  if (loggedInRole !== "SuperAdmin") {
+    filtered = filtered.filter(u => String(u.location_id) === String(currentLocation));
+  }
+
+  fullUserList = filtered;
+  currentPage = 1;
+  renderPaginatedTable();
+}
+// -------------------------------------------------------------
+// CLEAR FORM
+// -------------------------------------------------------------
+function clearForm() {
+  selectedId = null;
+
+  nameInput.disabled = false;
+  emailInput.disabled = false;
+  passwordInput.disabled = false;
+  roleSelect.disabled = false;
+  departmentInput.disabled = false;
+  statusSelect.disabled = false;
+  phoneInput.disabled = false;
+
+  nameInput.value = "";
+  emailInput.value = "";
+  passwordInput.value = "";
+  roleSelect.value = "";
+  departmentInput.value = "";
+  statusSelect.value = "Active";
+  phoneInput.value = "";
+
+  // Location logic
+  if (loggedInRole === "SuperAdmin") {
+    locationSelect.disabled = false;
+    locationSelect.value = "";
+  } else {
+    locationSelect.disabled = true;
+    locationSelect.value = currentLocation;
+  }
+
+  btnSave.style.display = "inline-block";
+  btnDelete.style.display = "none";
   btnResetPassword.style.display = "none";
 }
+
+// -------------------------------------------------------------
+// SETUP FORM ACCESS BASED ON LOGGED-IN ROLE
+// -------------------------------------------------------------
+function setupFormAccess() {
+  // SuperAdmin → full access
+  if (loggedInRole === "SuperAdmin") {
+    roleSelect.disabled = false;
+    locationSelect.disabled = false;
+    return;
+  }
+
+  // LocationAdmin / Manager / AsstManager → restricted
+  roleSelect.disabled = false;
+  locationSelect.disabled = true;
+  locationSelect.value = currentLocation;
+
+  // AsstManager cannot create anyone
+  if (loggedInRole === "AsstManager") {
+    roleSelect.disabled = true;
+  }
+
+  // Lower roles cannot create anyone
+  if (["Audit", "MSP", "Silver", "SilverAgent"].includes(loggedInRole)) {
+    roleSelect.disabled = true;
+  }
+}
+
+// -------------------------------------------------------------
+// HELPER: FILTER ROLE DROPDOWN BASED ON CREATION RULES
+// -------------------------------------------------------------
+function filterRoleDropdown() {
+  const allowedRoles = ROLE_HIERARCHY[loggedInRole] || [];
+
+  [...roleSelect.options].forEach(opt => {
+    if (!opt.value) return; // skip placeholder
+
+    // AsstManager visibility rule (Option B)
+    if (opt.value === "AsstManager") {
+      if (!["SuperAdmin", "LocationAdmin", "Manager"].includes(loggedInRole)) {
+        opt.style.display = "none";
+        return;
+      }
+    }
+
+    // Hide roles user cannot create
+    opt.style.display = allowedRoles.includes(opt.value) ? "block" : "none";
+  });
+}
+
+filterRoleDropdown();
+
+// -------------------------------------------------------------
+// END OF FILE
+// -------------------------------------------------------------
+console.log("Users.js fully loaded.");
