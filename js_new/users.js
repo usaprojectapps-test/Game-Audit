@@ -159,7 +159,7 @@ function canCreateRole(selectedRole) {
 // -------------------------------------------------------------
 async function loadUsers() {
   const roleFilter = document.getElementById("filterRole").value;
-  const locationFilter = document.getElementById("filterLocation").value;
+  const locationFilter = document.getElementById("filterLocation")?.value;
 
   let query = supabase.from("users").select("*");
 
