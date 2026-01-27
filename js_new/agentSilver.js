@@ -623,7 +623,9 @@ function initPrintModal() {
     };
   }
 });
+  }
 
+}
 
 // ⭐ QR as IMAGE (same method as Machine QR)
 function renderModalQr(slipNo) {
