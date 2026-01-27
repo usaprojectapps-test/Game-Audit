@@ -527,16 +527,20 @@ select option {
 /* ===============================
    QR VERTICAL BUTTON COLORS
 ================================ */
+
 @media print {
   body * {
-    visibility: hidden !important;
+    display: none !important;
   }
   #asPrintOverlay, #asPrintOverlay * {
-    visibility: visible !important;
+    display: block !important;
   }
   #asPrintOverlay {
     position: fixed;
     inset: 0;
+    background: white !important;
+    color: black !important;
+    z-index: 9999;
   }
 }
 
