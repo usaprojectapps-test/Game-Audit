@@ -47,6 +47,9 @@ async function initAgentSilver() {
   initSaveButton();
   initPrintModal();
 
+  // NEW: initialize delete button
+  initDeleteButtonVisibility();
+
   await loadFilterOptions();
   await loadBonusTypes();
   await loadSlipsTable();
@@ -82,6 +85,41 @@ async function loadCurrentUser() {
   if (currentUser.role === "SuperAdmin") {
     currentUser.name = "Super Admin";
   }
+}
+
+// -------------------------------------------------------------
+// DELETE BUTTON — ROLE‑BASED VISIBILITY (NEW)
+// -------------------------------------------------------------
+function initDeleteButtonVisibility() {
+  const deleteBtn = document.getElementById("asDeleteBtn");
+  if (!deleteBtn) return;
+
+  // Default: hide until a slip is loaded
+  deleteBtn.style.display = "none";
+}
+
+// Called later when a slip is loaded
+function updateDeleteButtonVisibility(slip) {
+  const deleteBtn = document.getElementById("asDeleteBtn");
+  if (!deleteBtn) return;
+
+  let canDelete = false;
+
+  // SuperAdmin → always allowed
+  if (currentUser.role === "SuperAdmin") {
+    canDelete = true;
+  }
+
+  // LocationAdmin → only if slip belongs to their location
+  if (
+    currentUser.role === "LocationAdmin" &&
+    slip.location_id === currentUser.location_id
+  ) {
+    canDelete = true;
+  }
+
+  // Everyone else → cannot delete
+  deleteBtn.style.display = canDelete ? "inline-block" : "none";
 }
 
 // -------------------------------------------------------------
@@ -181,7 +219,6 @@ async function loadBonusTypes() {
     select.appendChild(opt);
   });
 }
-
 // -------------------------------------------------------------
 // SLIP TYPE UI
 // -------------------------------------------------------------
@@ -284,12 +321,12 @@ function initSaveButton() {
 
       currentSlip = saved;
 
-      // ✅ Update QR preview on the right panel
+      // Update QR preview
       updateQrPreview(saved.slip_no);
 
       await loadSlipsTable();
 
-      // ✅ Open print modal with QR rendered
+      // Open print modal
       showPrintModal(saved);
 
     } catch (err) {
@@ -368,11 +405,9 @@ async function collectSlipFormData() {
     }
 
   } else {
-    // ✅ BONUS SLIP: keep DB happy (NOT NULL on machine_no)
     bonus_type = bonusTypeInput.value;
     bonus_amount = parseFloat(bonusAmountInput.value || "0");
 
-    // Use a placeholder string instead of null so NOT NULL constraint is satisfied
     machine_no = "BONUS";
   }
 
@@ -437,7 +472,6 @@ function renderFormQr(slipNo) {
 }
 
 function updateQrPreview(slipNo) {
-  // ✅ Use the IMG-based QR (no canvas)
   renderFormQr(slipNo);
 
   const text = document.getElementById("asQrText");
@@ -573,11 +607,14 @@ async function loadSlipIntoForm(slipNo) {
       Number(slip.bonus_amount).toFixed(2);
   }
 
-  // ✅ Update QR preview when loading an existing slip
+  // Update QR preview
   updateQrPreview(slip.slip_no);
+
+  // NEW: Update delete button visibility
+  updateDeleteButtonVisibility(slip);
 }
 // -------------------------------------------------------------
-// PRINT MODAL (FINAL QR IMAGE VERSION) — CLEAN + FIXED
+// PRINT MODAL (FINAL QR IMAGE VERSION)
 // -------------------------------------------------------------
 let asPrintOverlay = null;
 
@@ -638,14 +675,12 @@ function renderModalQr(slipNo) {
   img.src = qrData;
 }
 
-
 // -------------------------------------------------------------
 // SHOW PRINT MODAL
 // -------------------------------------------------------------
 function showPrintModal(slip) {
   if (!asPrintOverlay) return;
 
-  // Fill slip fields
   const isBonus = slip.slip_category === SLIP_TYPE.BONUS;
 
   document.getElementById("asModalSlipId").textContent = slip.slip_no;
@@ -748,7 +783,7 @@ async function generateSlipNumber(slip_category, location_id) {
   let serial = 1;
 
   if (!error && data && data.length > 0) {
-    const lastSlipNo = data[0].slip_no; // e.g. AS-20260126-005
+    const lastSlipNo = data[0].slip_no;
     const parts = lastSlipNo.split("-");
     const lastSerialStr = parts[parts.length - 1];
     const lastSerial = parseInt(lastSerialStr, 10);
@@ -759,4 +794,68 @@ async function generateSlipNumber(slip_category, location_id) {
 
   const serialPart = String(serial).padStart(3, "0");
   return `${prefix}-${datePart}-${serialPart}`;
+}
+
+// -------------------------------------------------------------
+// DELETE BUTTON — ACTION (NEW)
+// -------------------------------------------------------------
+const deleteBtn = document.getElementById("asDeleteBtn");
+if (deleteBtn) {
+  deleteBtn.addEventListener("click", async () => {
+    try {
+      if (!currentSlip) {
+        showToast("No slip selected to delete", "error");
+        return;
+      }
+
+      // Extra safety: enforce same rules as visibility
+      let canDelete = false;
+
+      if (currentUser.role === "SuperAdmin") {
+        canDelete = true;
+      }
+
+      if (
+        currentUser.role === "LocationAdmin" &&
+        currentSlip.location_id === currentUser.location_id
+      ) {
+        canDelete = true;
+      }
+
+      if (!canDelete) {
+        showToast("You are not allowed to delete this slip", "error");
+        return;
+      }
+
+      const confirmDelete = window.confirm(
+        `Delete slip ${currentSlip.slip_no}? This cannot be undone.`
+      );
+      if (!confirmDelete) return;
+
+      const { error } = await supabase
+        .from(AGENT_SILVER_TABLE)
+        .delete()
+        .eq("id", currentSlip.id);
+
+      if (error) {
+        console.error("Delete error:", error);
+        showToast("Error deleting slip", "error");
+        return;
+      }
+
+      showToast("Slip deleted successfully", "success");
+
+      // Reset form + state
+      currentSlip = null;
+      initFormDefaults();
+      updateSlipTypeUI();
+      updateQrPreview(""); // clear QR
+      updateDeleteButtonVisibility({ location_id: null }); // hide button
+
+      await loadSlipsTable();
+    } catch (err) {
+      console.error("Delete error:", err);
+      showToast(err.message || "Error deleting slip", "error");
+    }
+  });
 }
