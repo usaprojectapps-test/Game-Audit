@@ -188,7 +188,7 @@ async function loadUsers() {
 
   fullUserList = data;
   currentPage = 1;
-  renderPaginatedTable();
+  renderPaginatedTable(fullUserList);
 }
 
 // -------------------------------------------------------------
