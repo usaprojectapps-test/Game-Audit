@@ -21,7 +21,6 @@
   display: grid;
   grid-template-columns: 65fr 35fr;
   gap: 20px;
-  /*width: 100%;*/
   margin: 30px 0;
   align-items: start;
 }
@@ -46,7 +45,7 @@
 ============================================================ */
 .module-right {
   display: flex; 
-  height: fit-content;       /* right defines height */
+  height: fit-content;
   padding: 20px;
   background: rgba(255,255,255,0.06);
   border-radius: 16px;
@@ -66,6 +65,7 @@
   flex-direction: column;
   gap: 6px;
 }
+
 /* ============================================================
    AUDIT RIGHT FORM LAYOUT FIXES
 ============================================================ */
@@ -142,7 +142,6 @@
   }
 }
 
-
 /* ============================================================
    CARD HEADER
 ============================================================ */
@@ -187,7 +186,6 @@
 input,
 select,
 textarea {
-  /* width: 100%; */
   padding: 10px 14px;
   border-radius: 10px;
   border: 1px solid rgba(255,255,255,0.25);
@@ -213,10 +211,6 @@ select option {
 /* ============================================================
    FORM ACTIONS
 ============================================================ */
-/* ==============================
-   SAVE + RESET INLINE ROW
-================================ */
-
 .audit-action-row {
   display: flex;
   gap: 14px;
@@ -224,7 +218,7 @@ select option {
 }
 
 .audit-action-row button {
-  flex: 1;                 /* equal width */
+  flex: 1;
   height: 44px;
   font-size: 15px;
   font-weight: 600;
@@ -316,26 +310,19 @@ select option {
 /* ============================================================
    FIX: TABLE HEADER OVERLAP ON SCROLL
 ============================================================ */
-/* Sticky table header */
 .table-wrapper thead th {
   position: sticky;
   top: 0;
   z-index: 10;
-
-  /* SOLID background — this is key */
   background: #3b3f5c;
-
-  /* Optional polish */
   backdrop-filter: none;
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
 }
 
-/* Ensure table rows never overlay header */
 .table-wrapper tbody td {
   position: relative;
   z-index: 1;
 }
-
 
 /* ============================================================
    BUTTONS
@@ -419,6 +406,7 @@ select option {
   height: 300px;
   background: #000;
 }
+
 /* ===============================
    NOTES + QR SINGLE ROW LAYOUT
 ================================ */
@@ -524,10 +512,10 @@ select option {
     flex-direction: row;
   }
 }
+
 /* ===============================
    QR VERTICAL BUTTON COLORS
 ================================ */
-
 @media print {
   body * {
     display: none !important;
@@ -605,6 +593,7 @@ select option {
     max-height: 300px;
   }
 }
+
 /* ===============================
    MACHINE FILTER ROW (ONE LINE)
 ================================ */
@@ -640,6 +629,7 @@ select option {
 .filters-row::-webkit-scrollbar {
   height: 6px;
 }
+
 /* ===============================
    TABLE FOOTER (ONE ROW)
 ================================ */
@@ -670,6 +660,7 @@ select option {
   font-size: 14px;
   font-weight: 600;
 }
+
 /* ============================================================
    AUDIT SUMMARY BLOCK
 ============================================================ */
@@ -747,6 +738,7 @@ select option {
     gap: 6px;
   }
 }
+
 .as-slip-type-buttons {
   display: flex;
   gap: 8px;
@@ -773,6 +765,7 @@ select option {
 .as-slip-btn:active {
   transform: scale(0.50);
 }
+
 .as-summary-row {
   display: flex;
   justify-content: space-between;

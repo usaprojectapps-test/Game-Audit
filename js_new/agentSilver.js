@@ -598,22 +598,15 @@ function initPrintModal() {
   }
 
   if (printBtn) {
-      printBtn.addEventListener("click", () => {
-     if (currentSlip?.slip_no) {
-      const img = document.getElementById("asModalQrImage");
-      if (!img) return;
-
-      // Render QR first
-      renderModalQr(currentSlip.slip_no);
-
-      // Wait for image to fully load before printing
-      img.onload = () => {
-      window.print();
-      Image.onload = null;
-    };
+    printBtn.addEventListener("click", () => {
+      if (currentSlip?.slip_no) {
+        renderModalQr(currentSlip.slip_no);
+      }
+      // Small delay so QR image is fully rendered before print
+      setTimeout(() => { window.print(); }, 300);
+    });
   }
-});
-
+}
 
 // ⭐ QR as IMAGE (same method as Machine QR)
 function renderModalQr(slipNo) {
