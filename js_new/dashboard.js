@@ -80,7 +80,7 @@ function applyDashboardTileAccess() {
 }
 
 // -------------------------------------------------------------
-// MODULE LOADER (SAFE VERSION)
+// MODULE LOADER (FINAL, SAFE, NO DUPLICATE LOADS)
 // -------------------------------------------------------------
 async function loadModule(moduleName) {
   const container = document.getElementById("moduleContainer");
@@ -89,6 +89,7 @@ async function loadModule(moduleName) {
   container.innerHTML = `<div class="loading">Loading...</div>`;
 
   try {
+    // Load HTML
     const response = await fetch(`/modals/${moduleName}.html`);
     if (!response.ok) {
       container.innerHTML = `<div class="error">Module not found</div>`;
@@ -98,9 +99,19 @@ async function loadModule(moduleName) {
     const html = await response.text();
     container.innerHTML = html;
 
+    // Prevent duplicate script injection
+    const existingScript = document.querySelector(`script[data-module="${moduleName}"]`);
+    if (existingScript) {
+      // Script already loaded → just trigger module init
+      window.dispatchEvent(new Event(`${moduleName}ModuleLoaded`));
+      return;
+    }
+
+    // Load JS module only once
     const script = document.createElement("script");
     script.type = "module";
     script.src = `/js_new/${moduleName}.js?v=${Date.now()}`;
+    script.setAttribute("data-module", moduleName);
 
     script.onload = () => {
       window.dispatchEvent(new Event(`${moduleName}ModuleLoaded`));
