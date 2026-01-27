@@ -19,7 +19,6 @@ const PREFIX = {
   BONUS: "BS",
 };
 
-// ⭐ BONUS TYPES (Form-based, Option A)
 const BONUS_TYPES = [
   "Raffle",
   "Birthday Gift",
@@ -28,23 +27,18 @@ const BONUS_TYPES = [
 ];
 
 let currentUser = null;
-let currentLocation = null;
 let currentSlipType = SLIP_TYPE.REGULAR;
 let currentSlip = null;
 
 // -------------------------------------------------------------
 // INIT
 // -------------------------------------------------------------
-console.log("BEFORE INIT CALL");
-
 initAgentSilver().catch((err) => {
   console.error("INIT ERROR:", err);
   showToast("Error loading Agent Silver module", "error");
 });
 
 async function initAgentSilver() {
-  console.log("INIT STARTED");
-
   await loadCurrentUser();
   initFilters();
   initSlipTypeButtons();
@@ -54,15 +48,14 @@ async function initAgentSilver() {
   initPrintModal();
 
   await loadFilterOptions();
-  await loadBonusTypes();   // ⭐ NEW
+  await loadBonusTypes();
   await loadSlipsTable();
 
-  // Trigger global scanner initializer
   window.dispatchEvent(new Event("agentSilverModuleLoaded"));
 }
 
 // -------------------------------------------------------------
-// USER / LOCATION
+// USER
 // -------------------------------------------------------------
 async function loadCurrentUser() {
   const { data, error } = await supabase.auth.getUser();
@@ -76,9 +69,7 @@ async function loadCurrentUser() {
     .eq("email", email)
     .single();
 
-  if (accessErr || !accessRow) {
-    throw new Error("User not found in user_access");
-  }
+  if (accessErr || !accessRow) throw new Error("User not found");
 
   currentUser = {
     id: data.user.id,
@@ -94,7 +85,7 @@ async function loadCurrentUser() {
 }
 
 // -------------------------------------------------------------
-// FILTERS (DATE, LOCATION, USER)
+// FILTERS
 // -------------------------------------------------------------
 function initFilters() {
   const dateInput = document.getElementById("as_filter_date");
@@ -115,53 +106,40 @@ async function loadFilterOptions() {
   const locSelect = document.getElementById("as_filter_location");
   const userSelect = document.getElementById("as_filter_user");
 
-  // -------------------------------
-  // LOAD LOCATIONS (FIXED)
-  // -------------------------------
+  // LOCATIONS
   if (locSelect) {
     locSelect.innerHTML = "";
 
-    const { data: locations, error: locErr } = await supabase
+    const { data: locations } = await supabase
       .from("locations")
       .select("id, name")
       .order("name", { ascending: true });
 
-    if (locErr) {
-      console.error("Error loading locations:", locErr);
-    } else {
-      if (currentUser.role !== "SuperAdmin") {
-        // ⭐ Only show user's own location
-        const userLoc = locations.find(
-          (l) => l.id === currentUser.location_id
-        );
-
-        if (userLoc) {
-          const opt = document.createElement("option");
-          opt.value = userLoc.id;
-          opt.textContent = userLoc.name;
-          opt.selected = true;
-          locSelect.appendChild(opt);
-        }
-      } else {
-        // ⭐ SuperAdmin sees all
+    if (currentUser.role !== "SuperAdmin") {
+      const userLoc = locations.find((l) => l.id === currentUser.location_id);
+      if (userLoc) {
         const opt = document.createElement("option");
-        opt.value = "";
-        opt.textContent = "Select Location";
+        opt.value = userLoc.id;
+        opt.textContent = userLoc.name;
+        opt.selected = true;
         locSelect.appendChild(opt);
-
-        locations.forEach((loc) => {
-          const opt = document.createElement("option");
-          opt.value = loc.id;
-          opt.textContent = loc.name;
-          locSelect.appendChild(opt);
-        });
       }
+    } else {
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "Select Location";
+      locSelect.appendChild(opt);
+
+      locations.forEach((loc) => {
+        const opt = document.createElement("option");
+        opt.value = loc.id;
+        opt.textContent = loc.name;
+        locSelect.appendChild(opt);
+      });
     }
   }
 
-  // -------------------------------
-  // LOAD USERS
-  // -------------------------------
+  // USERS
   if (userSelect) {
     userSelect.innerHTML = "";
 
@@ -176,27 +154,21 @@ async function loadFilterOptions() {
       query = query.eq("location_id", currentUser.location_id);
     }
 
-    const { data: users, error: userErr } = await query.order("name", {
-      ascending: true,
-    });
+    const { data: users } = await query.order("name", { ascending: true });
 
-    if (userErr) {
-      console.error("Error loading users:", userErr);
-    } else {
-      users.forEach((u) => {
-        const opt = document.createElement("option");
-        opt.value = u.id;
-        opt.textContent = u.name;
-        userSelect.appendChild(opt);
-      });
-    }
+    users.forEach((u) => {
+      const opt = document.createElement("option");
+      opt.value = u.id;
+      opt.textContent = u.name;
+      userSelect.appendChild(opt);
+    });
 
     userSelect.value = currentUser.id;
   }
 }
 
 // -------------------------------------------------------------
-// BONUS TYPE DROPDOWN (FORM-BASED)
+// BONUS TYPES
 // -------------------------------------------------------------
 async function loadBonusTypes() {
   const select = document.getElementById("asBonusType");
@@ -209,8 +181,9 @@ async function loadBonusTypes() {
     select.appendChild(opt);
   });
 }
+
 // -------------------------------------------------------------
-// SLIP TYPE BUTTONS
+// SLIP TYPE UI
 // -------------------------------------------------------------
 function initSlipTypeButtons() {
   const btnRegular = document.getElementById("asBtnRegular");
@@ -242,9 +215,7 @@ function updateSlipTypeUI() {
   document.getElementById("rowBonusAmount").style.display = isBonus ? "" : "none";
 
   const amountInput = document.getElementById("asAmount");
-  if (amountInput) {
-    amountInput.disabled = isBonus;
-  }
+  if (amountInput) amountInput.disabled = isBonus;
 }
 
 // -------------------------------------------------------------
@@ -267,19 +238,13 @@ function toLocalDateTimeInputValue(date) {
 
 function initFormDefaults() {
   const dtInput = document.getElementById("asDateTime");
-  if (dtInput) {
-    dtInput.value = toLocalDateTimeInputValue(new Date());
-  }
+  if (dtInput) dtInput.value = toLocalDateTimeInputValue(new Date());
 
   const agentNameInput = document.getElementById("asAgentName");
-  if (agentNameInput) {
-    agentNameInput.value = currentUser.name;
-  }
+  if (agentNameInput) agentNameInput.value = currentUser.name;
 
   const amountInput = document.getElementById("asAmount");
-  if (amountInput) {
-    amountInput.value = "0.00";
-  }
+  if (amountInput) amountInput.value = "0.00";
 }
 
 // -------------------------------------------------------------
@@ -297,7 +262,7 @@ function initScanButton() {
 }
 
 // -------------------------------------------------------------
-// SAVE & UPDATE LOGIC
+// SAVE BUTTON
 // -------------------------------------------------------------
 function initSaveButton() {
   const saveBtn = document.getElementById("asSaveBtn");
@@ -333,7 +298,7 @@ function initSaveButton() {
 }
 
 // -------------------------------------------------------------
-// COLLECT FORM DATA (WITH MACHINE VALIDATION)
+// COLLECT FORM DATA + MACHINE VALIDATION
 // -------------------------------------------------------------
 async function collectSlipFormData() {
   const locSelect = document.getElementById("as_filter_location");
@@ -352,11 +317,12 @@ async function collectSlipFormData() {
 
   const slip_category = currentSlipType;
 
-  // ⭐ Slip number NEVER changes on update
-  const slip_no = currentSlip ? currentSlip.slip_no : await generateSlipNumber(
-    slip_category,
-    selectedLocationId || currentUser.location_id
-  );
+  const slip_no = currentSlip
+    ? currentSlip.slip_no
+    : await generateSlipNumber(
+        slip_category,
+        selectedLocationId || currentUser.location_id
+      );
 
   const datetime = dtInput.value
     ? new Date(dtInput.value).toISOString()
@@ -371,7 +337,6 @@ async function collectSlipFormData() {
     machine_no = machineInput.value.trim();
     amount = parseFloat(amountInput.value || "0");
 
-    // ⭐ MACHINE VALIDATION
     if (!machine_no) {
       showToast("Machine No is required", "error");
       throw new Error("Machine No missing");
@@ -449,7 +414,7 @@ async function updateSlipInSupabase(slip) {
 }
 
 // -------------------------------------------------------------
-// QR PREVIEW
+// QR PREVIEW (RIGHT SIDE)
 // -------------------------------------------------------------
 function updateQrPreview(slipNo) {
   const canvas = document.getElementById("asQrCanvas");
@@ -465,6 +430,7 @@ function updateQrPreview(slipNo) {
 
   text.textContent = slipNo;
 }
+
 // -------------------------------------------------------------
 // TABLE + SUMMARY
 // -------------------------------------------------------------
@@ -551,7 +517,7 @@ async function loadSlipsTable() {
 }
 
 // -------------------------------------------------------------
-// ROW CLICK → LOAD SLIP INTO RIGHT FORM
+// ROW CLICK → LOAD SLIP
 // -------------------------------------------------------------
 function attachRowClickHandlers() {
   const rows = document.querySelectorAll("#as_table_body tr");
@@ -596,7 +562,7 @@ async function loadSlipIntoForm(slipNo) {
 }
 
 // -------------------------------------------------------------
-// PRINT MODAL INITIALIZATION + QR FIX
+// PRINT MODAL (FINAL QR IMAGE VERSION)
 // -------------------------------------------------------------
 let asPrintOverlay = null;
 
@@ -617,18 +583,25 @@ function initPrintModal() {
 
   if (printBtn) {
     printBtn.addEventListener("click", () => {
-      // ⭐ Ensure QR is rendered before print
-      const modalCanvas = document.getElementById("asModalQrCanvas");
-      if (modalCanvas && window.QRious && currentSlip?.slip_no) {
-        new QRious({
-          element: modalCanvas,
-          size: 128,
-          value: currentSlip.slip_no,
-        });
+      if (currentSlip?.slip_no) {
+        renderModalQr(currentSlip.slip_no);
       }
       window.print();
     });
   }
+}
+
+// ⭐ QR as IMAGE (same method as Machine QR)
+function renderModalQr(slipNo) {
+  const img = document.getElementById("asModalQrImage");
+  if (!img || !window.QRious) return;
+
+  const qr = new QRious({
+    value: slipNo,
+    size: 128,
+  });
+
+  img.src = qr.toDataURL();
 }
 
 function showPrintModal(slip) {
@@ -637,9 +610,8 @@ function showPrintModal(slip) {
   const isBonus = slip.slip_category === SLIP_TYPE.BONUS;
 
   document.getElementById("asModalSlipId").textContent = slip.slip_no;
-  document.getElementById("asModalSlipDateTime").textContent = new Date(
-    slip.datetime
-  ).toLocaleString();
+  document.getElementById("asModalSlipDateTime").textContent =
+    new Date(slip.datetime).toLocaleString();
   document.getElementById("asModalSlipAgent").textContent =
     slip.agent_name || "";
 
@@ -671,14 +643,26 @@ function showPrintModal(slip) {
     elAmount.textContent = Number(slip.amount || 0).toFixed(2);
   }
 
-  // ⭐ Render QR code
-  const modalCanvas = document.getElementById("asModalQrCanvas");
-  if (modalCanvas && window.QRious) {
-    new QRious({
-      element: modalCanvas,
-      size: 128,
-      value: slip.slip_no,
-    });
+  // Render QR image for this slip
+  renderModalQr(slip.slip_no);
+
+  // Footer: Game-Audit System + Location Name (2-line block with separator)
+  const footerEl = document.getElementById("asModalFooterText");
+  if (footerEl) {
+    // You can adjust this if you store location name differently
+    const locationNameElement = document.querySelector(
+      "#as_filter_location option:checked"
+    );
+    const locationName =
+      locationNameElement && locationNameElement.textContent
+        ? locationNameElement.textContent
+        : "Location";
+
+    footerEl.innerHTML = `
+      Game-Audit System<br/>
+      -------------------------<br/>
+      ${locationName}
+    `;
   }
 
   asPrintOverlay.style.display = "flex";
@@ -688,4 +672,43 @@ function hidePrintModal() {
   if (asPrintOverlay) {
     asPrintOverlay.style.display = "none";
   }
+}
+
+// -------------------------------------------------------------
+// SLIP NUMBER GENERATION
+// -------------------------------------------------------------
+async function generateSlipNumber(slip_category, location_id) {
+  const prefix =
+    slip_category === SLIP_TYPE.REGULAR ? PREFIX.REGULAR : PREFIX.BONUS;
+
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, "0");
+  const d = String(today.getDate()).padStart(2, "0");
+  const datePart = `${y}${m}${d}`;
+
+  const { data, error } = await supabase
+    .from(AGENT_SILVER_TABLE)
+    .select("slip_no")
+    .eq("slip_category", slip_category)
+    .eq("location_id", location_id)
+    .gte("datetime", `${y}-${m}-${d} 00:00:00`)
+    .lte("datetime", `${y}-${m}-${d} 23:59:59`)
+    .order("slip_no", { ascending: false })
+    .limit(1);
+
+  let serial = 1;
+
+  if (!error && data && data.length > 0) {
+    const lastSlipNo = data[0].slip_no; // e.g. AS-20260126-005
+    const parts = lastSlipNo.split("-");
+    const lastSerialStr = parts[parts.length - 1];
+    const lastSerial = parseInt(lastSerialStr, 10);
+    if (!isNaN(lastSerial)) {
+      serial = lastSerial + 1;
+    }
+  }
+
+  const serialPart = String(serial).padStart(3, "0");
+  return `${prefix}-${datePart}-${serialPart}`;
 }

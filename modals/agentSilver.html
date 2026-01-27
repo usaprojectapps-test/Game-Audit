@@ -105,7 +105,7 @@
         <div class="form-group" style="grid-column:2; grid-row:2 / span 3;">
           <label>Slip QR</label>
           <div class="qr-preview-box">
-            <canvas id="asQrCanvas"></canvas>
+            <img id="asModalQrImage"><img>
           </div>
           <div id="asQrText"></div>
         </div>
@@ -185,12 +185,17 @@
       </div>
 
       <div style="text-align:center;margin-top:15px;">
-        <canvas id="asModalQrCanvas" width="128" height="128"></canvas>
+        <img id="asModalQrImage" style="width:128px;height:128px;" />
         <div style="font-size:12px;color:#666;">Scan to confirm payment</div>
       </div>
 
       <div style="text-align:center;font-size:12px;margin-top:10px;border-top:1px dashed #999;padding-top:5px;">
         Game Audit System
+      </div>
+
+      <div id="asModalFooterText"
+       style="text-align:center;font-size:12px;margin-top:10px;border-top:1px dashed #999;padding-top:5px;">
+        <!-- Filled by JS -->
       </div>
 
       <div style="margin-top:10px;display:flex;justify-content:space-between;">
