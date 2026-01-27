@@ -23,7 +23,7 @@ const BONUS_TYPES = [
   "Raffle",
   "Birthday Gift",
   "Festival Bonus",
-  "Promo Bonus"
+  "Promo Bonus",
 ];
 
 let currentUser = null;
@@ -85,13 +85,13 @@ async function loadCurrentUser() {
 }
 
 // -------------------------------------------------------------
-// FILTERS
+// FILTERS (LEFT SIDE) — Date, Location, User
 // -------------------------------------------------------------
 function initFilters() {
   const dateInput = document.getElementById("as_filter_date");
   if (dateInput) {
-    const now = new Date();
-    dateInput.value = now.toISOString().split("T")[0];
+    const today = new Date().toISOString().split("T")[0];
+    dateInput.value = today; // Option B: set today on load, user can change
     dateInput.addEventListener("change", () => loadSlipsTable());
   }
 
@@ -183,7 +183,7 @@ async function loadBonusTypes() {
 }
 
 // -------------------------------------------------------------
-// SLIP TYPE UI
+// SLIP TYPE UI (Regular / Bonus)
 // -------------------------------------------------------------
 function initSlipTypeButtons() {
   const btnRegular = document.getElementById("asBtnRegular");
@@ -219,7 +219,7 @@ function updateSlipTypeUI() {
 }
 
 // -------------------------------------------------------------
-// FORM DEFAULTS
+// FORM DEFAULTS (Right Side)
 // -------------------------------------------------------------
 function toLocalDateTimeInputValue(date) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -248,10 +248,12 @@ function initFormDefaults() {
 }
 
 // -------------------------------------------------------------
-// QR SCAN BUTTON
+// QR SCAN BUTTON (Machine No)
 // -------------------------------------------------------------
 function initScanButton() {
   const scanBtn = document.getElementById("asScanBtn");
+  if (!scanBtn) return;
+
   scanBtn.addEventListener("click", () => {
     if (!window.qrScanner || typeof window.qrScanner.open !== "function") {
       showToast("QR scanner not available", "error");
@@ -260,307 +262,226 @@ function initScanButton() {
     window.qrScanner.open({ targetInputId: "asMachineNo" });
   });
 }
-
 // -------------------------------------------------------------
-// SAVE BUTTON
+// COLLECT FORM DATA
 // -------------------------------------------------------------
-function initSaveButton() {
-  const saveBtn = document.getElementById("asSaveBtn");
-
-  saveBtn.addEventListener("click", async () => {
-    try {
-      saveBtn.disabled = true;
-
-      const slipData = await collectSlipFormData();
-
-      let saved;
-      if (currentSlip) {
-        saved = await updateSlipInSupabase(slipData);
-        showToast("Slip updated successfully", "success");
-      } else {
-        saved = await saveSlipToSupabase(slipData);
-        showToast("Slip saved successfully", "success");
-      }
-
-      currentSlip = saved;
-      updateQrPreview(saved.slip_no);
-
-      await loadSlipsTable();
-      showPrintModal(saved);
-
-    } catch (err) {
-      console.error("Save error:", err);
-      showToast(err.message || "Error saving slip", "error");
-    } finally {
-      saveBtn.disabled = false;
-    }
-  });
-}
-
-// -------------------------------------------------------------
-// COLLECT FORM DATA + MACHINE VALIDATION
-// -------------------------------------------------------------
-async function collectSlipFormData() {
-  const locSelect = document.getElementById("as_filter_location");
-  const selectedLocationId = locSelect.value;
-
-  if (currentUser.role === "SuperAdmin" && !selectedLocationId) {
-    showToast("Please select a location before saving", "error");
-    throw new Error("Location not selected");
-  }
-
+function collectFormData() {
   const dtInput = document.getElementById("asDateTime");
   const machineInput = document.getElementById("asMachineNo");
   const amountInput = document.getElementById("asAmount");
   const bonusTypeInput = document.getElementById("asBonusType");
   const bonusAmountInput = document.getElementById("asBonusAmount");
 
-  const slip_category = currentSlipType;
+  const slip = {
+    slip_category: currentSlipType,
+    datetime: dtInput.value,
+    agent_id: currentUser.id,
+    agent_name: currentUser.name,
+    location_id: currentUser.location_id,
+  };
 
-  const slip_no = currentSlip
-    ? currentSlip.slip_no
-    : await generateSlipNumber(
-        slip_category,
-        selectedLocationId || currentUser.location_id
-      );
-
-  const datetime = dtInput.value
-    ? new Date(dtInput.value).toISOString()
-    : new Date().toISOString();
-
-  let machine_no = null;
-  let amount = 0;
-  let bonus_type = null;
-  let bonus_amount = 0;
-
-  if (slip_category === SLIP_TYPE.REGULAR) {
-    machine_no = machineInput.value.trim();
-    amount = parseFloat(amountInput.value || "0");
-
-    if (!machine_no) {
-      showToast("Machine No is required", "error");
-      throw new Error("Machine No missing");
-    }
-
-    const { data: machineRow, error: machineErr } = await supabase
-      .from("machines")
-      .select("machineid, location_id, healthstatus")
-      .eq("machineid", machine_no)
-      .single();
-
-    if (machineErr || !machineRow) {
-      showToast("Invalid Machine No — not found", "error");
-      throw new Error("Machine not found");
-    }
-
-    if (machineRow.location_id !== (selectedLocationId || currentUser.location_id)) {
-      showToast("Machine does not belong to this location", "error");
-      throw new Error("Machine location mismatch");
-    }
-
-    if (machineRow.healthstatus !== "Active") {
-      showToast("Machine is not Active", "error");
-      throw new Error("Machine inactive");
-    }
-
+  if (currentSlipType === SLIP_TYPE.REGULAR) {
+    slip.machine_no = machineInput.value.trim();
+    slip.amount = parseFloat(amountInput.value || 0);
   } else {
-    bonus_type = bonusTypeInput.value;
-    bonus_amount = parseFloat(bonusAmountInput.value || "0");
+    slip.bonus_type = bonusTypeInput.value;
+    slip.bonus_amount = parseFloat(bonusAmountInput.value || 0);
   }
 
-  return {
-    slip_no,
-    slip_category,
-    datetime,
-    agent_id: currentUser.id,
-    agent_name: currentUser.role === "SuperAdmin" ? "Super Admin" : currentUser.name,
-    machine_no,
-    amount,
-    bonus_type,
-    bonus_amount,
-    location_id: selectedLocationId || currentUser.location_id,
-    created_by: currentUser.id,
-    is_paid: currentSlip ? currentSlip.is_paid : false,
-  };
+  return slip;
 }
 
 // -------------------------------------------------------------
-// INSERT NEW SLIP
+// SAVE BUTTON
 // -------------------------------------------------------------
-async function saveSlipToSupabase(slip) {
-  const { data, error } = await supabase
-    .from(AGENT_SILVER_TABLE)
-    .insert(slip)
-    .select("*")
-    .single();
+function initSaveButton() {
+  const saveBtn = document.getElementById("asSaveBtn");
+  if (!saveBtn) return;
 
-  if (error) throw error;
-  return data;
+  saveBtn.addEventListener("click", async () => {
+    try {
+      const slipData = collectFormData();
+
+      if (!slipData.datetime) {
+        showToast("Please select date & time", "error");
+        return;
+      }
+
+      if (slipData.slip_category === SLIP_TYPE.REGULAR) {
+        if (!slipData.machine_no) {
+          showToast("Machine number required", "error");
+          return;
+        }
+        if (slipData.amount <= 0) {
+          showToast("Amount must be greater than 0", "error");
+          return;
+        }
+      } else {
+        if (!slipData.bonus_type) {
+          showToast("Select a bonus type", "error");
+          return;
+        }
+        if (slipData.bonus_amount <= 0) {
+          showToast("Bonus amount must be greater than 0", "error");
+          return;
+        }
+      }
+
+      const slipNo = await generateSlipNumber(
+        slipData.slip_category,
+        slipData.location_id
+      );
+      slipData.slip_no = slipNo;
+
+      const { data, error } = await supabase
+        .from(AGENT_SILVER_TABLE)
+        .insert(slipData)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      currentSlip = data;
+
+      // ⭐ Update QR preview on right side
+      renderFormQr(data.slip_no);
+
+      showToast("Slip saved", "success");
+
+      await loadSlipsTable();
+
+      // ⭐ Open print modal
+      showPrintModal(data);
+    } catch (err) {
+      console.error(err);
+      showToast("Error saving slip", "error");
+    }
+  });
 }
 
 // -------------------------------------------------------------
-// UPDATE EXISTING SLIP
+// QR PREVIEW (RIGHT SIDE FORM)
 // -------------------------------------------------------------
-async function updateSlipInSupabase(slip) {
-  const { data, error } = await supabase
-    .from(AGENT_SILVER_TABLE)
-    .update(slip)
-    .eq("slip_no", slip.slip_no)
-    .select("*")
-    .single();
+function renderFormQr(slipNo) {
+  const img = document.getElementById("asFormQrImage");
+  if (!img || !window.QRious) return;
 
-  if (error) throw error;
-  return data;
-}
-
-// -------------------------------------------------------------
-// QR PREVIEW (RIGHT SIDE)
-// -------------------------------------------------------------
-function updateQrPreview(slipNo) {
-  const canvas = document.getElementById("asQrCanvas");
-  const text = document.getElementById("asQrText");
-
-  if (!canvas || !window.QRious) return;
-
-  new QRious({
-    element: canvas,
-    size: 128,
+  const qr = new QRious({
     value: slipNo,
+    size: 128,
   });
 
-  text.textContent = slipNo;
+  img.src = qr.toDataURL();
 }
 
 // -------------------------------------------------------------
-// TABLE + SUMMARY
+// LOAD SLIPS TABLE
 // -------------------------------------------------------------
 async function loadSlipsTable() {
   const tbody = document.getElementById("as_table_body");
+  if (!tbody) return;
+
   tbody.innerHTML = "";
 
-  const dateInput = document.getElementById("as_filter_date");
-  const locSelect = document.getElementById("as_filter_location");
-  const userSelect = document.getElementById("as_filter_user");
-
-  const selectedDate = dateInput.value;
-  const selectedLocationId =
-    currentUser.role === "SuperAdmin"
-      ? locSelect.value || null
-      : currentUser.location_id;
-
-  const selectedUserId = userSelect.value;
+  const date = document.getElementById("as_filter_date").value;
+  const loc = document.getElementById("as_filter_location").value;
+  const user = document.getElementById("as_filter_user").value;
 
   let query = supabase
     .from(AGENT_SILVER_TABLE)
     .select("*")
+    .gte("datetime", `${date} 00:00:00`)
+    .lte("datetime", `${date} 23:59:59`)
     .order("datetime", { ascending: false });
 
-  if (selectedLocationId) {
-    query = query.eq("location_id", selectedLocationId);
-  }
-
-  if (selectedDate) {
-    query = query
-      .gte("datetime", `${selectedDate} 00:00:00`)
-      .lte("datetime", `${selectedDate} 23:59:59`);
-  }
-
-  if (selectedUserId !== "all") {
-    query = query.eq("created_by", selectedUserId);
-  }
+  if (loc) query = query.eq("location_id", loc);
+  if (user !== "all") query = query.eq("agent_id", user);
 
   const { data, error } = await query;
   if (error) {
-    console.error("Error loading slips:", error);
+    console.error(error);
     return;
   }
 
-  let totalSlips = 0;
+  renderSummary(data);
+  renderTableRows(data);
+}
+
+// -------------------------------------------------------------
+// SUMMARY
+// -------------------------------------------------------------
+function renderSummary(rows) {
+  let totalSlips = rows.length;
   let totalAmount = 0;
   let totalBonus = 0;
 
-  data.forEach((row) => {
-    totalSlips++;
-
-    if (row.slip_category === SLIP_TYPE.REGULAR) {
-      totalAmount += Number(row.amount || 0);
+  rows.forEach((r) => {
+    if (r.slip_category === SLIP_TYPE.REGULAR) {
+      totalAmount += r.amount || 0;
     } else {
-      totalBonus += Number(row.bonus_amount || 0);
+      totalBonus += r.bonus_amount || 0;
     }
-
-    const tr = document.createElement("tr");
-    tr.classList.add("as-slip-row");
-
-    tr.innerHTML = `
-      <td>${row.slip_no}</td>
-      <td>${new Date(row.datetime).toLocaleString()}</td>
-      <td>${row.agent_name}</td>
-      <td>${row.slip_category === "regular" ? row.machine_no : "-"}</td>
-      <td>${row.slip_category === "regular"
-        ? Number(row.amount).toFixed(2)
-        : Number(row.bonus_amount).toFixed(2)}</td>
-    `;
-
-    tbody.appendChild(tr);
   });
 
   document.getElementById("as_sum_slips").textContent = totalSlips;
-  document.getElementById("as_sum_amount").textContent =
-    totalAmount.toFixed(2);
-  document.getElementById("as_sum_bonus").textContent =
-    totalBonus.toFixed(2);
+  document.getElementById("as_sum_amount").textContent = totalAmount.toFixed(2);
+  document.getElementById("as_sum_bonus").textContent = totalBonus.toFixed(2);
   document.getElementById("as_sum_grand").textContent = (
     totalAmount + totalBonus
   ).toFixed(2);
-
-  attachRowClickHandlers();
 }
 
 // -------------------------------------------------------------
-// ROW CLICK → LOAD SLIP
+// TABLE ROWS
 // -------------------------------------------------------------
-function attachRowClickHandlers() {
-  const rows = document.querySelectorAll("#as_table_body tr");
+function renderTableRows(rows) {
+  const tbody = document.getElementById("as_table_body");
+  tbody.innerHTML = "";
 
-  rows.forEach((row) => {
-    row.addEventListener("click", () => {
-      const slipNo = row.children[0].textContent;
-      loadSlipIntoForm(slipNo);
-    });
+  rows.forEach((r) => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${r.slip_no}</td>
+      <td>${new Date(r.datetime).toLocaleString()}</td>
+      <td>${r.agent_name}</td>
+      <td>${r.machine_no || "-"}</td>
+      <td>${(r.amount || r.bonus_amount || 0).toFixed(2)}</td>
+    `;
+
+    tr.addEventListener("click", () => loadSlipIntoForm(r));
+    tbody.appendChild(tr);
   });
 }
 
-async function loadSlipIntoForm(slipNo) {
-  const { data: slip, error } = await supabase
-    .from(AGENT_SILVER_TABLE)
-    .select("*")
-    .eq("slip_no", slipNo)
-    .single();
-
-  if (error || !slip) {
-    showToast("Error loading slip", "error");
-    return;
-  }
-
+// -------------------------------------------------------------
+// LOAD SLIP INTO FORM (Right Side)
+// -------------------------------------------------------------
+function loadSlipIntoForm(slip) {
   currentSlip = slip;
-  currentSlipType = slip.slip_category;
-  updateSlipTypeUI();
 
-  document.getElementById("asDateTime").value =
-    toLocalDateTimeInputValue(new Date(slip.datetime));
+  document.getElementById("asDateTime").value = toLocalDateTimeInputValue(
+    new Date(slip.datetime)
+  );
 
   if (slip.slip_category === SLIP_TYPE.REGULAR) {
-    document.getElementById("asMachineNo").value = slip.machine_no || "";
-    document.getElementById("asAmount").value = Number(slip.amount).toFixed(2);
+    currentSlipType = SLIP_TYPE.REGULAR;
+    updateSlipTypeUI();
+
+    document.getElementById("asMachineNo").value = slip.machine_no;
+    document.getElementById("asAmount").value = slip.amount.toFixed(2);
   } else {
-    document.getElementById("asBonusType").value = slip.bonus_type || "";
+    currentSlipType = SLIP_TYPE.BONUS;
+    updateSlipTypeUI();
+
+    document.getElementById("asBonusType").value = slip.bonus_type;
     document.getElementById("asBonusAmount").value =
-      Number(slip.bonus_amount).toFixed(2);
+      slip.bonus_amount.toFixed(2);
   }
 
-  updateQrPreview(slip.slip_no);
+  // ⭐ Update QR preview on right side
+  renderFormQr(slip.slip_no);
 }
-
 // -------------------------------------------------------------
 // PRINT MODAL (FINAL QR IMAGE VERSION)
 // -------------------------------------------------------------
@@ -586,12 +507,18 @@ function initPrintModal() {
       if (currentSlip?.slip_no) {
         renderModalQr(currentSlip.slip_no);
       }
-      setTimeout(() => { window.print(); }, 300); // Delay ensures QR loads
+
+      // ⭐ Delay ensures QR loads before print
+      setTimeout(() => {
+        window.print();
+      }, 300);
     });
   }
 }
 
-// ⭐ QR as IMAGE (same method as Machine QR)
+// -------------------------------------------------------------
+// QR FOR PRINT MODAL
+// -------------------------------------------------------------
 function renderModalQr(slipNo) {
   const img = document.getElementById("asModalQrImage");
   if (!img || !window.QRious) return;
@@ -604,6 +531,9 @@ function renderModalQr(slipNo) {
   img.src = qr.toDataURL();
 }
 
+// -------------------------------------------------------------
+// SHOW / HIDE PRINT MODAL
+// -------------------------------------------------------------
 function showPrintModal(slip) {
   if (!asPrintOverlay) return;
 
@@ -643,21 +573,17 @@ function showPrintModal(slip) {
     elAmount.textContent = Number(slip.amount || 0).toFixed(2);
   }
 
-  // Render QR image for this slip
+  // ⭐ Render QR for print modal
   renderModalQr(slip.slip_no);
-        console.log("QR src:", document.getElementById("asModalQrImage").src);
 
-  // Footer: Game-Audit System + Location Name (2-line block with separator)
+  // ⭐ Footer: Game-Audit System + Location Name
   const footerEl = document.getElementById("asModalFooterText");
   if (footerEl) {
-    // You can adjust this if you store location name differently
     const locationNameElement = document.querySelector(
       "#as_filter_location option:checked"
     );
     const locationName =
-      locationNameElement && locationNameElement.textContent
-        ? locationNameElement.textContent
-        : "Location";
+      locationNameElement?.textContent || "Location";
 
     footerEl.innerHTML = `
       Game-Audit System<br/>
@@ -701,7 +627,7 @@ async function generateSlipNumber(slip_category, location_id) {
   let serial = 1;
 
   if (!error && data && data.length > 0) {
-    const lastSlipNo = data[0].slip_no; // e.g. AS-20260126-005
+    const lastSlipNo = data[0].slip_no;
     const parts = lastSlipNo.split("-");
     const lastSerialStr = parts[parts.length - 1];
     const lastSerial = parseInt(lastSerialStr, 10);
@@ -713,3 +639,7 @@ async function generateSlipNumber(slip_category, location_id) {
   const serialPart = String(serial).padStart(3, "0");
   return `${prefix}-${datePart}-${serialPart}`;
 }
+
+// -------------------------------------------------------------
+// END OF FILE
+// -------------------------------------------------------------
