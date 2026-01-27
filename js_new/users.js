@@ -486,6 +486,8 @@ async function createUser(payload) {
   role: payload.role,
   location_id: payload.location_id
   });
+
+  console.log("ACCESS ERROR:", accessError);
   showToast("User created successfully.", "success");
 }
 
