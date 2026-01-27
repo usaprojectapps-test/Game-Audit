@@ -598,7 +598,7 @@ function initPrintModal() {
   }
 
   if (printBtn) {
-    printBtn.addEventListener("click", () => {
+    /*printBtn.addEventListener("click", () => {
       if (currentSlip?.slip_no) {
         renderModalQr(currentSlip.slip_no);
       }
@@ -606,7 +606,24 @@ function initPrintModal() {
       setTimeout(() => { window.print(); }, 300);
     });
   }
-}
+}*/
+
+
+  printBtn.addEventListener("click", () => {
+  const img = document.getElementById("asModalQrImage");
+
+  renderModalQr(currentSlip.slip_no);
+
+  if (img.complete) {
+    window.print();
+  } else {
+    img.onload = () => {
+      window.print();
+      img.onload = null;
+    };
+  }
+});
+
 
 // ⭐ QR as IMAGE (same method as Machine QR)
 function renderModalQr(slipNo) {
