@@ -598,18 +598,7 @@ function initPrintModal() {
   }
 
   if (printBtn) {
-    /*printBtn.addEventListener("click", () => {
-      if (currentSlip?.slip_no) {
-        renderModalQr(currentSlip.slip_no);
-      }
-      // Small delay so QR image is fully rendered before print
-      setTimeout(() => { window.print(); }, 300);
-    });
-  }
-}*/
-
-
-  printBtn.addEventListener("click", () => {
+   printBtn.addEventListener("click", () => {
   const img = document.getElementById("asModalQrImage");
 
   renderModalQr(currentSlip.slip_no);
@@ -628,7 +617,7 @@ function initPrintModal() {
 }
 
 // ⭐ QR as IMAGE (same method as Machine QR)
-function renderModalQr(slipNo) {
+/* function renderModalQr(slipNo) {
   const img = document.getElementById("asModalQrImage");
   if (!img || !window.QRious) return;
 
@@ -638,6 +627,33 @@ function renderModalQr(slipNo) {
   });
 
   img.src = qr.toDataURL();
+} */
+
+let modalQrInstance = null;
+
+function renderModalQr(slipNo) {
+  const img = document.getElementById("asModalQrImage");
+  if (!img || !window.QRious) return;
+
+  // Reuse or create QRious instance
+  if (!modalQrInstance) {
+    modalQrInstance = new QRious({
+      value: slipNo,
+      size: 128,
+    });
+  } else {
+    modalQrInstance.set({
+      value: slipNo,
+    });
+  }
+
+  // Set image source
+  img.src = modalQrInstance.toDataURL();
+
+  // Optional: force redraw
+  img.onload = () => {
+    console.log("QR image loaded");
+  };
 }
 
 function showPrintModal(slip) {
