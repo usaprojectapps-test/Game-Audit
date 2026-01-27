@@ -626,7 +626,7 @@ function searchUsers() {
   }
 
   currentPage = 1;
-  renderPaginatedTable();
+  renderPaginatedTable(filtered);
 }
 // -------------------------------------------------------------
 // CLEAR FORM
