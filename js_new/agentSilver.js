@@ -576,9 +576,8 @@ async function loadSlipIntoForm(slipNo) {
   // ✅ Update QR preview when loading an existing slip
   updateQrPreview(slip.slip_no);
 }
-
 // -------------------------------------------------------------
-// PRINT MODAL (FINAL QR IMAGE VERSION)
+// PRINT MODAL (FINAL QR IMAGE VERSION) — CLEAN + FIXED
 // -------------------------------------------------------------
 let asPrintOverlay = null;
 
@@ -598,26 +597,29 @@ function initPrintModal() {
   }
 
   if (printBtn) {
-   printBtn.addEventListener("click", () => {
-  const img = document.getElementById("asModalQrImage");
+    printBtn.addEventListener("click", () => {
+      const img = document.getElementById("asModalQrImage");
 
-  renderModalQr(currentSlip.slip_no);
+      // Always re-render QR before printing
+      renderModalQr(currentSlip.slip_no);
 
-  if (img.complete) {
-    window.print();
-  } else {
-    img.onload = () => {
-      window.print();
-      img.onload = null;
-    };
+      // If QR already loaded → print immediately
+      if (img.complete) {
+        window.print();
+      } else {
+        img.onload = () => {
+          window.print();
+          img.onload = null;
+        };
+      }
+    });
   }
-});
-  }
-
 }
 
-// ⭐ QR as IMAGE (same method as Machine QR)
-/* function renderModalQr(slipNo) {
+// -------------------------------------------------------------
+// QR RENDERING (IMAGE VERSION)
+// -------------------------------------------------------------
+function renderModalQr(slipNo) {
   const img = document.getElementById("asModalQrImage");
   if (!img || !window.QRious) return;
 
@@ -627,68 +629,15 @@ function initPrintModal() {
   });
 
   img.src = qr.toDataURL();
-} 
-
-let modalQrInstance = null;
-
-function renderModalQr(slipNo) {
-  const img = document.getElementById("asModalQrImage");
-  if (!img || !window.QRious) return;
-
-  // Reuse or create QRious instance
-  if (!modalQrInstance) {
-    modalQrInstance = new QRious({
-      value: slipNo,
-      size: 128,
-    });
-  } else {
-    modalQrInstance.set({
-      value: slipNo,
-    });
-  } */
-function renderModalQr(slipNo) {
-  const img = document.getElementById("asModalQrImage");
-  if (!img || !window.QRious) return;
-
-  const qr = new QRious({
-    value: slipNo,
-    size: 128,
-  });
-
-  const qrData = qr.toDataURL();
-
-  // Set image source and wait for it to load
-  img.onload = () => {
-    console.log("QR image loaded");
-  };
-
-  img.src = qrData;
 }
 
-  // Set image source
-  img.src = modalQrInstance.toDataURL();
-
-  // Optional: force redraw
-  img.onload = () => {
-    console.log("QR image loaded");
-  };
-}
-//function showPrintModal(slip) {
-
-function showPrintModal(slip) { 
-  const img = document.getElementById("asModalQrImage"); 
-  if (!img) return; 
-
-  renderModalQr(slip.slip_no); // Wait for QR image to load before showing modal 
-  if (img.complete) { 
-    asPrintOverlay.style.display = "flex"; 
-  } else { 
-    img.onload = () => { asPrintOverlay.style.display = "flex";
-  
-   }; }
-
+// -------------------------------------------------------------
+// SHOW PRINT MODAL
+// -------------------------------------------------------------
+function showPrintModal(slip) {
   if (!asPrintOverlay) return;
 
+  // Fill slip fields
   const isBonus = slip.slip_category === SLIP_TYPE.BONUS;
 
   document.getElementById("asModalSlipId").textContent = slip.slip_no;
@@ -725,31 +674,28 @@ function showPrintModal(slip) {
     elAmount.textContent = Number(slip.amount || 0).toFixed(2);
   }
 
-  // ✅ Render QR image for this slip in the modal
-  //renderModalQr(slip.slip_no);
-
+  // Render QR
+  const img = document.getElementById("asModalQrImage");
   renderModalQr(slip.slip_no);
 
-    const img = document.getElementById("asModalQrImage");
-    if (img && img.complete) {
-      console.log("QR image ready");
-    } else {
-      img.onload = () => {
-        console.log("QR image loaded after modal open");
-      };
-    }
+  // Wait for QR to load before showing modal
+  if (img.complete) {
+    asPrintOverlay.style.display = "flex";
+  } else {
+    img.onload = () => {
+      asPrintOverlay.style.display = "flex";
+      img.onload = null;
+    };
+  }
 
-
-  // Footer: Game-Audit System + Location Name (2-line block with separator)
+  // Footer
   const footerEl = document.getElementById("asModalFooterText");
   if (footerEl) {
     const locationNameElement = document.querySelector(
       "#as_filter_location option:checked"
     );
     const locationName =
-      locationNameElement && locationNameElement.textContent
-        ? locationNameElement.textContent
-        : "Location";
+      locationNameElement?.textContent || "Location";
 
     footerEl.innerHTML = `
       Game-Audit System<br/>
@@ -757,10 +703,11 @@ function showPrintModal(slip) {
       ${locationName}
     `;
   }
-
-  asPrintOverlay.style.display = "flex";
 }
 
+// -------------------------------------------------------------
+// HIDE PRINT MODAL
+// -------------------------------------------------------------
 function hidePrintModal() {
   if (asPrintOverlay) {
     asPrintOverlay.style.display = "none";
