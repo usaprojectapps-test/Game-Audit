@@ -8,40 +8,39 @@ import { callEdgeFunction } from "./edgeClient.js";
 
 console.log("USERS JS LOADED");
 
-window.addEventListener("usersModuleLoaded", () => {
-  console.log("USERS MODULE FULLY LOADED");
-
 // -------------------------------------------------------------
-// VARIABLES
+// GLOBAL STATE
 // -------------------------------------------------------------
-let tableBody, searchInput, form;
+let tableBody, searchInput;
 let nameInput, emailInput, passwordInput, roleSelect, departmentInput;
 let locationSelect, statusSelect, phoneInput;
 let btnSave, btnDelete, btnClear, btnResetPassword;
 
 let selectedId = null;
 
-// Session values (Option A)
+let fullUserList = [];
+let currentPage = 1;
+const pageSize = 10;
+
+// Logged-in session values
 const loggedInUserId = sessionStorage.getItem("userId");
 const loggedInRole = sessionStorage.getItem("role");
 const currentLocation = sessionStorage.getItem("locationId");
 
-let currentPage = 1;
-const pageSize = 10;
-let fullUserList = [];
-
 // -------------------------------------------------------------
 // INIT MODULE
 // -------------------------------------------------------------
-setTimeout(() => initUsersModule(), 50);
+window.addEventListener("usersModuleLoaded", () => {
+  setTimeout(() => initUsersModule(), 50);
+});
 
 function initUsersModule() {
   console.log("Users module initialized");
 
+  // FORM ELEMENTS
   tableBody = document.getElementById("usersTableBody");
   searchInput = document.getElementById("searchUser");
 
-  form = document.getElementById("userForm");
   nameInput = document.getElementById("userName");
   emailInput = document.getElementById("userEmail");
   passwordInput = document.getElementById("userPassword");
@@ -58,16 +57,13 @@ function initUsersModule() {
 
   // Phone auto-format
   phoneInput?.addEventListener("input", () => {
-    let value = phoneInput.value.replace(/\D/g, "");
-    if (value.length > 3 && value.length <= 6) {
-      value = value.replace(/(\d{3})(\d+)/, "$1-$2");
-    } else if (value.length > 6) {
-      value = value.replace(/(\d{3})(\d{3})(\d+)/, "$1-$2-$3");
-    }
-    phoneInput.value = value;
+    let v = phoneInput.value.replace(/\D/g, "");
+    if (v.length > 3 && v.length <= 6) v = v.replace(/(\d{3})(\d+)/, "$1-$2");
+    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d+)/, "$1-$2-$3");
+    phoneInput.value = v;
   });
 
-  // Events
+  // EVENTS
   btnClear?.addEventListener("click", clearForm);
   btnSave?.addEventListener("click", saveUser);
   btnDelete?.addEventListener("click", deleteUser);
@@ -84,7 +80,7 @@ function initUsersModule() {
   });
 
   document.getElementById("nextUsers")?.addEventListener("click", () => {
-    if ((currentPage * pageSize) < fullUserList.length) {
+    if (currentPage * pageSize < fullUserList.length) {
       currentPage++;
       renderPaginatedTable();
     }
@@ -93,8 +89,8 @@ function initUsersModule() {
   document.getElementById("confirmReset")?.addEventListener("click", confirmResetPassword);
   document.getElementById("cancelReset")?.addEventListener("click", closeResetModal);
 
-  loadUsers();
   loadLocations();
+  loadUsers();
   setupFormAccess();
 }
 
@@ -122,31 +118,17 @@ function validateForm(payload, isNew) {
 }
 
 // -------------------------------------------------------------
-// EDGE FUNCTIONS
-// -------------------------------------------------------------
-async function createUserSync(payload) {
-  return await callEdgeFunction("create_user", payload);
-}
-
-async function updatePasswordSync(id, newPassword, email) {
-  return await callEdgeFunction("update_password", { id, newPassword, email });
-}
-
-// -------------------------------------------------------------
 // LOAD USERS
 // -------------------------------------------------------------
 async function loadUsers() {
-  const roleFilter = document.getElementById("filterRole").value;
-
   let query = supabase.from("users").select("*");
 
   if (loggedInRole !== "SuperAdmin") {
     query = query.eq("location_id", currentLocation);
   }
 
-  if (roleFilter) {
-    query = query.eq("role", roleFilter);
-  }
+  const roleFilter = document.getElementById("filterRole").value;
+  if (roleFilter) query = query.eq("role", roleFilter);
 
   const { data, error } = await query;
 
@@ -173,6 +155,11 @@ function renderPaginatedTable() {
 
   document.getElementById("prevUsers").disabled = currentPage === 1;
   document.getElementById("nextUsers").disabled = end >= fullUserList.length;
+
+  document.getElementById("machines-pagination-text").textContent =
+    `Showing ${pageRows.length} of ${fullUserList.length}`;
+
+  document.getElementById("machines-current-page").textContent = currentPage;
 }
 
 // -------------------------------------------------------------
@@ -246,10 +233,8 @@ function loadForm(row) {
     locationSelect.disabled = true;
   }
 
-  // ⭐ Password field enabled only for self
   passwordInput.disabled = row.id !== loggedInUserId;
 
-  // ⭐ Reset button visible only for Admin/Manager editing others
   if (
     (loggedInRole === "LocationAdmin" || loggedInRole === "Manager") &&
     row.id !== loggedInUserId
@@ -265,16 +250,64 @@ function loadForm(row) {
 // -------------------------------------------------------------
 function clearForm() {
   selectedId = null;
-  form.reset();
+  nameInput.value = "";
+  emailInput.value = "";
+  passwordInput.value = "";
+  roleSelect.value = "";
+  departmentInput.value = "";
+  statusSelect.value = "Active";
   phoneInput.value = "";
 
   if (loggedInRole !== "SuperAdmin") {
     locationSelect.value = currentLocation;
     locationSelect.disabled = true;
+  } else {
+    locationSelect.disabled = false;
+    locationSelect.value = "";
   }
 
   passwordInput.disabled = false;
   btnResetPassword.style.display = "none";
+}
+
+// -------------------------------------------------------------
+// CREATE USER (AUTH + DB)
+// -------------------------------------------------------------
+async function createUser(payload) {
+  const result = await callEdgeFunction("create_user", payload);
+
+  if (result?.error) {
+    console.error(result.error);
+    return { error: true };
+  }
+
+  const authUserId = result?.data?.user?.id;
+  if (!authUserId) return { error: true };
+
+  // Insert into users table
+  const { error: userErr } = await supabase.from("users").insert({
+    id: authUserId,
+    name: payload.name,
+    email: payload.email,
+    role: payload.role,
+    department: payload.department,
+    phone: payload.phone,
+    location_id: payload.location_id,
+    status: payload.status
+  });
+
+  if (userErr) return { error: true };
+
+  // Insert into user_access table
+  const { error: accessErr } = await supabase.from("user_access").insert({
+    email: payload.email,
+    role: payload.role,
+    location_id: payload.location_id
+  });
+
+  if (accessErr) return { error: true };
+
+  return { success: true };
 }
 
 // -------------------------------------------------------------
@@ -300,11 +333,11 @@ async function saveUser() {
     return;
   }
 
-  // NEW USER
+  // CREATE NEW USER
   if (isNew) {
-    const result = await createUserSync(payload);
+    const result = await createUser(payload);
 
-    if (result?.error) {
+    if (result.error) {
       showToast("Failed to create user.", "error");
       return;
     }
@@ -312,7 +345,7 @@ async function saveUser() {
     showToast("User created successfully.", "success");
   }
 
-  // EXISTING USER
+  // UPDATE EXISTING USER
   else {
     const { error } = await supabase
       .from("users")
@@ -332,10 +365,13 @@ async function saveUser() {
       return;
     }
 
-    // ⭐ Direct password update only for self
     if (payload.password) {
       if (selectedId === loggedInUserId) {
-        const result = await updatePasswordSync(selectedId, payload.password, payload.email);
+        const result = await callEdgeFunction("update_password", {
+          id: selectedId,
+          newPassword: payload.password,
+          email: payload.email
+        });
 
         if (result?.error) {
           showToast("Password update failed.", "error");
@@ -343,8 +379,7 @@ async function saveUser() {
           showToast("Your password has been updated.", "success");
         }
       } else {
-        showToast("You cannot directly change another user's password. Use Reset Password instead.", "warning");
-        return;
+        showToast("Use Reset Password to update another user's password.", "warning");
       }
     } else {
       showToast("User updated successfully.", "success");
@@ -377,7 +412,7 @@ async function deleteUser() {
 }
 
 // -------------------------------------------------------------
-// SEARCH
+// SEARCH USERS
 // -------------------------------------------------------------
 async function searchUsers() {
   const term = searchInput.value.toLowerCase();
@@ -418,13 +453,11 @@ function openResetModal() {
     return;
   }
 
-  // ⭐ Prevent self-reset
   if (selectedId === loggedInUserId) {
     showToast("Use Change Password to update your own password.", "info");
     return;
   }
 
-  // ⭐ Only Admin/Manager can reset others
   if (loggedInRole !== "LocationAdmin" && loggedInRole !== "Manager") {
     showToast("You are not authorized to reset passwords.", "warning");
     return;
@@ -458,10 +491,6 @@ async function confirmResetPassword() {
 // FORM ACCESS CONTROL
 // -------------------------------------------------------------
 function setupFormAccess() {
-  applyModuleAccess(loggedInRole, "Users", form);
-
-  // Hide reset button by default
+  applyModuleAccess(loggedInRole, "Users", document.getElementById("userForm"));
   btnResetPassword.style.display = "none";
 }
-});
-
