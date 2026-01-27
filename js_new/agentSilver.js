@@ -609,6 +609,7 @@ function initPrintModal() {
       // Wait for image to fully load before printing
       img.onload = () => {
       window.print();
+      Image.onload = null;
     };
   }
 });
