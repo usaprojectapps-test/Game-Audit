@@ -211,8 +211,11 @@
   #asPrintOverlay {
     position: fixed;
     inset: 0;
+    background: white !important;   /* ⭐ REQUIRED */
+    z-index: 9999;                  /* ⭐ Ensures modal is on top */
   }
 }
+
 
   .as-slip-type-buttons {
     display: flex;
