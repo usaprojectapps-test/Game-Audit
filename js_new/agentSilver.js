@@ -665,8 +665,6 @@ function renderModalQr(slipNo) {
   img.src = qrData;
 }
 
-
-
   // Set image source
   img.src = modalQrInstance.toDataURL();
 
@@ -675,7 +673,20 @@ function renderModalQr(slipNo) {
     console.log("QR image loaded");
   };
 
-function showPrintModal(slip) {
+//function showPrintModal(slip) {
+
+function showPrintModal(slip) { 
+  const img = document.getElementById("asModalQrImage"); 
+  if (!img) return; 
+
+  renderModalQr(slip.slip_no); // Wait for QR image to load before showing modal 
+  if (img.complete) { 
+    asPrintOverlay.style.display = "flex"; 
+  } else { 
+    img.onload = () => { asPrintOverlay.style.display = "flex";
+  
+   }; }
+   
   if (!asPrintOverlay) return;
 
   const isBonus = slip.slip_category === SLIP_TYPE.BONUS;
