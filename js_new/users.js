@@ -447,7 +447,12 @@ async function createUser(payload) {
   // 1. Create Auth user
   const { data: authUser, error: authError } = await supabase.auth.signUp({
     email: payload.email,
-    password: payload.password
+    password: payload.password,
+    options: { 
+    data: {
+     name: payload.name 
+    }
+    }
   });
 
   if (authError) {
