@@ -203,18 +203,18 @@
 
 <!-- PRINT CSS -->
 <style>
-  @media print {
-    body * {
-      visibility: hidden !important;
-    }
-    #asPrintOverlay, #asPrintOverlay * {
-      visibility: visible !important;
-    }
-    #asPrintOverlay {
-      position: fixed;
-      inset: 0;
-    }
+ @media print {
+  body * {
+    display: none !important;
   }
+  #asPrintOverlay, #asPrintOverlay * {
+    display: block !important;
+  }
+  #asPrintOverlay {
+    position: fixed;
+    inset: 0;
+  }
+}
 
   .as-slip-type-buttons {
     display: flex;
