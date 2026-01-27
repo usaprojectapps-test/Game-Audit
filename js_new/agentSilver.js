@@ -619,7 +619,7 @@ function initPrintModal() {
 // -------------------------------------------------------------
 // QR RENDERING (IMAGE VERSION)
 // -------------------------------------------------------------
-function renderModalQr(slipNo) {
+/*function renderModalQr(slipNo) {
   const img = document.getElementById("asModalQrImage");
   if (!img || !window.QRious) return;
 
@@ -629,7 +629,27 @@ function renderModalQr(slipNo) {
   });
 
   img.src = qr.toDataURL();
+}*/
+
+function renderModalQr(slipNo) {
+  const img = document.getElementById("asModalQrImage");
+  if (!img || !window.QRious) {
+    console.log("QRious or image element missing");
+    return;
+  }
+
+  const qr = new QRious({
+    value: slipNo,
+    size: 128,
+  });
+
+  const qrData = qr.toDataURL();
+
+  console.log("QR DATA URL:", qrData.substring(0, 50), "...");
+
+  img.src = qrData;
 }
+
 
 // -------------------------------------------------------------
 // SHOW PRINT MODAL
