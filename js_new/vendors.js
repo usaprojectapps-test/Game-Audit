@@ -196,16 +196,29 @@ function initVendorsModule() {
 
       try {
         let query = supabase
-          .from("Vendors")
-          .select("*")
-          .order("VendorName", { ascending: true })
-          .range(from, to);
+        .from("Vendors")
+        .select("*")
+        .order("VendorName", { ascending: true })
+        .range(from, to);
+
+      // LOCATION FILTERING
+      if (userRole === "SuperAdmin") {
+        const selectedLoc = filterLocation?.value;
+        if (selectedLoc) {
+          query = query.eq("location_id", selectedLoc);
+        }
+      } else {
+        // All other roles → force their own location
+        query = query.eq("location_id", userLocationId);
+      }
 
         const { data, error } = await query;
         if (error) return;
 
         renderTable(data || []);
         if (pageInfo) pageInfo.textContent = `Page ${currentPage}`;
+        document.getElementById("vendorCurrentPage").textContent = currentPage;
+
       } catch (err) {
         console.error("loadVendors error:", err);
       }
