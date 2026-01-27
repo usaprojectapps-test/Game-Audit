@@ -244,3 +244,11 @@
 
 <!-- Agent Silver JS -->
 <script type="module" src="/js_new/agentSilver.js"></script>
+<img id="testQrImage" style="width:128px;height:128px;" />
+<script>
+  const testQR = new QRious({
+    value: "TEST-QR-123",
+    size: 128
+  });
+  document.getElementById("testQrImage").src = testQR.toDataURL();
+</script>
