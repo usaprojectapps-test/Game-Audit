@@ -627,7 +627,7 @@ function initPrintModal() {
   });
 
   img.src = qr.toDataURL();
-} */
+} 
 
 let modalQrInstance = null;
 
@@ -645,7 +645,27 @@ function renderModalQr(slipNo) {
     modalQrInstance.set({
       value: slipNo,
     });
-  }
+  } */
+function renderModalQr(slipNo) {
+  const img = document.getElementById("asModalQrImage");
+  if (!img || !window.QRious) return;
+
+  const qr = new QRious({
+    value: slipNo,
+    size: 128,
+  });
+
+  const qrData = qr.toDataURL();
+
+  // Set image source and wait for it to load
+  img.onload = () => {
+    console.log("QR image loaded");
+  };
+
+  img.src = qrData;
+}
+
+
 
   // Set image source
   img.src = modalQrInstance.toDataURL();
@@ -654,7 +674,6 @@ function renderModalQr(slipNo) {
   img.onload = () => {
     console.log("QR image loaded");
   };
-}
 
 function showPrintModal(slip) {
   if (!asPrintOverlay) return;
