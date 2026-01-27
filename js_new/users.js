@@ -113,6 +113,7 @@ function initUsersModule() {
   document.getElementById("cancelReset")?.addEventListener("click", closeResetModal);
 
   loadLocations();
+  filterRoleDropdown();
   loadUsers();
   setupFormAccess();
 }
@@ -479,15 +480,20 @@ async function createUser(payload) {
     return;
   }
 
-  // 3. Insert into user_access table
-  await supabase.from("user_access").insert({
-  user_id: newUserId,
-  email: payload.email,
-  role: payload.role,
-  location_id: payload.location_id
+ // 3. Insert into user_access table
+    const { error: accessError } = await supabase.from("user_access").insert({
+    user_id: newUserId,
+    email: payload.email,
+    role: payload.role,
+    location_id: payload.location_id
   });
 
+  if (accessError) {
   console.log("ACCESS ERROR:", accessError);
+  showToast("Failed to save user access.", "error");
+  return;
+  }
+
   showToast("User created successfully.", "success");
 }
 
@@ -511,16 +517,20 @@ async function updateUser(payload) {
     showToast("Failed to update user.", "error");
     return;
   }
-
   // Update user_access
-  await supabase
-    .from("user_access")
-    .update({
-      role: payload.role,
-      location_id: payload.location_id
-    })
-    .eq("user_id", selectedId);
+  const { error: accessUpdateError } = await supabase
+  .from("user_access")
+  .update({
+    role: payload.role,
+    location_id: payload.location_id
+  })
+  .eq("user_id", selectedId);
 
+  if (accessUpdateError) {
+  console.log("ACCESS UPDATE ERROR:", accessUpdateError);
+  showToast("Failed to update user access.", "error");
+  return;
+  }
   showToast("User updated successfully.", "success");
 }
 // -------------------------------------------------------------
@@ -719,8 +729,6 @@ function filterRoleDropdown() {
     opt.style.display = allowedRoles.includes(opt.value) ? "block" : "none";
   });
 }
-
-filterRoleDropdown();
 
 // -------------------------------------------------------------
 // END OF FILE
