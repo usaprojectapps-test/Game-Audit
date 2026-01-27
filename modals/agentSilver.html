@@ -201,22 +201,25 @@
 
 <!-- PRINT CSS -->
 <style>
- @media print {
+@media print {
   body * {
     display: none !important;
+    visibility: hidden !important;
   }
+
   #asPrintOverlay, #asPrintOverlay * {
     display: block !important;
+    visibility: visible !important;
   }
+
   #asPrintOverlay {
     position: fixed;
     inset: 0;
-    background: white !important;   /* ⭐ REQUIRED */
-    z-index: 9999;                  /* ⭐ Ensures modal is on top */
+    background: white !important;
+    color: black !important;
+    z-index: 9999;
   }
 }
-
-
   .as-slip-type-buttons {
     display: flex;
     gap: 10px;
