@@ -476,11 +476,11 @@ async function createUser(payload) {
 
   // 3. Insert into user_access table
   await supabase.from("user_access").insert({
-    user_id: newUserId,
-    role: payload.role,
-    location_id: payload.location_id
+  user_id: newUserId,
+  email: payload.email,
+  role: payload.role,
+  location_id: payload.location_id
   });
-
   showToast("User created successfully.", "success");
 }
 
