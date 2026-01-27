@@ -672,7 +672,7 @@ function renderModalQr(slipNo) {
   img.onload = () => {
     console.log("QR image loaded");
   };
-
+}
 //function showPrintModal(slip) {
 
 function showPrintModal(slip) { 
@@ -686,7 +686,7 @@ function showPrintModal(slip) {
     img.onload = () => { asPrintOverlay.style.display = "flex";
   
    }; }
-   
+
   if (!asPrintOverlay) return;
 
   const isBonus = slip.slip_category === SLIP_TYPE.BONUS;
