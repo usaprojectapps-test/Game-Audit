@@ -283,9 +283,13 @@ function initSaveButton() {
       }
 
       currentSlip = saved;
+
+      // ✅ Update QR preview on the right panel
       updateQrPreview(saved.slip_no);
 
       await loadSlipsTable();
+
+      // ✅ Open print modal with QR rendered
       showPrintModal(saved);
 
     } catch (err) {
@@ -364,8 +368,12 @@ async function collectSlipFormData() {
     }
 
   } else {
+    // ✅ BONUS SLIP: keep DB happy (NOT NULL on machine_no)
     bonus_type = bonusTypeInput.value;
     bonus_amount = parseFloat(bonusAmountInput.value || "0");
+
+    // Use a placeholder string instead of null so NOT NULL constraint is satisfied
+    machine_no = "BONUS";
   }
 
   return {
@@ -416,19 +424,26 @@ async function updateSlipInSupabase(slip) {
 // -------------------------------------------------------------
 // QR PREVIEW (RIGHT SIDE)
 // -------------------------------------------------------------
-function updateQrPreview(slipNo) {
-  const canvas = document.getElementById("asQrCanvas");
-  const text = document.getElementById("asQrText");
+function renderFormQr(slipNo) {
+  const img = document.getElementById("asFormQrImage");
+  if (!img || !window.QRious) return;
 
-  if (!canvas || !window.QRious) return;
-
-  new QRious({
-    element: canvas,
-    size: 128,
+  const qr = new QRious({
     value: slipNo,
+    size: 128
   });
 
-  text.textContent = slipNo;
+  img.src = qr.toDataURL();
+}
+
+function updateQrPreview(slipNo) {
+  // ✅ Use the IMG-based QR (no canvas)
+  renderFormQr(slipNo);
+
+  const text = document.getElementById("asQrText");
+  if (text) {
+    text.textContent = slipNo;
+  }
 }
 
 // -------------------------------------------------------------
@@ -558,6 +573,7 @@ async function loadSlipIntoForm(slipNo) {
       Number(slip.bonus_amount).toFixed(2);
   }
 
+  // ✅ Update QR preview when loading an existing slip
   updateQrPreview(slip.slip_no);
 }
 
@@ -586,23 +602,11 @@ function initPrintModal() {
       if (currentSlip?.slip_no) {
         renderModalQr(currentSlip.slip_no);
       }
-      setTimeout(() => { window.print(); }, 300); // Delay ensures QR loads
+      // Small delay so QR image is fully rendered before print
+      setTimeout(() => { window.print(); }, 300);
     });
   }
 }
-
-function renderFormQr(slipNo) {
-  const img = document.getElementById("asFormQrImage");
-  if (!img || !window.QRious) return;
-
-  const qr = new QRious({
-    value: slipNo,
-    size: 128
-  });
-
-  img.src = qr.toDataURL();
-}
-
 
 // ⭐ QR as IMAGE (same method as Machine QR)
 function renderModalQr(slipNo) {
@@ -656,14 +660,12 @@ function showPrintModal(slip) {
     elAmount.textContent = Number(slip.amount || 0).toFixed(2);
   }
 
-  // Render QR image for this slip
+  // ✅ Render QR image for this slip in the modal
   renderModalQr(slip.slip_no);
-        console.log("QR src:", document.getElementById("asModalQrImage").src);
 
   // Footer: Game-Audit System + Location Name (2-line block with separator)
   const footerEl = document.getElementById("asModalFooterText");
   if (footerEl) {
-    // You can adjust this if you store location name differently
     const locationNameElement = document.querySelector(
       "#as_filter_location option:checked"
     );
