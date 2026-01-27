@@ -696,7 +696,19 @@ function showPrintModal(slip) {
   }
 
   // ✅ Render QR image for this slip in the modal
+  //renderModalQr(slip.slip_no);
+
   renderModalQr(slip.slip_no);
+
+    const img = document.getElementById("asModalQrImage");
+    if (img && img.complete) {
+      console.log("QR image ready");
+    } else {
+      img.onload = () => {
+        console.log("QR image loaded after modal open");
+      };
+    }
+
 
   // Footer: Game-Audit System + Location Name (2-line block with separator)
   const footerEl = document.getElementById("asModalFooterText");
