@@ -278,6 +278,8 @@ function collectFormData() {
     agent_id: currentUser.id,
     agent_name: currentUser.name,
     location_id: currentUser.location_id,
+    / ⭐ REQUIRED FIELD (fixes your error) 
+    created_by: currentUser.id,
   };
 
   if (currentSlipType === SLIP_TYPE.REGULAR) {
