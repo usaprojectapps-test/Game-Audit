@@ -341,20 +341,21 @@ async function createUser(payload) {
   }
 
   // 3. Insert into user_access
-  const { error: accessError } = await supabase.from("user_access").insert({
-    user_id: newUserId,
-    email: payload.email,
-    role: payload.role,
-    location_id: payload.location_id
-  });
+const { error: accessError } = await supabase.from("user_access").insert({
+  user_id: newUserId,
+  email: payload.email,
+  role: payload.role,
+  location_id: payload.location_id || null   // <-- FIXED
+});
 
-  if (accessError) {
-    console.log("ACCESS INSERT ERROR:", accessError);
-    showToast("Failed to save user access.", "error");
-    return;
-  }
+if (accessError) {
+  console.log("ACCESS INSERT ERROR:", accessError);
+  showToast("Failed to save user access.", "error");
+  return;
+}
 
-  showToast("User created successfully.", "success");
+showToast("User created successfully.", "success");
+
 }
 
 // UPDATE
