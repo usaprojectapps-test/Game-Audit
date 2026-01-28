@@ -15,22 +15,25 @@ let currentLocation = null;
 // VALIDATE SESSION
 // -------------------------------------------------------------
 async function validateSession() {
-  const { data } = await supabase.auth.getSession();
+  const { data, error } = await supabase.auth.getSession();
 
-  if (!data.session) {
+  if (error || !data.session) {
     sessionStorage.clear();
     window.location.href = "login.html";
     return;
   }
 
   currentUser = data.session.user;
+
+  // Ensure userId is always synced
+  sessionStorage.setItem("userId", currentUser.id);
+  sessionStorage.setItem("email", currentUser.email);
 }
 
 // -------------------------------------------------------------
 // LOAD USER PROFILE
 // -------------------------------------------------------------
 async function loadUserProfile() {
-  // Use Supabase session user, not sessionStorage
   const sessionUserId = currentUser?.id;
 
   console.log("Loading profile for:", sessionUserId);
@@ -74,12 +77,11 @@ async function loadUserProfile() {
     locationEl.textContent = locData?.name || "Unknown Location";
   }
 
-  // Store updated values in session
   sessionStorage.setItem("name", data.name);
   sessionStorage.setItem("role", currentRole);
   sessionStorage.setItem("locationId", currentLocation);
-  sessionStorage.setItem("userId", sessionUserId);
 }
+
 // -------------------------------------------------------------
 // DASHBOARD TILE ACCESS
 // -------------------------------------------------------------
@@ -87,13 +89,13 @@ function applyDashboardTileAccess() {
   const role = sessionStorage.getItem("role");
 
   document.querySelectorAll(".dashboard-tile").forEach(tile => {
-    const allowed = tile.getAttribute("data-dept")?.split(",");
+    const allowed = tile.getAttribute("data-dept")?.split(",") || [];
     if (!allowed.includes(role)) tile.style.display = "none";
   });
 }
 
 // -------------------------------------------------------------
-// MODULE LOADER (FINAL, SAFE, NO DUPLICATE LOADS)
+// MODULE LOADER
 // -------------------------------------------------------------
 async function loadModule(moduleName) {
   const container = document.getElementById("moduleContainer");
@@ -102,7 +104,6 @@ async function loadModule(moduleName) {
   container.innerHTML = `<div class="loading">Loading...</div>`;
 
   try {
-    // Load HTML
     const response = await fetch(`/modals/${moduleName}.html`);
     if (!response.ok) {
       container.innerHTML = `<div class="error">Module not found</div>`;
@@ -112,15 +113,12 @@ async function loadModule(moduleName) {
     const html = await response.text();
     container.innerHTML = html;
 
-    // Prevent duplicate script injection
     const existingScript = document.querySelector(`script[data-module="${moduleName}"]`);
     if (existingScript) {
-      // Script already loaded → just trigger module init
       window.dispatchEvent(new Event(`${moduleName}ModuleLoaded`));
       return;
     }
 
-    // Load JS module only once
     const script = document.createElement("script");
     script.type = "module";
     script.src = `/js_new/${moduleName}.js?v=${Date.now()}`;
@@ -131,7 +129,6 @@ async function loadModule(moduleName) {
     };
 
     document.body.appendChild(script);
-
   } catch (err) {
     container.innerHTML = `<div class="error">Failed to load module</div>`;
   }
@@ -164,7 +161,7 @@ function setupLogout() {
 }
 
 // -------------------------------------------------------------
-// CHANGE PASSWORD (USER)
+// CHANGE PASSWORD
 // -------------------------------------------------------------
 function setupChangePassword() {
   const btn = document.getElementById("btnChangePassword");

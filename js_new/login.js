@@ -1,56 +1,64 @@
+// -------------------------------------------------------------
+// IMPORTS
+// -------------------------------------------------------------
 import { supabase } from "./supabaseClient.js";
+import { showToast } from "./toast.js";
 
-const loginForm = document.getElementById("loginForm");
-const loginBtn = document.getElementById("loginBtn");
-const errorMsg = document.getElementById("errorMsg");
+// -------------------------------------------------------------
+// HANDLE LOGIN
+// -------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("loginForm");
+  if (!form) return;
 
-loginForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  loginBtn.disabled = true;
-  errorMsg.textContent = "";
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+    const email = form.querySelector("#email").value.trim();
+    const password = form.querySelector("#password").value.trim();
 
-  if (!email || !password) {
-    errorMsg.textContent = "Please enter both email and password.";
-    loginBtn.disabled = false;
-    return;
-  }
+    if (!email || !password) {
+      showToast("Please enter email and password.", "error");
+      return;
+    }
 
-  // 1. Authenticate user
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
+    // 1. Sign in with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (authError || !authData?.user) {
+      showToast("Invalid email or password.", "error");
+      return;
+    }
+
+    const user = authData.user;
+
+    // 2. Load profile from users table
+    const { data: profile, error: profileError } = await supabase
+      .from("users")
+      .select("name, role, location_id")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile) {
+      showToast("No user profile found.", "error");
+      return;
+    }
+
+    const role = profile.role?.trim() || "";
+    const locationId = profile.location_id || null;
+
+    // 3. Store in sessionStorage
+    sessionStorage.setItem("userId", user.id);
+    sessionStorage.setItem("email", user.email);
+    sessionStorage.setItem("name", profile.name);
+    sessionStorage.setItem("role", role);
+    sessionStorage.setItem("locationId", locationId);
+
+    // 4. Redirect to dashboard
+    showToast("Login successful.", "success");
+    window.location.href = "dashboard.html";
   });
-
-  if (error) {
-    errorMsg.textContent = "Invalid credentials or inactive account.";
-    loginBtn.disabled = false;
-    return;
-  }
-
-  const user = data.user;
-
-  // 2. Fetch role + location from user_access (NEW — replaces metadata)
-  const { data: access, error: accessError } = await supabase
-    .from("user_access")
-    .select("role, location_id")
-    .eq("email", user.email)
-    .single();
-
-  if (accessError || !access) {
-    errorMsg.textContent = "Access configuration missing. Contact admin.";
-    loginBtn.disabled = false;
-    return;
-  }
-
-  // 3. Store session data
-  sessionStorage.setItem("userId", user.id);
-  sessionStorage.setItem("userName", user.email); // or fetch from users table if needed
-  sessionStorage.setItem("role", access.role);
-  sessionStorage.setItem("locationId", access.location_id);
-
-  // 4. Redirect to dashboard
-  window.location.href = "dashboard.html";
 });
