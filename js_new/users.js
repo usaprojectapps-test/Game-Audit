@@ -29,20 +29,16 @@ const ROLE_HIERARCHY = {
 // -------------------------------------------------------------
 // INIT
 // -------------------------------------------------------------
-document.addEventListener("DOMContentLoaded", async () => {
-  console.log("USERS JS LOADED");
+window.addEventListener("usersModuleLoaded", async () => {
+  console.log("Users module initialized");
 
   await loadLocations();
   await loadUsers();
-
   setupSearchAndFilters();
   setupFormButtons();
   applyRoleDropdownRestrictions();
   renderUsersTable();
-
-  console.log("Users.js fully loaded.");
 });
-
 // -------------------------------------------------------------
 // LOAD LOCATIONS
 // -------------------------------------------------------------
