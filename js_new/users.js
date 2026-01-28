@@ -5,6 +5,14 @@ import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
 
 // -------------------------------------------------------------
+// EDGE FUNCTION ENDPOINTS (adjust if your paths differ)
+// -------------------------------------------------------------
+const CREATE_USER_URL = "/functions/v1/create_user";
+const UPDATE_USER_URL = "/functions/v1/update_user";
+const DELETE_USER_URL = "/functions/v1/delete_user";
+const RESET_PASSWORD_URL = "/functions/v1/reset_password";
+
+// -------------------------------------------------------------
 // STATE & CONSTANTS
 // -------------------------------------------------------------
 let users = [];
@@ -39,6 +47,7 @@ window.addEventListener("usersModuleLoaded", async () => {
   applyRoleDropdownRestrictions();
   renderUsersTable();
 });
+
 // -------------------------------------------------------------
 // LOAD LOCATIONS
 // -------------------------------------------------------------
@@ -84,7 +93,7 @@ async function loadLocations() {
 async function loadUsers() {
   const { data, error } = await supabase
     .from("users")
-    .select("id, name, email, role, location_id, status")
+    .select("id, name, email, role, location_id, status, department, phone")
     .order("name", { ascending: true });
 
   if (error) {
@@ -195,7 +204,8 @@ function renderUsersTable() {
     const tr = document.createElement("tr");
 
     const locationName =
-      locations.find(l => l.id === user.location_id)?.name || (user.role === "SuperAdmin" ? "All Locations" : "-");
+      locations.find(l => l.id === user.location_id)?.name ||
+      (user.role === "SuperAdmin" ? "All Locations" : "-");
 
     tr.innerHTML = `
       <td>${user.name || ""}</td>
@@ -291,123 +301,101 @@ async function saveUser() {
     return;
   }
 
-  if (selectedUserId) {
-    await updateUser(payload);
-  } else {
-    await createUser(payload);
-  }
-
-  await loadUsers();
-  resetForm();
-}
-
-// CREATE
-async function createUser(payload) {
-  // 1. Create auth user
-  const { data: authData, error: authError } = await supabase.auth.signUp({
-    email: payload.email,
-    password: payload.password,
-    options: {
-      data: {
-        name: payload.name
-      }
+  try {
+    if (selectedUserId) {
+      await updateUser(payload);
+    } else {
+      await createUser(payload);
     }
-  });
 
-  if (authError || !authData?.user) {
-    console.log("AUTH CREATE ERROR:", authError);
-    showToast("Failed to create auth user.", "error");
-    return;
-  }
-
-  const newUserId = authData.user.id;
-
-  // 2. Insert into users table
-  const { error: userInsertError } = await supabase.from("users").insert({
-    id: newUserId,
-    name: payload.name,
-    email: payload.email,
-    role: payload.role,
-    department: payload.department,
-    location_id: payload.location_id,
-    status: payload.status,
-    phone: payload.phone
-  });
-
-  if (userInsertError) {
-    console.log("USERS INSERT ERROR:", userInsertError);
+    await loadUsers();
+    resetForm();
+  } catch (err) {
+    console.log("SAVE USER ERROR:", err);
     showToast("Failed to save user.", "error");
-    return;
   }
-
-// 3. Insert into user_access
-const { data: accessData, error: accessError } = await supabase
-  .from("user_access")
-  .insert({
-    user_id: newUserId,
-    email: payload.email,
-    role: payload.role,
-    location_id: payload.location_id || null
-  })
-  .select();
-
-console.log("ACCESS INSERT DATA:", accessData);
-console.log("ACCESS INSERT ERROR:", JSON.stringify(accessError, null, 2));
-
 }
 
-// UPDATE
+// -------------------------------------------------------------
+// CREATE (via Edge Function)
+// -------------------------------------------------------------
+async function createUser(payload) {
+  try {
+    const res = await fetch(CREATE_USER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: payload.name,
+        email: payload.email,
+        password: payload.password,
+        role: payload.role,
+        location_id: payload.location_id,
+        status: payload.status,
+        phone: payload.phone,
+        department: payload.department
+      })
+    });
+
+    const result = await res.json();
+
+    if (!res.ok || result.error) {
+      console.log("CREATE_USER FUNCTION ERROR:", result.error || result);
+      showToast("Failed to create user.", "error");
+      return;
+    }
+
+    showToast("User created successfully.", "success");
+  } catch (err) {
+    console.log("CREATE_USER CALL ERROR:", err);
+    showToast("Failed to create user.", "error");
+  }
+}
+
+// -------------------------------------------------------------
+// UPDATE (via Edge Function)
+// -------------------------------------------------------------
 async function updateUser(payload) {
   if (!selectedUserId) return;
 
-  const { error: userUpdateError } = await supabase
-    .from("users")
-    .update({
-      name: payload.name,
-      email: payload.email,
-      role: payload.role,
-      department: payload.department,
-      location_id: payload.location_id,
-      status: payload.status,
-      phone: payload.phone
-    })
-    .eq("id", selectedUserId);
+  const editor_role = sessionStorage.getItem("role");
+  const editor_location_id = sessionStorage.getItem("location_id") || null;
 
-  if (userUpdateError) {
-    console.log("USERS UPDATE ERROR:", userUpdateError);
-    showToast("Failed to update user.", "error");
-    return;
-  }
-
-  const { error: accessUpdateError } = await supabase
-    .from("user_access")
-    .update({
-      email: payload.email,
-      role: payload.role,
-      location_id: payload.location_id
-    })
-    .eq("user_id", selectedUserId);
-
-  if (accessUpdateError) {
-    console.log("ACCESS UPDATE ERROR:", accessUpdateError);
-    showToast("Failed to update user access.", "error");
-    return;
-  }
-
-  // Optional: update password if provided
-  if (payload.password) {
-    const { error: passError } = await supabase.auth.updateUser({
-      password: payload.password
+  try {
+    const res = await fetch(UPDATE_USER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: selectedUserId,
+        name: payload.name,
+        email: payload.email,
+        role: payload.role,
+        location_id: payload.location_id,
+        status: payload.status,
+        phone: payload.phone,
+        department: payload.department,
+        password: payload.password || null,
+        editor_role,
+        editor_location_id
+      })
     });
 
-    if (passError) {
-      console.log("PASSWORD UPDATE ERROR:", passError);
-      showToast("User updated, but password change failed.", "error");
+    const result = await res.json();
+
+    if (!res.ok || result.error) {
+      console.log("UPDATE_USER FUNCTION ERROR:", result.error || result);
+      showToast(result.error?.message || "Failed to update user.", "error");
       return;
     }
-  }
 
-  showToast("User updated successfully.", "success");
+    if (result.warning) {
+      showToast(result.warning, "warning");
+    } else {
+      showToast("User updated successfully.", "success");
+    }
+  } catch (err) {
+    console.log("UPDATE_USER CALL ERROR:", err);
+    showToast("Failed to update user.", "error");
+  }
 }
 
 // -------------------------------------------------------------
@@ -429,7 +417,7 @@ function startEditUser(id) {
 }
 
 // -------------------------------------------------------------
-// DELETE USER (tables only; auth deletion should be server-side)
+// DELETE USER (via Edge Function)
 // -------------------------------------------------------------
 async function deleteUser() {
   if (!selectedUserId) {
@@ -459,38 +447,33 @@ async function deleteUser() {
   const confirmed = confirm(`Are you sure you want to delete user "${user.name}"?`);
   if (!confirmed) return;
 
-  // 1. Delete from user_access
-  const { error: accessDeleteError } = await supabase
-    .from("user_access")
-    .delete()
-    .eq("user_id", selectedUserId);
+  try {
+    const res = await fetch(DELETE_USER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: selectedUserId })
+    });
 
-  if (accessDeleteError) {
-    console.log("ACCESS DELETE ERROR:", accessDeleteError);
-    showToast("Failed to delete user access.", "error");
-    return;
-  }
+    const result = await res.json();
 
-  // 2. Delete from users
-  const { error: userDeleteError } = await supabase
-    .from("users")
-    .delete()
-    .eq("id", selectedUserId);
+    if (!res.ok || result.error) {
+      console.log("DELETE_USER FUNCTION ERROR:", result.error || result);
+      showToast("Failed to delete user.", "error");
+      return;
+    }
 
-  if (userDeleteError) {
-    console.log("USERS DELETE ERROR:", userDeleteError);
+    showToast("User deleted successfully.", "success");
+    selectedUserId = null;
+    await loadUsers();
+    resetForm();
+  } catch (err) {
+    console.log("DELETE_USER CALL ERROR:", err);
     showToast("Failed to delete user.", "error");
-    return;
   }
-
-  showToast("User deleted successfully.", "success");
-  selectedUserId = null;
-  await loadUsers();
-  resetForm();
 }
 
 // -------------------------------------------------------------
-// RESET PASSWORD (for selected user via email link)
+// RESET PASSWORD (via Edge Function or placeholder)
 // -------------------------------------------------------------
 async function resetPasswordForUser() {
   if (!selectedUserId) {
@@ -504,7 +487,30 @@ async function resetPasswordForUser() {
     return;
   }
 
-  // In a real app, this should trigger a password reset email via backend.
-  showToast("Password reset flow should be handled server-side.", "info");
+  // If your reset_password function expects email:
+  try {
+    const res = await fetch(RESET_PASSWORD_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: user.email, user_id: user.id })
+    });
+
+    const result = await res.json();
+
+    if (!res.ok || result.error) {
+      console.log("RESET_PASSWORD FUNCTION ERROR:", result.error || result);
+      showToast("Failed to trigger password reset.", "error");
+      return;
+    }
+
+    showToast("Password reset email triggered (server-side).", "success");
+  } catch (err) {
+    console.log("RESET_PASSWORD CALL ERROR:", err);
+    showToast("Failed to trigger password reset.", "error");
+  }
 }
+
+// -------------------------------------------------------------
+// TRIGGER INITIAL LOAD
+// -------------------------------------------------------------
 window.dispatchEvent(new Event("usersModuleLoaded"));
