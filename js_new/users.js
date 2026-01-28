@@ -481,12 +481,12 @@ async function createUser(payload) {
   }
 
  // 3. Insert into user_access table
-    const { error: accessError } = await supabase.from("user_access").insert({
-    user_id: newUserId,
-    email: payload.email,
-    role: payload.role,
-    location_id: payload.location_id
-  });
+  const { error: accessError } = await supabase.from("user_access").insert({
+  user_id: newUserId,
+  email: payload.email,
+  role: payload.role,
+  location_id: payload.location_id
+});
 
   if (accessError) {
   console.log("ACCESS ERROR:", accessError);
@@ -518,7 +518,7 @@ async function updateUser(payload) {
     return;
   }
   // Update user_access
-  const { error: accessUpdateError } = await supabase
+   const { error: accessUpdateError } = await supabase
   .from("user_access")
   .update({
     role: payload.role,
@@ -531,7 +531,7 @@ async function updateUser(payload) {
   showToast("Failed to update user access.", "error");
   return;
   }
-  showToast("User updated successfully.", "success");
+ showToast("User updated successfully.", "success");
 }
 // -------------------------------------------------------------
 // DELETE USER
