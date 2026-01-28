@@ -50,7 +50,11 @@ async function loadUserProfile() {
     .single();
 
   console.log("Profile result:", data);
-  console.log("Profile error:", error);
+  if (error) {
+  console.error("Profile load error:", error);
+} else {
+  console.log("Profile loaded:", data);
+}
 
   if (error || !data) {
     showToast("Unable to load user profile.", "error");
