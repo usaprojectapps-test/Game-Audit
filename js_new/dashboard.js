@@ -30,18 +30,22 @@ async function validateSession() {
 // LOAD USER PROFILE
 // -------------------------------------------------------------
 async function loadUserProfile() {
-  const sessionUserId = sessionStorage.getItem("userId");
+  // Use Supabase session user, not sessionStorage
+  const sessionUserId = currentUser?.id;
 
   console.log("Loading profile for:", sessionUserId);
 
-  // Fetch user profile
+  if (!sessionUserId) {
+    showToast("Unable to load user profile.", "error");
+    return;
+  }
+
   const { data, error } = await supabase
     .from("users")
     .select("name, role, location_id")
     .eq("id", sessionUserId)
     .single();
 
-  // Debug logs BEFORE return
   console.log("Profile result:", data);
   console.log("Profile error:", error);
 
@@ -50,11 +54,9 @@ async function loadUserProfile() {
     return;
   }
 
-  // Extract values
   currentRole = data.role?.trim() || "";
   currentLocation = data.location_id;
 
-  // Update header UI
   document.getElementById("headerUserName").textContent = data.name;
   document.getElementById("headerUserDept").textContent = currentRole;
 
@@ -76,9 +78,8 @@ async function loadUserProfile() {
   sessionStorage.setItem("name", data.name);
   sessionStorage.setItem("role", currentRole);
   sessionStorage.setItem("locationId", currentLocation);
-  sessionStorage.setItem("userId", sessionUserId); // FIXED
+  sessionStorage.setItem("userId", sessionUserId);
 }
-
 // -------------------------------------------------------------
 // DASHBOARD TILE ACCESS
 // -------------------------------------------------------------
