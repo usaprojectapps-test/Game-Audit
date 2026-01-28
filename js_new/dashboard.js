@@ -32,25 +32,29 @@ async function validateSession() {
 async function loadUserProfile() {
   const sessionUserId = sessionStorage.getItem("userId");
 
+  console.log("Loading profile for:", sessionUserId);
+
+  // Fetch user profile
   const { data, error } = await supabase
-  .from("users")
-  .select("name, role, location_id")
-  .eq("id", sessionUserId)
-  .single();
+    .from("users")
+    .select("name, role, location_id")
+    .eq("id", sessionUserId)
+    .single();
+
+  // Debug logs BEFORE return
+  console.log("Profile result:", data);
+  console.log("Profile error:", error);
 
   if (error || !data) {
-  showToast("Unable to load user profile.", "error");
-  return;
-
-  console.log("Loading profile for:", sessionUserId);
-  console.log("Profile result:", data);
-
+    showToast("Unable to load user profile.", "error");
+    return;
   }
 
-
-  currentRole = data.role.trim();
+  // Extract values
+  currentRole = data.role?.trim() || "";
   currentLocation = data.location_id;
 
+  // Update header UI
   document.getElementById("headerUserName").textContent = data.name;
   document.getElementById("headerUserDept").textContent = currentRole;
 
@@ -68,10 +72,11 @@ async function loadUserProfile() {
     locationEl.textContent = locData?.name || "Unknown Location";
   }
 
+  // Store updated values in session
   sessionStorage.setItem("name", data.name);
   sessionStorage.setItem("role", currentRole);
   sessionStorage.setItem("locationId", currentLocation);
-  sessionStorage.setItem("userId", currentUser.id);
+  sessionStorage.setItem("userId", sessionUserId); // FIXED
 }
 
 // -------------------------------------------------------------
