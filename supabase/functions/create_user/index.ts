@@ -64,6 +64,13 @@ serve(async (req) => {
         headers: corsHeaders
       });
     }
+    // 2A profiles insert
+    await supabase.from("profiles").insert({
+      user_id: uid,
+      role,
+      location_id,
+      full_name: name
+    });
 
     // 3. Insert into NEW user_access table (for RLS)
     const { error: accessError } = await supabase
