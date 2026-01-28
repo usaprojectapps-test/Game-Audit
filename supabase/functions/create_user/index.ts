@@ -57,6 +57,11 @@ serve(async (req) => {
       phone,
       department
     });
+    
+    if (role === "SuperAdmin") {
+    location_id = "00000000-0000-0000-0000-000000000000";
+    }
+
 
     if (dbError) {
       return new Response(JSON.stringify({ error: dbError }), {
