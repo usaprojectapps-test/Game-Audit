@@ -582,7 +582,6 @@ async function resetPasswordForUser() {
     showToast("Failed to trigger password reset.", "error");
   }
 }
-
 // -------------------------------------------------------------
 // TRIGGER INITIAL LOAD
 // -------------------------------------------------------------
