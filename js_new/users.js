@@ -508,3 +508,4 @@ async function resetPasswordForUser() {
   // In a real app, this should trigger a password reset email via backend.
   showToast("Password reset flow should be handled server-side.", "info");
 }
+window.dispatchEvent(new Event("usersModuleLoaded"));
