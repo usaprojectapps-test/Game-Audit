@@ -69,6 +69,7 @@ async function loadLocations() {
 
   locations = data || [];
 
+  // Populate form dropdown
   select.innerHTML = `<option value="">Select Location</option>`;
   locations.forEach(loc => {
     const opt = document.createElement("option");
@@ -77,7 +78,7 @@ async function loadLocations() {
     select.appendChild(opt);
   });
 
-  // Filter dropdown
+  // Populate filter dropdown
   filterSelect.innerHTML = `<option value="">All Locations</option>`;
   locations.forEach(loc => {
     const opt = document.createElement("option");
@@ -85,14 +86,25 @@ async function loadLocations() {
     opt.textContent = loc.name;
     filterSelect.appendChild(opt);
   });
+
+  // 🔒 Lock behavior based on role
   const loggedInRole = sessionStorage.getItem("role");
-  if (loggedInRole === "SuperAdmin") {
-  filterSelect.value = "";
-  filterSelect.disabled = true; // prevents accidental filtering
-}
+  const loggedInLocationId = sessionStorage.getItem("location_id");
 
-}
+  if (loggedInRole === "LocationAdmin") {
+    // Left side filter: fixed to login location
+    if (filterSelect && loggedInLocationId) {
+      filterSelect.value = loggedInLocationId;
+      filterSelect.disabled = true;
+    }
 
+    // Right side form: only login location, not changeable
+    if (select && loggedInLocationId) {
+      select.value = loggedInLocationId;
+      select.disabled = true;
+    }
+  }
+}
 // -------------------------------------------------------------
 // LOAD USERS
 // -------------------------------------------------------------
@@ -351,9 +363,15 @@ async function saveUser() {
 // -------------------------------------------------------------
 async function createUser(payload) {
   try {
+    const session = await supabase.auth.getSession();
+    const accessToken = session.data.session.access_token;
+
     const res = await fetch(CREATE_USER_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`
+      },
       body: JSON.stringify({
         name: payload.name,
         email: payload.email,
@@ -375,12 +393,12 @@ async function createUser(payload) {
     }
 
     showToast("User created successfully.", "success");
+
   } catch (err) {
     console.log("CREATE_USER CALL ERROR:", err);
     showToast("Failed to create user.", "error");
   }
 }
-
 // -------------------------------------------------------------
 // UPDATE (via Edge Function)
 // -------------------------------------------------------------
@@ -391,9 +409,16 @@ async function updateUser(payload) {
   const editor_location_id = sessionStorage.getItem("location_id") || null;
 
   try {
+    // 🔥 MUST include access token for Edge Function
+    const session = await supabase.auth.getSession();
+    const accessToken = session.data.session.access_token;
+
     const res = await fetch(UPDATE_USER_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`   // 🔥 REQUIRED
+      },
       body: JSON.stringify({
         user_id: selectedUserId,
         name: payload.name,
@@ -422,12 +447,12 @@ async function updateUser(payload) {
     } else {
       showToast("User updated successfully.", "success");
     }
+
   } catch (err) {
     console.log("UPDATE_USER CALL ERROR:", err);
     showToast("Failed to update user.", "error");
   }
 }
-
 // -------------------------------------------------------------
 // EDIT USER
 // -------------------------------------------------------------
@@ -478,9 +503,16 @@ async function deleteUser() {
   if (!confirmed) return;
 
   try {
+    // 🔥 MUST include access token for Edge Function
+    const session = await supabase.auth.getSession();
+    const accessToken = session.data.session.access_token;
+
     const res = await fetch(DELETE_USER_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`   // 🔥 REQUIRED
+      },
       body: JSON.stringify({ id: selectedUserId })
     });
 
@@ -496,6 +528,7 @@ async function deleteUser() {
     selectedUserId = null;
     await loadUsers();
     resetForm();
+
   } catch (err) {
     console.log("DELETE_USER CALL ERROR:", err);
     showToast("Failed to delete user.", "error");
@@ -503,7 +536,7 @@ async function deleteUser() {
 }
 
 // -------------------------------------------------------------
-// RESET PASSWORD (via Edge Function or placeholder)
+// RESET PASSWORD (via Edge Function)
 // -------------------------------------------------------------
 async function resetPasswordForUser() {
   if (!selectedUserId) {
@@ -517,12 +550,21 @@ async function resetPasswordForUser() {
     return;
   }
 
-  // If your reset_password function expects email:
   try {
+    // 🔥 MUST include access token for Edge Function
+    const session = await supabase.auth.getSession();
+    const accessToken = session.data.session.access_token;
+
     const res = await fetch(RESET_PASSWORD_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: user.email, user_id: user.id })
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`   // 🔥 REQUIRED
+      },
+      body: JSON.stringify({
+        email: user.email,
+        user_id: user.id
+      })
     });
 
     const result = await res.json();
@@ -534,6 +576,7 @@ async function resetPasswordForUser() {
     }
 
     showToast("Password reset email triggered (server-side).", "success");
+
   } catch (err) {
     console.log("RESET_PASSWORD CALL ERROR:", err);
     showToast("Failed to trigger password reset.", "error");
