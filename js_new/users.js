@@ -85,6 +85,12 @@ async function loadLocations() {
     opt.textContent = loc.name;
     filterSelect.appendChild(opt);
   });
+  const loggedInRole = sessionStorage.getItem("role");
+  if (loggedInRole === "SuperAdmin") {
+  filterSelect.value = "";
+  filterSelect.disabled = true; // prevents accidental filtering
+}
+
 }
 
 // -------------------------------------------------------------
@@ -156,6 +162,15 @@ function setupSearchAndFilters() {
     };
   }
 }
+// -------------------------------------------------------------
+// SUPERADMIN SHOULD ALWAYS SEE ALL LOCATIONS
+// -------------------------------------------------------------
+const loggedInRole = sessionStorage.getItem("role");
+if (loggedInRole === "SuperAdmin") {
+  const locFilter = document.getElementById("filterLocation");
+  if (locFilter) locFilter.value = ""; // force "All Locations"
+}
+
 
 function applyFiltersAndSearch() {
   const searchValue = document.getElementById("searchUser")?.value.trim().toLowerCase() || "";
@@ -163,12 +178,17 @@ function applyFiltersAndSearch() {
   const filterRole = document.getElementById("filterRole")?.value || "";
 
   filteredUsers = users.filter(u => {
-    const matchesSearch =
-      !searchValue ||
-      u.name?.toLowerCase().includes(searchValue) ||
-      u.email?.toLowerCase().includes(searchValue);
+  const matchesSearch =
+    !searchValue ||
+    u.name?.toLowerCase().includes(searchValue) ||
+    u.email?.toLowerCase().includes(searchValue);
 
-    const matchesLocation = !filterLocation || u.location_id === filterLocation;
+  // SuperAdmin sees ALL locations
+  const matchesLocation =
+    loggedInRole === "SuperAdmin"
+      ? true
+      : (!filterLocation || u.location_id === filterLocation);
+
     const matchesRole = !filterRole || u.role === filterRole;
 
     return matchesSearch && matchesLocation && matchesRole;
