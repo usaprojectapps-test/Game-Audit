@@ -30,16 +30,23 @@ async function validateSession() {
 // LOAD USER PROFILE
 // -------------------------------------------------------------
 async function loadUserProfile() {
+  const sessionUserId = sessionStorage.getItem("userId");
+
   const { data, error } = await supabase
-    .from("users")
-    .select("name, role, location_id")
-    .eq("id", currentUser.id)
-    .single();
+  .from("users")
+  .select("name, role, location_id")
+  .eq("id", sessionUserId)
+  .single();
 
   if (error || !data) {
-    showToast("Unable to load user profile.", "error");
-    return;
+  showToast("Unable to load user profile.", "error");
+  return;
+
+  console.log("Loading profile for:", sessionUserId);
+  console.log("Profile result:", data);
+
   }
+
 
   currentRole = data.role.trim();
   currentLocation = data.location_id;
