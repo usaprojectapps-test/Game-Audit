@@ -31,7 +31,7 @@ async function validateSession() {
 }
 
 // -------------------------------------------------------------
-// LOAD USER PROFILE
+// LOAD USER PROFILE (CLEAN + SAFE + CORRECT)
 // -------------------------------------------------------------
 async function loadUserProfile() {
   const sessionUserId = currentUser?.id;
@@ -43,27 +43,38 @@ async function loadUserProfile() {
     return;
   }
 
+  // -------------------------------------------------------------
+  // 1. Load from USERS table (source of truth)
+  // -------------------------------------------------------------
   const { data, error } = await supabase
     .from("users")
     .select("name, role, location_id")
     .eq("id", sessionUserId)
     .single();
 
-  console.log("Profile result:", data);
   if (error) {
-  console.error("Profile load error:", error);
-} else {
-  console.log("Profile loaded:", data);
-}
-
-  if (error || !data) {
+    console.error("Profile load error:", error);
     showToast("Unable to load user profile.", "error");
     return;
   }
 
+  if (!data) {
+    console.error("Profile load error: No user row found");
+    showToast("Unable to load user profile.", "error");
+    return;
+  }
+
+  console.log("Profile loaded:", data);
+
+  // -------------------------------------------------------------
+  // 2. Extract role + location
+  // -------------------------------------------------------------
   currentRole = data.role?.trim() || "";
   currentLocation = data.location_id;
 
+  // -------------------------------------------------------------
+  // 3. Update header UI
+  // -------------------------------------------------------------
   document.getElementById("headerUserName").textContent = data.name;
   document.getElementById("headerUserDept").textContent = currentRole;
 
@@ -72,18 +83,26 @@ async function loadUserProfile() {
   if (currentRole === "SuperAdmin") {
     locationEl.textContent = "All Locations";
   } else {
-    const { data: locData } = await supabase
+    // Load location name
+    const { data: locData, error: locError } = await supabase
       .from("locations")
       .select("name")
       .eq("id", currentLocation)
       .single();
 
+    if (locError) {
+      console.warn("Location lookup failed:", locError);
+    }
+
     locationEl.textContent = locData?.name || "Unknown Location";
   }
 
+  // -------------------------------------------------------------
+  // 4. Store in sessionStorage (correct keys)
+  // -------------------------------------------------------------
   sessionStorage.setItem("name", data.name);
   sessionStorage.setItem("role", currentRole);
-  sessionStorage.setItem("locationId", currentLocation);
+  sessionStorage.setItem("location_id", currentLocation); // FIXED KEY
 }
 
 // -------------------------------------------------------------
