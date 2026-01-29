@@ -31,6 +31,7 @@ async function validateSession() {
 
   // Store user info
   const user = data.session.user;
+  currentUser = user;
   sessionStorage.setItem("userId", user.id);
   sessionStorage.setItem("email", user.email);
 
@@ -45,7 +46,8 @@ async function validateSession() {
 // LOAD USER PROFILE (CLEAN + SAFE + CORRECT)
 // -------------------------------------------------------------
 async function loadUserProfile() {
-  const sessionUserId = currentUser?.id;
+  //const sessionUserId = currentUser?.id;
+  const sessionUserId = sessionStorage.getItem("userId");
 
   console.log("Loading profile for:", sessionUserId);
 
