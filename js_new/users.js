@@ -75,10 +75,9 @@ async function loadLocations() {
   // -------------------------------------------------------------
   // RIGHT-SIDE FORM DROPDOWN (userLocation)
   // -------------------------------------------------------------
-  select.innerHTML = `<option value="">Select Location</option>`;
-
   if (loggedInRole === "LocationAdmin" && loggedInLocationId) {
-    // Only add THIS location for LocationAdmin
+    // Only their location, no placeholder, hard-locked
+    select.innerHTML = "";
     const loc = locations.find(l => l.id === loggedInLocationId);
     if (loc) {
       const opt = document.createElement("option");
@@ -87,9 +86,10 @@ async function loadLocations() {
       select.appendChild(opt);
       select.value = loc.id;
     }
-    select.disabled = true; // hard lock
+    select.disabled = true;
   } else {
-    // SuperAdmin (or others): show all locations
+    // SuperAdmin (or others): show all locations, editable
+    select.innerHTML = `<option value="">Select Location</option>`;
     locations.forEach(loc => {
       const opt = document.createElement("option");
       opt.value = loc.id;
@@ -136,13 +136,13 @@ async function loadUsers() {
   users = data || [];
 
   const loggedInRole = sessionStorage.getItem("role");
-if (loggedInRole === "SuperAdmin") {
-  const locFilter = document.getElementById("filterLocation");
-  if (locFilter) {
-    locFilter.value = "";     // force "All Locations"
-    locFilter.dispatchEvent(new Event("change")); // ensure UI updates
+  if (loggedInRole === "SuperAdmin") {
+    const locFilter = document.getElementById("filterLocation");
+    if (locFilter) {
+      locFilter.value = ""; // force "All Locations"
+      locFilter.dispatchEvent(new Event("change"));
+    }
   }
-}
 
   applyFiltersAndSearch();
 }
@@ -197,15 +197,15 @@ function setupSearchAndFilters() {
     };
   }
 }
+
 // -------------------------------------------------------------
-// SUPERADMIN SHOULD ALWAYS SEE ALL LOCATIONS
+// SUPERADMIN SHOULD ALWAYS SEE ALL LOCATIONS (FILTER)
 // -------------------------------------------------------------
 const loggedInRole = sessionStorage.getItem("role");
 if (loggedInRole === "SuperAdmin") {
   const locFilter = document.getElementById("filterLocation");
-  if (locFilter) locFilter.value = ""; // force "All Locations"
+  if (locFilter) locFilter.value = "";
 }
-
 
 function applyFiltersAndSearch() {
   const searchValue = document.getElementById("searchUser")?.value.trim().toLowerCase() || "";
@@ -213,16 +213,15 @@ function applyFiltersAndSearch() {
   const filterRole = document.getElementById("filterRole")?.value || "";
 
   filteredUsers = users.filter(u => {
-  const matchesSearch =
-    !searchValue ||
-    u.name?.toLowerCase().includes(searchValue) ||
-    u.email?.toLowerCase().includes(searchValue);
+    const matchesSearch =
+      !searchValue ||
+      u.name?.toLowerCase().includes(searchValue) ||
+      u.email?.toLowerCase().includes(searchValue);
 
-  // SuperAdmin sees ALL locations
-  const matchesLocation =
-    loggedInRole === "SuperAdmin"
-      ? true
-      : (!filterLocation || u.location_id === filterLocation);
+    const matchesLocation =
+      loggedInRole === "SuperAdmin"
+        ? true
+        : (!filterLocation || u.location_id === filterLocation);
 
     const matchesRole = !filterRole || u.role === filterRole;
 
@@ -294,10 +293,12 @@ function renderUsersTable() {
 // -------------------------------------------------------------
 function applyRoleDropdownRestrictions() {
   const roleSelect = document.getElementById("userRole");
-  roleSelect.innerHTML = "";
+  if (!roleSelect) return;
 
   const loggedInRole = sessionStorage.getItem("role");
   const allowedRoles = ROLE_HIERARCHY[loggedInRole] || [];
+
+  roleSelect.innerHTML = `<option value="">Select Role</option>`;
 
   allowedRoles.forEach(role => {
     const opt = document.createElement("option");
@@ -340,6 +341,7 @@ function resetForm() {
   const form = document.getElementById("userForm");
   if (form) form.reset();
   applyRoleDropdownRestrictions();
+  // For LocationAdmin, loadLocations already locked location; reset won't change disabled state.
 }
 
 // -------------------------------------------------------------
@@ -408,12 +410,12 @@ async function createUser(payload) {
     }
 
     showToast("User created successfully.", "success");
-
   } catch (err) {
     console.log("CREATE_USER CALL ERROR:", err);
     showToast("Failed to create user.", "error");
   }
 }
+
 // -------------------------------------------------------------
 // UPDATE (via Edge Function)
 // -------------------------------------------------------------
@@ -424,7 +426,6 @@ async function updateUser(payload) {
   const editor_location_id = sessionStorage.getItem("location_id") || null;
 
   try {
-    // 🔥 MUST include access token for Edge Function
     const session = await supabase.auth.getSession();
     const accessToken = session.data.session.access_token;
 
@@ -432,7 +433,7 @@ async function updateUser(payload) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`   // 🔥 REQUIRED
+        Authorization: `Bearer ${accessToken}`
       },
       body: JSON.stringify({
         user_id: selectedUserId,
@@ -462,12 +463,12 @@ async function updateUser(payload) {
     } else {
       showToast("User updated successfully.", "success");
     }
-
   } catch (err) {
     console.log("UPDATE_USER CALL ERROR:", err);
     showToast("Failed to update user.", "error");
   }
 }
+
 // -------------------------------------------------------------
 // EDIT USER
 // -------------------------------------------------------------
@@ -476,7 +477,6 @@ function startEditUser(id) {
   const user = users.find(u => u.id === id);
   if (!user) return;
 
-  // Populate form fields
   document.getElementById("userName").value = user.name || "";
   document.getElementById("userEmail").value = user.email || "";
   document.getElementById("userRole").value = user.role || "";
@@ -485,32 +485,17 @@ function startEditUser(id) {
   document.getElementById("userPhone").value = user.phone || "";
   document.getElementById("userPassword").value = "";
 
-  // -------------------------------------------------------------
-  // LOCATION DROPDOWN PATCH
-  // -------------------------------------------------------------
   const locationSelect = document.getElementById("userLocation");
   const loggedInRole = sessionStorage.getItem("role");
-  const loggedInLocationId = sessionStorage.getItem("location_id");
 
-  if (loggedInRole === "LocationAdmin") {
-    // 🔒 Lock to logged-in location
-    locationSelect.value = loggedInLocationId;
-    locationSelect.disabled = true;
-  } else {
-    // 🔍 Match location_id to dropdown option
+  if (loggedInRole === "SuperAdmin") {
     const matchingOption = [...locationSelect.options].find(
       opt => opt.value === user.location_id
     );
     locationSelect.value = matchingOption?.value || "";
     locationSelect.disabled = false;
   }
-  // FINAL HARD LOCK FOR LOCATIONADMIN
-  if (sessionStorage.getItem("role") === "LocationAdmin") {
-  const locationSelect = document.getElementById("userLocation");
-  locationSelect.value = sessionStorage.getItem("location_id");
-  locationSelect.disabled = true;
-}
-
+  // For LocationAdmin, loadLocations already restricted and locked the dropdown.
 }
 
 // -------------------------------------------------------------
@@ -523,7 +508,7 @@ async function deleteUser() {
   }
 
   const loggedInUserId = sessionStorage.getItem("userId");
-  const loggedInRole = sessionStorage.getItem("role");
+  const loggedInRoleDelete = sessionStorage.getItem("role");
 
   if (selectedUserId === loggedInUserId) {
     showToast("You cannot delete your own account.", "error");
@@ -536,7 +521,7 @@ async function deleteUser() {
     return;
   }
 
-  if (user.role === "SuperAdmin" && loggedInRole !== "SuperAdmin") {
+  if (user.role === "SuperAdmin" && loggedInRoleDelete !== "SuperAdmin") {
     showToast("Only SuperAdmin can delete a SuperAdmin.", "error");
     return;
   }
@@ -545,7 +530,6 @@ async function deleteUser() {
   if (!confirmed) return;
 
   try {
-    // 🔥 MUST include access token for Edge Function
     const session = await supabase.auth.getSession();
     const accessToken = session.data.session.access_token;
 
@@ -553,7 +537,7 @@ async function deleteUser() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`   // 🔥 REQUIRED
+        Authorization: `Bearer ${accessToken}`
       },
       body: JSON.stringify({ id: selectedUserId })
     });
@@ -570,7 +554,6 @@ async function deleteUser() {
     selectedUserId = null;
     await loadUsers();
     resetForm();
-
   } catch (err) {
     console.log("DELETE_USER CALL ERROR:", err);
     showToast("Failed to delete user.", "error");
@@ -593,7 +576,6 @@ async function resetPasswordForUser() {
   }
 
   try {
-    // 🔥 MUST include access token for Edge Function
     const session = await supabase.auth.getSession();
     const accessToken = session.data.session.access_token;
 
@@ -601,7 +583,7 @@ async function resetPasswordForUser() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`   // 🔥 REQUIRED
+        Authorization: `Bearer ${accessToken}`
       },
       body: JSON.stringify({
         email: user.email,
@@ -618,12 +600,12 @@ async function resetPasswordForUser() {
     }
 
     showToast("Password reset email triggered (server-side).", "success");
-
   } catch (err) {
     console.log("RESET_PASSWORD CALL ERROR:", err);
     showToast("Failed to trigger password reset.", "error");
   }
 }
+
 // -------------------------------------------------------------
 // TRIGGER INITIAL LOAD
 // -------------------------------------------------------------
