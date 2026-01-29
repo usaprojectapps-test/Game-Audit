@@ -78,7 +78,7 @@ serve(async (req) => {
     });
 
     // 3. Insert into user_access (MUST include user_id)
-    const { error: accessError } = await supabase
+    /*const { error: accessError } = await supabase
       .from("user_access")
       .insert({
         user_id: uid,
@@ -92,7 +92,26 @@ serve(async (req) => {
         status: 400,
         headers: corsHeaders
       });
-    }
+    }*/
+
+      const { data: existingAccess } = await supabase
+  .from("user_access")
+  .select("user_id")
+  .eq("user_id", uid)
+  .single();
+
+if (!existingAccess) {
+  const { error: accessError } = await supabase
+    .from("user_access")
+    .insert({ user_id: uid, email, role, location_id });
+
+  if (accessError) {
+    return new Response(JSON.stringify({ error: accessError }), {
+      status: 400,
+      headers: corsHeaders
+    });
+  }}
+
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
