@@ -69,16 +69,39 @@ async function loadLocations() {
 
   locations = data || [];
 
-  // Populate RIGHT-SIDE FORM dropdown
-  select.innerHTML = `<option value="">Select Location</option>`;
-  locations.forEach(loc => {
-    const opt = document.createElement("option");
-    opt.value = loc.id;
-    opt.textContent = loc.name;
-    select.appendChild(opt);
-  });
+  const loggedInRole = sessionStorage.getItem("role");
+  const loggedInLocationId = sessionStorage.getItem("location_id");
 
-  // Populate LEFT-SIDE FILTER dropdown
+  // -------------------------------------------------------------
+  // RIGHT-SIDE FORM DROPDOWN (userLocation)
+  // -------------------------------------------------------------
+  select.innerHTML = `<option value="">Select Location</option>`;
+
+  if (loggedInRole === "LocationAdmin" && loggedInLocationId) {
+    // Only add THIS location for LocationAdmin
+    const loc = locations.find(l => l.id === loggedInLocationId);
+    if (loc) {
+      const opt = document.createElement("option");
+      opt.value = loc.id;
+      opt.textContent = loc.name;
+      select.appendChild(opt);
+      select.value = loc.id;
+    }
+    select.disabled = true; // hard lock
+  } else {
+    // SuperAdmin (or others): show all locations
+    locations.forEach(loc => {
+      const opt = document.createElement("option");
+      opt.value = loc.id;
+      opt.textContent = loc.name;
+      select.appendChild(opt);
+    });
+    select.disabled = false;
+  }
+
+  // -------------------------------------------------------------
+  // LEFT-SIDE FILTER DROPDOWN (filterLocation)
+  // -------------------------------------------------------------
   filterSelect.innerHTML = `<option value="">All Locations</option>`;
   locations.forEach(loc => {
     const opt = document.createElement("option");
@@ -87,25 +110,14 @@ async function loadLocations() {
     filterSelect.appendChild(opt);
   });
 
-  // ROLE-BASED LOCKING
-  const loggedInRole = sessionStorage.getItem("role");
-  const loggedInLocationId = sessionStorage.getItem("location_id");
-
-  if (loggedInRole === "LocationAdmin") {
-    // LEFT FILTER: lock to login location
+  if (loggedInRole === "LocationAdmin" && loggedInLocationId) {
     filterSelect.value = loggedInLocationId;
     filterSelect.disabled = true;
-
-    // RIGHT FORM: do NOT lock here
-    // startEditUser() will lock it AFTER user loads
-    select.disabled = false;
-
   } else {
-    // SuperAdmin: everything stays editable
     filterSelect.disabled = false;
-    select.disabled = false;
   }
 }
+
 // -------------------------------------------------------------
 // LOAD USERS
 // -------------------------------------------------------------
