@@ -69,7 +69,9 @@ async function loadLocations() {
 
   locations = data || [];
 
-  // Populate form dropdown
+  // -------------------------------------------------------------
+  // Populate RIGHT-SIDE FORM dropdown
+  // -------------------------------------------------------------
   select.innerHTML = `<option value="">Select Location</option>`;
   locations.forEach(loc => {
     const opt = document.createElement("option");
@@ -78,7 +80,9 @@ async function loadLocations() {
     select.appendChild(opt);
   });
 
-  // Populate filter dropdown
+  // -------------------------------------------------------------
+  // Populate LEFT-SIDE FILTER dropdown
+  // -------------------------------------------------------------
   filterSelect.innerHTML = `<option value="">All Locations</option>`;
   locations.forEach(loc => {
     const opt = document.createElement("option");
@@ -87,22 +91,24 @@ async function loadLocations() {
     filterSelect.appendChild(opt);
   });
 
-  // 🔒 Lock behavior based on role
+  // -------------------------------------------------------------
+  // ROLE-BASED LOCKING
+  // -------------------------------------------------------------
   const loggedInRole = sessionStorage.getItem("role");
   const loggedInLocationId = sessionStorage.getItem("location_id");
 
   if (loggedInRole === "LocationAdmin") {
-    // Left side filter: fixed to login location
-    if (filterSelect && loggedInLocationId) {
-      filterSelect.value = loggedInLocationId;
-      filterSelect.disabled = true;
-    }
+    // LEFT FILTER: lock to login location
+    filterSelect.value = loggedInLocationId;
+    filterSelect.disabled = true;
 
-    // Right side form: only login location, not changeable
-    if (select && loggedInLocationId) {
-      select.value = loggedInLocationId;
-      select.disabled = true;
-    }
+    // RIGHT FORM: DO NOT lock here
+    // Let startEditUser() lock it AFTER user data is loaded
+    select.disabled = false;
+  } else {
+    // SuperAdmin: everything stays editable
+    filterSelect.disabled = false;
+    select.disabled = false;
   }
 }
 // -------------------------------------------------------------
@@ -461,14 +467,34 @@ function startEditUser(id) {
   const user = users.find(u => u.id === id);
   if (!user) return;
 
+  // Populate form fields
   document.getElementById("userName").value = user.name || "";
   document.getElementById("userEmail").value = user.email || "";
   document.getElementById("userRole").value = user.role || "";
   document.getElementById("userDepartment").value = user.department || "";
-  document.getElementById("userLocation").value = user.location_id || "";
   document.getElementById("userStatus").value = user.status || "Active";
   document.getElementById("userPhone").value = user.phone || "";
   document.getElementById("userPassword").value = "";
+
+  // -------------------------------------------------------------
+  // LOCATION DROPDOWN PATCH
+  // -------------------------------------------------------------
+  const locationSelect = document.getElementById("userLocation");
+  const loggedInRole = sessionStorage.getItem("role");
+  const loggedInLocationId = sessionStorage.getItem("location_id");
+
+  if (loggedInRole === "LocationAdmin") {
+    // 🔒 Lock to logged-in location
+    locationSelect.value = loggedInLocationId;
+    locationSelect.disabled = true;
+  } else {
+    // 🔍 Match location_id to dropdown option
+    const matchingOption = [...locationSelect.options].find(
+      opt => opt.value === user.location_id
+    );
+    locationSelect.value = matchingOption?.value || "";
+    locationSelect.disabled = false;
+  }
 }
 
 // -------------------------------------------------------------
