@@ -69,9 +69,7 @@ async function loadLocations() {
 
   locations = data || [];
 
-  // -------------------------------------------------------------
   // Populate RIGHT-SIDE FORM dropdown
-  // -------------------------------------------------------------
   select.innerHTML = `<option value="">Select Location</option>`;
   locations.forEach(loc => {
     const opt = document.createElement("option");
@@ -80,9 +78,7 @@ async function loadLocations() {
     select.appendChild(opt);
   });
 
-  // -------------------------------------------------------------
   // Populate LEFT-SIDE FILTER dropdown
-  // -------------------------------------------------------------
   filterSelect.innerHTML = `<option value="">All Locations</option>`;
   locations.forEach(loc => {
     const opt = document.createElement("option");
@@ -91,9 +87,7 @@ async function loadLocations() {
     filterSelect.appendChild(opt);
   });
 
-  // -------------------------------------------------------------
   // ROLE-BASED LOCKING
-  // -------------------------------------------------------------
   const loggedInRole = sessionStorage.getItem("role");
   const loggedInLocationId = sessionStorage.getItem("location_id");
 
@@ -102,19 +96,14 @@ async function loadLocations() {
     filterSelect.value = loggedInLocationId;
     filterSelect.disabled = true;
 
-    // RIGHT FORM: DO NOT lock here
-    // Let startEditUser() lock it AFTER user data is loaded
-    if (sessionStorage.getItem("role") !== "LocationAdmin") {
-    locationSelect.disabled = false;
-}
+    // RIGHT FORM: do NOT lock here
+    // startEditUser() will lock it AFTER user loads
+    select.disabled = false;
 
   } else {
     // SuperAdmin: everything stays editable
     filterSelect.disabled = false;
-    if (sessionStorage.getItem("role") !== "LocationAdmin") {
-    locationSelect.disabled = false;
-}
-
+    select.disabled = false;
   }
 }
 // -------------------------------------------------------------
