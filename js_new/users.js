@@ -7,10 +7,10 @@ import { showToast } from "./toast.js";
 // -------------------------------------------------------------
 // EDGE FUNCTION ENDPOINTS (adjust if your paths differ)
 // -------------------------------------------------------------
-const CREATE_USER_URL = "/functions/v1/create_user";
-const UPDATE_USER_URL = "/functions/v1/update_user";
-const DELETE_USER_URL = "/functions/v1/delete_user";
-const RESET_PASSWORD_URL = "/functions/v1/reset_password";
+const CREATE_USER_URL = "https://kjfzdmmloryzbuiixceh.supabase.co/functions/v1/create_user";
+const UPDATE_USER_URL = "https://kjfzdmmloryzbuiixceh.supabase.co/functions/v1/update_user";
+const DELETE_USER_URL = "https://kjfzdmmloryzbuiixceh.supabase.co/functions/v1/delete_user";
+const RESET_PASSWORD_URL = "https://kjfzdmmloryzbuiixceh.supabase.co/functions/v1/reset_password";
 
 // -------------------------------------------------------------
 // STATE & CONSTANTS
