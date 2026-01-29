@@ -340,8 +340,18 @@ function resetForm() {
   selectedUserId = null;
   const form = document.getElementById("userForm");
   if (form) form.reset();
+
   applyRoleDropdownRestrictions();
-  // For LocationAdmin, loadLocations already locked location; reset won't change disabled state.
+
+  // FIX: Restore location for LocationAdmin
+  const role = sessionStorage.getItem("role");
+  const loc = sessionStorage.getItem("location_id");
+  const locationSelect = document.getElementById("userLocation");
+
+  if (role === "LocationAdmin" && locationSelect) {
+    locationSelect.value = loc;
+    locationSelect.disabled = true;
+  }
 }
 
 // -------------------------------------------------------------
