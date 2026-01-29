@@ -495,6 +495,13 @@ function startEditUser(id) {
     locationSelect.value = matchingOption?.value || "";
     locationSelect.disabled = false;
   }
+  // FINAL HARD LOCK FOR LOCATIONADMIN
+  if (sessionStorage.getItem("role") === "LocationAdmin") {
+  const locationSelect = document.getElementById("userLocation");
+  locationSelect.value = sessionStorage.getItem("location_id");
+  locationSelect.disabled = true;
+}
+
 }
 
 // -------------------------------------------------------------
