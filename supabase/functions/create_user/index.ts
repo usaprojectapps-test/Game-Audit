@@ -7,12 +7,11 @@ serve(async (req) => {
   if (cors) return cors;
 
   try {
-    // Read the body ONCE
     const body = await req.json();
 
     console.log("Incoming payload:", body);
 
-    const {
+    let {
       name,
       email,
       password,
@@ -27,6 +26,11 @@ serve(async (req) => {
       Deno.env.get("PROJECT_URL")!,
       Deno.env.get("SERVICE_ROLE_KEY")!
     );
+
+    // If SuperAdmin → override location BEFORE inserts
+    if (role === "SuperAdmin") {
+      location_id = "00000000-0000-0000-0000-000000000000";
+    }
 
     // 1. Create Auth user
     const { data: authUser, error: authError } =
@@ -46,7 +50,7 @@ serve(async (req) => {
 
     const uid = authUser.user.id;
 
-    // 2. Insert into your existing "users" table
+    // 2. Insert into users table
     const { error: dbError } = await supabase.from("users").insert({
       id: uid,
       name,
@@ -57,11 +61,6 @@ serve(async (req) => {
       phone,
       department
     });
-    
-    if (role === "SuperAdmin") {
-    location_id = "00000000-0000-0000-0000-000000000000";
-    }
-
 
     if (dbError) {
       return new Response(JSON.stringify({ error: dbError }), {
@@ -69,7 +68,8 @@ serve(async (req) => {
         headers: corsHeaders
       });
     }
-    // 2A profiles insert
+
+    // 2A. Insert into profiles
     await supabase.from("profiles").insert({
       user_id: uid,
       role,
@@ -77,10 +77,11 @@ serve(async (req) => {
       full_name: name
     });
 
-    // 3. Insert into NEW user_access table (for RLS)
+    // 3. Insert into user_access (MUST include user_id)
     const { error: accessError } = await supabase
       .from("user_access")
       .insert({
+        user_id: uid,
         email,
         role,
         location_id
