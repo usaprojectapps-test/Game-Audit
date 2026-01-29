@@ -104,11 +104,17 @@ async function loadLocations() {
 
     // RIGHT FORM: DO NOT lock here
     // Let startEditUser() lock it AFTER user data is loaded
-    select.disabled = false;
+    if (sessionStorage.getItem("role") !== "LocationAdmin") {
+    locationSelect.disabled = false;
+}
+
   } else {
     // SuperAdmin: everything stays editable
     filterSelect.disabled = false;
-    select.disabled = false;
+    if (sessionStorage.getItem("role") !== "LocationAdmin") {
+    locationSelect.disabled = false;
+}
+
   }
 }
 // -------------------------------------------------------------
