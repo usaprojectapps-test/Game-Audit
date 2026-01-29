@@ -293,15 +293,17 @@ function renderUsersTable() {
 // ROLE DROPDOWN RESTRICTIONS
 // -------------------------------------------------------------
 function applyRoleDropdownRestrictions() {
-  const loggedInRole = sessionStorage.getItem("role");
   const roleSelect = document.getElementById("userRole");
-  if (!roleSelect || !loggedInRole) return;
+  roleSelect.innerHTML = "";
 
+  const loggedInRole = sessionStorage.getItem("role");
   const allowedRoles = ROLE_HIERARCHY[loggedInRole] || [];
 
-  [...roleSelect.options].forEach(opt => {
-    if (!opt.value) return;
-    opt.disabled = !allowedRoles.includes(opt.value);
+  allowedRoles.forEach(role => {
+    const opt = document.createElement("option");
+    opt.value = role;
+    opt.textContent = role;
+    roleSelect.appendChild(opt);
   });
 }
 
