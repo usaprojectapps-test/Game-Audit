@@ -15,27 +15,32 @@ let currentLocation = null;
 // VALIDATE SESSION
 // -------------------------------------------------------------
 async function validateSession() {
+  // Always get session + error
+  const { data, error } = await supabase.auth.getSession();
 
-  const { data } = await supabase.auth.getSession();
-if (data.session) {
-    sessionStorage.setItem("access_token", data.session.access_token);
-}
-
-//  const { data, error } = await supabase.auth.getSession();
-
+  // If no session → redirect to login
   if (error || !data.session) {
     sessionStorage.clear();
     window.location.href = "login.html";
     return;
   }
 
-  currentUser = data.session.user;
+  // Session exists → store token safely
+  const token = data.session.access_token;
+  sessionStorage.setItem("access_token", token);
 
-  // Ensure userId is always synced
-  sessionStorage.setItem("userId", currentUser.id);
-  sessionStorage.setItem("email", currentUser.email);
+  // Store user info
+  const user = data.session.user;
+  sessionStorage.setItem("userId", user.id);
+  sessionStorage.setItem("email", user.email);
+
+  // Also store metadata if needed
+  if (user.user_metadata) {
+    sessionStorage.setItem("role", user.user_metadata.role);
+    sessionStorage.setItem("location_id", user.user_metadata.location_id);
+    sessionStorage.setItem("name", user.user_metadata.name);
+  }
 }
-
 // -------------------------------------------------------------
 // LOAD USER PROFILE (CLEAN + SAFE + CORRECT)
 // -------------------------------------------------------------
