@@ -15,7 +15,13 @@ let currentLocation = null;
 // VALIDATE SESSION
 // -------------------------------------------------------------
 async function validateSession() {
-  const { data, error } = await supabase.auth.getSession();
+
+  const { data } = await supabase.auth.getSession();
+if (data.session) {
+    sessionStorage.setItem("access_token", data.session.access_token);
+}
+
+//  const { data, error } = await supabase.auth.getSession();
 
   if (error || !data.session) {
     sessionStorage.clear();
