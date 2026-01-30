@@ -135,14 +135,15 @@ async function loadUsers() {
 
   users = data || [];
 
-  const loggedInRole = sessionStorage.getItem("role");
+  /*const loggedInRole = sessionStorage.getItem("role");
   if (loggedInRole === "SuperAdmin") {
     const locFilter = document.getElementById("filterLocation");
     if (locFilter) {
       locFilter.value = ""; // force "All Locations"
       locFilter.dispatchEvent(new Event("change"));
-    }
-  }
+    }*/
+    locFilter.dispatchEvent(new Event("change"));
+  
 
   applyFiltersAndSearch();
 }
