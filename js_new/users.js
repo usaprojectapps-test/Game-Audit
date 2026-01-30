@@ -134,6 +134,7 @@ async function loadUsers() {
   }
 
   users = data || [];
+console.log("RAW USERS FROM SUPABASE:", users);
 
   applyFiltersAndSearch();
 }
