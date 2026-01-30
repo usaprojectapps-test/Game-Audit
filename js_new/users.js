@@ -210,8 +210,8 @@ function applyFiltersAndSearch() {
 
     const matchesLocation =
       loggedInRole === "SuperAdmin"
-        ? true
-        : (!filterLocation || u.location_id === filterLocation);
+      ? true
+      : u.location_id === sessionStorage.getItem("location_id");
 
     const matchesRole = !filterRole || u.role === filterRole;
 
