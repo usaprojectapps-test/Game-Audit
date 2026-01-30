@@ -38,7 +38,7 @@ serve(async (req) => {
       role,
       location_id
     });
-    
+
 
     // If SuperAdmin → override location BEFORE inserts
     if (role === "SuperAdmin") {
@@ -106,8 +106,26 @@ serve(async (req) => {
         headers: corsHeaders
       });
     }*/
+// INSERT INTO user_access
+console.log("INSERT PAYLOAD:", {
+  user_id: uid,
+  email,
+  role,
+  location_id
+});
 
-      const { data: existingAccess } = await supabase
+const { error: accessError } = await supabase
+  .from("user_access")
+  .insert({
+    user_id: uid,
+    email,
+    role,
+    location_id
+  });
+
+console.log("user_access insert error:", accessError);
+
+/*      const { data: existingAccess } = await supabase
   .from("user_access")
   .select("user_id")
   .eq("user_id", uid)
@@ -116,7 +134,7 @@ serve(async (req) => {
 if (!existingAccess) {
   const { error: accessError } = await supabase
     .from("user_access")
-    .insert({ user_id: uid, email, role, location_id });
+    .insert({ user_id: uid, email, role, location_id });*/
 
   if (accessError) {
     return new Response(JSON.stringify({ error: accessError }), {
