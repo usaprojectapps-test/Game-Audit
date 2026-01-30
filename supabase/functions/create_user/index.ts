@@ -22,10 +22,22 @@ serve(async (req) => {
       department
     } = body;
 
-    const supabase = createClient(
+    /* const supabase = createClient(
+      Deno.env.get("PROJECT_URL")!,
+      Deno.env.get("SERVICE_ROLE_KEY")!
+    );*/
+
+    const admin = createClient(
       Deno.env.get("PROJECT_URL")!,
       Deno.env.get("SERVICE_ROLE_KEY")!
     );
+
+    await admin.from("user_access").insert({
+      user_id: uid,
+      email,
+      role,
+      location_id
+    });
 
     // If SuperAdmin → override location BEFORE inserts
     if (role === "SuperAdmin") {
