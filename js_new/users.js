@@ -196,7 +196,6 @@ if (loggedInRole === "SuperAdmin") {
   const locFilter = document.getElementById("filterLocation");
   if (locFilter) locFilter.value = "";
 }
-
 function applyFiltersAndSearch() {
   const searchValue = document.getElementById("searchUser")?.value.trim().toLowerCase() || "";
   const filterLocation = document.getElementById("filterLocation")?.value || "";
@@ -224,6 +223,7 @@ function applyFiltersAndSearch() {
   currentPage = 1;
   renderUsersTable();
 }
+
 // -------------------------------------------------------------
 // RENDER TABLE + PAGINATION
 // -------------------------------------------------------------
