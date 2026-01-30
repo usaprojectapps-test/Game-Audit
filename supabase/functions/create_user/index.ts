@@ -38,6 +38,7 @@ serve(async (req) => {
       role,
       location_id
     });
+    
 
     // If SuperAdmin → override location BEFORE inserts
     if (role === "SuperAdmin") {
