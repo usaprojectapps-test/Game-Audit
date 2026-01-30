@@ -8,7 +8,6 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-
     console.log("Incoming payload:", body);
 
     let {
@@ -22,23 +21,11 @@ serve(async (req) => {
       department
     } = body;
 
-    /* const supabase = createClient(
-      Deno.env.get("PROJECT_URL")!,
-      Deno.env.get("SERVICE_ROLE_KEY")!
-    );*/
-
+    // ADMIN CLIENT (service role)
     const admin = createClient(
       Deno.env.get("PROJECT_URL")!,
       Deno.env.get("SERVICE_ROLE_KEY")!
     );
-
-    await admin.from("user_access").insert({
-      user_id: uid,
-      email,
-      role,
-      location_id
-    });
-
 
     // If SuperAdmin → override location BEFORE inserts
     if (role === "SuperAdmin") {
@@ -47,7 +34,7 @@ serve(async (req) => {
 
     // 1. Create Auth user
     const { data: authUser, error: authError } =
-      await supabase.auth.admin.createUser({
+      await admin.auth.admin.createUser({
         email,
         password,
         email_confirm: true,
@@ -55,6 +42,7 @@ serve(async (req) => {
       });
 
     if (authError) {
+      console.log("Auth error:", authError);
       return new Response(JSON.stringify({ error: authError }), {
         status: 400,
         headers: corsHeaders
@@ -64,7 +52,7 @@ serve(async (req) => {
     const uid = authUser.user.id;
 
     // 2. Insert into users table
-    const { error: dbError } = await supabase.from("users").insert({
+    const { error: dbError } = await admin.from("users").insert({
       id: uid,
       name,
       email,
@@ -76,22 +64,30 @@ serve(async (req) => {
     });
 
     if (dbError) {
+      console.log("Users insert error:", dbError);
       return new Response(JSON.stringify({ error: dbError }), {
         status: 400,
         headers: corsHeaders
       });
     }
 
-    // 2A. Insert into profiles
-    await supabase.from("profiles").insert({
+    // 3. Insert into profiles
+    await admin.from("profiles").insert({
       user_id: uid,
       role,
       location_id,
       full_name: name
     });
 
-    // 3. Insert into user_access (MUST include user_id)
-    /*const { error: accessError } = await supabase
+    // 4. Insert into user_access
+    console.log("INSERT PAYLOAD:", {
+      user_id: uid,
+      email,
+      role,
+      location_id
+    });
+
+    const { error: accessError } = await admin
       .from("user_access")
       .insert({
         user_id: uid,
@@ -100,49 +96,14 @@ serve(async (req) => {
         location_id
       });
 
+    console.log("user_access insert error:", accessError);
+
     if (accessError) {
       return new Response(JSON.stringify({ error: accessError }), {
         status: 400,
         headers: corsHeaders
       });
-    }*/
-// INSERT INTO user_access
-console.log("INSERT PAYLOAD:", {
-  user_id: uid,
-  email,
-  role,
-  location_id
-});
-
-const { error: accessError } = await supabase
-  .from("user_access")
-  .insert({
-    user_id: uid,
-    email,
-    role,
-    location_id
-  });
-
-console.log("user_access insert error:", accessError);
-
-/*      const { data: existingAccess } = await supabase
-  .from("user_access")
-  .select("user_id")
-  .eq("user_id", uid)
-  .single();
-
-if (!existingAccess) {
-  const { error: accessError } = await supabase
-    .from("user_access")
-    .insert({ user_id: uid, email, role, location_id });*/
-
-  if (accessError) {
-    return new Response(JSON.stringify({ error: accessError }), {
-      status: 400,
-      headers: corsHeaders
-    });
-  }}
-
+    }
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
@@ -150,6 +111,7 @@ if (!existingAccess) {
     });
 
   } catch (err) {
+    console.log("Unhandled error:", err);
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: corsHeaders
