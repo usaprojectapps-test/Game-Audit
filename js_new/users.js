@@ -215,7 +215,8 @@ function applyFiltersAndSearch() {
         ? (!filterLocation || u.location_id === filterLocation)
         : u.location_id === loggedInLocationId;
 
-    const matchesRole = !filterRole || u.role === filterRole;
+    const matchesRole =
+      !filterRole || filterRole === "All Roles" || u.role === filterRole;
 
     return matchesSearch && matchesLocation && matchesRole;
   });
