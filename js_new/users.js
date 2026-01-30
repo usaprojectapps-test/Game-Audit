@@ -197,6 +197,8 @@ if (loggedInRole === "SuperAdmin") {
   const locFilter = document.getElementById("filterLocation");
   if (locFilter) locFilter.value = "";
 }
+console.log("BEFORE FILTER:", users);
+
 function applyFiltersAndSearch() {
   const searchValue = document.getElementById("searchUser")?.value.trim().toLowerCase() || "";
   const filterLocation = document.getElementById("filterLocation")?.value || "";
@@ -205,6 +207,28 @@ function applyFiltersAndSearch() {
   const loggedInLocationId = sessionStorage.getItem("location_id");
 
   filteredUsers = users.filter(u => {
+  const matchesSearch =
+    !searchValue ||
+    u.name?.toLowerCase().includes(searchValue) ||
+    u.email?.toLowerCase().includes(searchValue);
+
+  const matchesLocation =
+    loggedInRole === "SuperAdmin"
+      ? (!filterLocation || u.location_id === filterLocation)
+      : u.location_id === loggedInLocationId;
+
+  const matchesRole =
+    !filterRole || filterRole === "All Roles" || u.role === filterRole;
+
+  const keep = matchesSearch && matchesLocation && matchesRole;
+
+  if (!keep) {
+    console.log("FILTERED OUT:", u);
+  }
+
+  return keep;
+});
+/*filteredUsers = users.filter(u => {
     const matchesSearch =
       !searchValue ||
       u.name?.toLowerCase().includes(searchValue) ||
@@ -219,9 +243,11 @@ function applyFiltersAndSearch() {
       !filterRole || filterRole === "All Roles" || u.role === filterRole;
 
     return matchesSearch && matchesLocation && matchesRole;
-  });
+  });*/
 
   currentPage = 1;
+  console.log("AFTER FILTER:", filteredUsers);
+
   renderUsersTable();
 }
 
