@@ -201,6 +201,8 @@ function applyFiltersAndSearch() {
   const searchValue = document.getElementById("searchUser")?.value.trim().toLowerCase() || "";
   const filterLocation = document.getElementById("filterLocation")?.value || "";
   const filterRole = document.getElementById("filterRole")?.value || "";
+  const loggedInRole = sessionStorage.getItem("role");
+  const loggedInLocationId = sessionStorage.getItem("location_id");
 
   filteredUsers = users.filter(u => {
     const matchesSearch =
@@ -210,8 +212,8 @@ function applyFiltersAndSearch() {
 
     const matchesLocation =
       loggedInRole === "SuperAdmin"
-      ? true
-      : u.location_id === sessionStorage.getItem("location_id");
+        ? (!filterLocation || u.location_id === filterLocation)
+        : u.location_id === loggedInLocationId;
 
     const matchesRole = !filterRole || u.role === filterRole;
 
