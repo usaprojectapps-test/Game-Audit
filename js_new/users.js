@@ -224,7 +224,6 @@ function applyFiltersAndSearch() {
   currentPage = 1;
   renderUsersTable();
 }
-
 // -------------------------------------------------------------
 // RENDER TABLE + PAGINATION
 // -------------------------------------------------------------
