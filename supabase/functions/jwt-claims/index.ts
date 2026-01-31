@@ -11,14 +11,11 @@ serve(async (req) => {
       );
     }
 
-    // Extract the JWT
+    // Extract JWT
     const token = authHeader.replace("Bearer ", "");
 
-    // Decode WITHOUT verifying (Supabase already verified it)
-    const payload = JSON.parse(
-      atob(token.split(".")[1])
-    );
-
+    // Decode JWT payload (Supabase already verified it)
+    const payload = JSON.parse(atob(token.split(".")[1]));
     const uid = payload.sub;
 
     const supabase = createClient(
