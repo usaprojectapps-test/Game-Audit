@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+console.log("SECRET:", Deno.env.get("HOOK_SECRET"));
+
 function base64UrlToUint8Array(base64Url: string) {
   const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/") +
     "=".repeat((4 - (base64Url.length % 4)) % 4);
