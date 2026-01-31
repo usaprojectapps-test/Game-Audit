@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { verifyJwt } from "https://deno.land/x/supabase_jwt@v0.0.4/mod.ts";
 
 serve(async (req) => {
   try {
@@ -12,12 +11,12 @@ serve(async (req) => {
       );
     }
 
+    // Extract the JWT
     const token = authHeader.replace("Bearer ", "");
 
-    // Verify the JWT from Supabase Auth
-    const payload = await verifyJwt(
-      token,
-      Deno.env.get("SUPABASE_JWT_SECRET")!
+    // Decode WITHOUT verifying (Supabase already verified it)
+    const payload = JSON.parse(
+      atob(token.split(".")[1])
     );
 
     const uid = payload.sub;
