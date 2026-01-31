@@ -1,12 +1,26 @@
-// supabase/functions/jwt-claims/index.ts
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { verifyJwt } from "https://deno.land/x/supabase_jwt@v0.0.4/mod.ts";
 
 serve(async (req) => {
   try {
-    const { event } = await req.json();
-    const uid = event.user.id;
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Missing authorization header" }),
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+
+    // Verify the JWT from Supabase Auth
+    const payload = await verifyJwt(
+      token,
+      Deno.env.get("SUPABASE_JWT_SECRET")!
+    );
+
+    const uid = payload.sub;
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
