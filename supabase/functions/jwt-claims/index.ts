@@ -1,14 +1,27 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Webhook } from "https://esm.sh/@octokit/webhooks@12.0.10";
 
 serve(async (req) => {
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Missing authorization header" }), { status: 401 });
+    const signature = req.headers.get("X-Supabase-Signature");
+    const secret = Deno.env.get("SUPABASE_HOOK_SECRET")!;
+
+    if (!signature) {
+      return new Response(JSON.stringify({ error: "Missing signature" }), { status: 401 });
     }
 
-    const token = authHeader.replace("Bearer ", "");
+    const body = await req.text();
+
+    const webhook = new Webhook({ secret });
+    await webhook.verify(body, signature); // verify signature
+
+    const data = JSON.parse(body);
+    const token = data?.jwt;
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Missing JWT" }), { status: 401 });
+    }
+
     const payload = JSON.parse(atob(token.split(".")[1]));
     const uid = payload.sub;
 
