@@ -3,8 +3,6 @@
 // -------------------------------------------------------------
 import { supabase } from "./supabaseClient.js";
 import { showToast } from "./toast.js";
-// rbac.js should define: function can(perm) { ... } using window.permissions
-// <script type="module" src="rbac.js"></script> should be loaded before this
 
 // -------------------------------------------------------------
 // STATE
@@ -14,63 +12,41 @@ let currentRole = null;
 let currentLocation = null;
 
 // -------------------------------------------------------------
-// LOAD RBAC FROM JWT (roles, permissions, location_id)
-// -------------------------------------------------------------
-async function loadRBACFromJWT() {
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data.user) {
-    console.warn("Unable to load user for RBAC:", error);
-    return;
-  }
-
-  const user = data.user;
-  currentUser = user;
-
-  // These are injected by your JWT Claims hook
-  const roles = user.app_metadata?.roles || [];
-  const permissions = user.app_metadata?.permissions || [];
-  const locationId = user.app_metadata?.location_id || null;
-
-  // Expose globally so rbac.js and modules can use them
-  window.roles = roles;
-  window.permissions = permissions;
-  window.locationId = locationId;
-
-  console.log("RBAC from JWT →", { roles, permissions, locationId });
-}
-
-// -------------------------------------------------------------
 // VALIDATE SESSION
 // -------------------------------------------------------------
 async function validateSession() {
+  // Always get session + error
   const { data, error } = await supabase.auth.getSession();
 
+  // If no session → redirect to login
   if (error || !data.session) {
     sessionStorage.clear();
     window.location.href = "login.html";
     return;
   }
 
+  // Session exists → store token safely
   const token = data.session.access_token;
   sessionStorage.setItem("access_token", token);
 
+  // Store user info
   const user = data.session.user;
   currentUser = user;
   sessionStorage.setItem("userId", user.id);
   sessionStorage.setItem("email", user.email);
 
-  // Keep this for backward compatibility if you still use user_metadata
+  // Also store metadata if needed
   if (user.user_metadata) {
-    sessionStorage.setItem("role", user.user_metadata.role || "");
-    sessionStorage.setItem("location_id", user.user_metadata.location_id || "");
-    sessionStorage.setItem("name", user.user_metadata.name || "");
+    sessionStorage.setItem("role", user.user_metadata.role);
+    sessionStorage.setItem("location_id", user.user_metadata.location_id);
+    sessionStorage.setItem("name", user.user_metadata.name);
   }
 }
-
 // -------------------------------------------------------------
-// LOAD USER PROFILE (still from users table for name/header)
+// LOAD USER PROFILE (CLEAN + SAFE + CORRECT)
 // -------------------------------------------------------------
 async function loadUserProfile() {
+  //const sessionUserId = currentUser?.id;
   const sessionUserId = sessionStorage.getItem("userId");
 
   console.log("Loading profile for:", sessionUserId);
@@ -80,24 +56,38 @@ async function loadUserProfile() {
     return;
   }
 
+  // -------------------------------------------------------------
+  // 1. Load from USERS table (source of truth)
+  // -------------------------------------------------------------
   const { data, error } = await supabase
     .from("users")
     .select("name, role, location_id")
     .eq("id", sessionUserId)
     .single();
 
-  if (error || !data) {
-    console.error("Profile load error:", error || "No user row found");
+  if (error) {
+    console.error("Profile load error:", error);
+    showToast("Unable to load user profile.", "error");
+    return;
+  }
+
+  if (!data) {
+    console.error("Profile load error: No user row found");
     showToast("Unable to load user profile.", "error");
     return;
   }
 
   console.log("Profile loaded:", data);
 
+  // -------------------------------------------------------------
+  // 2. Extract role + location
+  // -------------------------------------------------------------
   currentRole = data.role?.trim() || "";
   currentLocation = data.location_id;
 
-  // Header UI
+  // -------------------------------------------------------------
+  // 3. Update header UI
+  // -------------------------------------------------------------
   document.getElementById("headerUserName").textContent = data.name;
   document.getElementById("headerUserDept").textContent = currentRole;
 
@@ -106,6 +96,7 @@ async function loadUserProfile() {
   if (currentRole === "SuperAdmin") {
     locationEl.textContent = "All Locations";
   } else {
+    // Load location name
     const { data: locData, error: locError } = await supabase
       .from("locations")
       .select("name")
@@ -119,25 +110,23 @@ async function loadUserProfile() {
     locationEl.textContent = locData?.name || "Unknown Location";
   }
 
-  // Store in sessionStorage
+  // -------------------------------------------------------------
+  // 4. Store in sessionStorage (correct keys)
+  // -------------------------------------------------------------
   sessionStorage.setItem("name", data.name);
   sessionStorage.setItem("role", currentRole);
-  sessionStorage.setItem("location_id", currentLocation);
+  sessionStorage.setItem("location_id", currentLocation); // FIXED KEY
 }
 
 // -------------------------------------------------------------
-// DASHBOARD TILE ACCESS (now permission-based)
-// Each tile should have: class="dashboard-tile" data-perm="msp.read" etc.
+// DASHBOARD TILE ACCESS
 // -------------------------------------------------------------
 function applyDashboardTileAccess() {
-  document.querySelectorAll(".dashboard-tile").forEach(tile => {
-    const requiredPerm = tile.getAttribute("data-perm");
-    if (!requiredPerm) return; // no perm → leave as-is
+  const role = sessionStorage.getItem("role");
 
-    // `can` comes from rbac.js and uses window.permissions
-    if (!window.can || !can(requiredPerm)) {
-      tile.style.display = "none";
-    }
+  document.querySelectorAll(".dashboard-tile").forEach(tile => {
+    const allowed = tile.getAttribute("data-dept")?.split(",") || [];
+    if (!allowed.includes(role)) tile.style.display = "none";
   });
 }
 
@@ -160,9 +149,7 @@ async function loadModule(moduleName) {
     const html = await response.text();
     container.innerHTML = html;
 
-    const existingScript = document.querySelector(
-      `script[data-module="${moduleName}"]`
-    );
+    const existingScript = document.querySelector(`script[data-module="${moduleName}"]`);
     if (existingScript) {
       window.dispatchEvent(new Event(`${moduleName}ModuleLoaded`));
       return;
@@ -179,7 +166,6 @@ async function loadModule(moduleName) {
 
     document.body.appendChild(script);
   } catch (err) {
-    console.error("Module load error:", err);
     container.innerHTML = `<div class="error">Failed to load module</div>`;
   }
 }
@@ -271,9 +257,8 @@ function startClock() {
 // -------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", async () => {
   await validateSession();
-  await loadRBACFromJWT();   // <-- Step 1: load roles/permissions/location from JWT
-  await loadUserProfile();   // header info from users table
-  applyDashboardTileAccess(); // Step 3: hide tiles by permission
+  await loadUserProfile();
+  applyDashboardTileAccess();
   setupTileNavigation();
   setupLogout();
   setupChangePassword();

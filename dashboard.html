@@ -20,104 +20,105 @@
   <!-- TOASTS -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- HEADER (ALWAYS TOP) -->
-  <header
-    class="glass-card dashboard-header"
-    style="display:flex;align-items:center;justify-content:space-between;padding:16px 24px;"
-  >
+    <!-- HEADER (ALWAYS TOP) -->
+    <header
+      class="glass-card dashboard-header"
+      style="display:flex;align-items:center;justify-content:space-between;padding:16px 24px;"
+    >
 
-    <!-- LEFT -->
-    <div class="header-left">
-      <div class="card-header">Dashboard</div>
-      <div class="card-subtitle">
-        Welcome, <span id="headerUserName"></span> —
-        <span id="headerUserDept"></span>
-      </div>
-    </div>
-
-    <!-- CENTER -->
-    <div class="header-center">
-      <div id="headerLocationName" class="location-banner"></div>
-    </div>
-
-    <!-- RIGHT -->
-    <div class="header-right">
-        <div id="headerDateTime" class="header-clock"></div>
-
-        <div class="header-actions">
-          <button id="btnChangePassword">🔒 Change Password</button>
-          <button id="btnLogout">⏻ Logout</button>
+      <!-- LEFT -->
+      <div class="header-left">
+        <div class="card-header">Dashboard</div>
+        <div class="card-subtitle">
+          Welcome, <span id="headerUserName"></span> —
+          <span id="headerUserDept"></span>
         </div>
       </div>
 
-  </header>
- <!-- MODULE CONTAINER (ONLY ONE, CORRECT PLACE) -->
-  <div id="moduleContainer"></div>
+      <!-- CENTER -->
+      <div class="header-center">
+        <div id="headerLocationName" class="location-banner"></div>
+      </div>
 
- 
-  <!-- DASHBOARD TILES -->
-  <div class="dashboard-grid">
+      <!-- RIGHT -->
+      <div class="header-right">
+          <div id="headerDateTime" class="header-clock"></div>
 
-    <div class="dashboard-tile" id="tile-vendors" data-module="vendors" data-dept="SuperAdmin,LocationAdmin,Manager,Audit">
-      <div class="tile-icon">🏪</div>
-      <div class="tile-title">Vendors</div>
-    </div>
+          <div class="header-actions">
+            <button id="btnChangePassword">🔒 Change Password</button>
+            <button id="btnLogout">⏻ Logout</button>
+          </div>
+        </div>
 
-    <div class="dashboard-tile" id="tile-machines" data-module="machines" data-dept="SuperAdmin,LocationAdmin,Manager,Audit">
-      <div class="tile-icon">🖥️</div>
-      <div class="tile-title">Machines</div>
-    </div>
+    </header>
+  <!-- MODULE CONTAINER (ONLY ONE, CORRECT PLACE) -->
+    <div id="moduleContainer"></div>
 
-    <div class="dashboard-tile" id="tile-users" data-module="users" data-dept="SuperAdmin,LocationAdmin,Manager">
-      <div class="tile-icon">👥</div>
-      <div class="tile-title">Users</div>
-    </div>
+  
+    <!-- DASHBOARD TILES -->
+    <div class="dashboard-grid">
 
-    <div class="dashboard-tile" id="tile-audit" data-module="audit" data-dept="Audit,SuperAdmin,LocationAdmin,Manager">
-      <div class="tile-icon">📊</div>
-      <div class="tile-title">Audit</div>
-    </div>
+      <div class="dashboard-tile" id="tile-vendors" data-module="vendors" data-perm="vendors.read">
+        <div class="tile-icon">🏪</div>
+        <div class="tile-title">Vendors</div>
+      </div>
 
-    <div class="dashboard-tile" id="tile-msp" data-module="msp" data-dept="MSP,SuperAdmin,LocationAdmin,Manager">
-      <div class="tile-icon">💰</div>
-      <div class="tile-title">MSP</div>
-    </div>
+      <div class="dashboard-tile" id="tile-machines" data-module="machines" data-perm="machines.read">
+        <div class="tile-icon">🖥️</div>
+        <div class="tile-title">Machines</div>
+      </div>
 
-    <div class="dashboard-tile" id="tile-silver" data-module="silver" data-dept="Silver,SuperAdmin,LocationAdmin,Manager">
-      <div class="tile-icon">🥈</div>
-      <div class="tile-title">Silver</div>
-    </div>
+      <div class="dashboard-tile" id="tile-users" data-module="users" data-perm="users.read">
+        <div class="tile-icon">👥</div>
+        <div class="tile-title">Users</div>
+      </div>
 
-    <div class="dashboard-tile" id="tile-silverAgent" data-module="agentSilver" data-dept="SilverAgent,SuperAdmin,LocationAdmin,Manager">
-      <div class="tile-icon">🧾</div>
-      <div class="tile-title">Silver Agents</div>
-    </div>
+      <div class="dashboard-tile" id="tile-audit" data-module="audit" data-perm="audit.read">
+        <div class="tile-icon">📊</div>
+        <div class="tile-title">Audit</div>
+      </div>
 
-    <div class="dashboard-tile" id="tile-silverPurchase" data-module="silverPurchase" data-dept="Silver,SuperAdmin,LocationAdmin,Manager">
-      <div class="tile-icon">💳</div>
-      <div class="tile-title">Silver Purchase</div>
-    </div>
+      <div class="dashboard-tile" id="tile-msp" data-module="msp" data-perm="msp.read">
+        <div class="tile-icon">💰</div>
+        <div class="tile-title">MSP</div>
+      </div>
 
-    <div class="dashboard-tile" id="tile-general" data-module="general" data-dept="SuperAdmin,LocationAdmin,Manager,Audit,MSP,Silver,SilverAgent">
-      <div class="tile-icon">⚙️</div>
-      <div class="tile-title">General</div>
-    </div>
+      <div class="dashboard-tile" id="tile-silver" data-module="silver" data-perm="agent_silver.read">
+        <div class="tile-icon">🥈</div>
+        <div class="tile-title">Silver</div>
+      </div>
 
-    <div class="dashboard-tile" id="tile-locations" data-module="locations" data-dept="SuperAdmin">
-      <div class="tile-icon">📍</div>
-      <div class="tile-title">Locations</div>
-    </div>
-      <!-- PENDING REQUESTS WIDGET --> 
-       <div class="dashboard-card" id="pendingRequestsCard"> 
+      <div class="dashboard-tile" id="tile-silverAgent" data-module="agentSilver" data-perm="agent_silver.read">
+        <div class="tile-icon">🧾</div>
+        <div class="tile-title">Silver Agents</div>
+      </div>
+
+      <div class="dashboard-tile" id="tile-silverPurchase" data-module="silverPurchase" data-perm="silver_purchase.read">
+        <div class="tile-icon">💳</div>
+        <div class="tile-title">Silver Purchase</div>
+      </div>
+
+      <div class="dashboard-tile" id="tile-general" data-module="general" data-perm="general.read">
+        <div class="tile-icon">⚙️</div>
+        <div class="tile-title">General</div>
+      </div>
+
+      <div class="dashboard-tile" id="tile-locations" data-module="locations" data-perm="locations.read">
+        <div class="tile-icon">📍</div>
+        <div class="tile-title">Locations</div>
+      </div>
+
+      <div class="dashboard-card" id="pendingRequestsCard" data-perm="delete_requests.read">
         <h3> Pending Delete Requests 
           <span id="pendingBadge" class="pending-badge hidden"></span> 
         </h3> 
         <div class="count" id="pendingRequestsCount">0</div> 
       </div>
+    </div>
 
   </div>
 
-    <!-- RESET PASSWORD MODAL (ADMIN USE ONLY) -->
+  <!-- RESET PASSWORD MODAL (ADMIN USE ONLY) -->
   <div id="resetPasswordModal" class="modal-overlay" aria-hidden="true">
     <div class="modal-card">
 
