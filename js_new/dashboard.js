@@ -142,6 +142,47 @@ function applyDashboardTileAccess() {
 }
 
 // -------------------------------------------------------------
+// PENDING DELETE REQUESTS (RBAC + COUNT LOADING)
+// -------------------------------------------------------------
+async function loadPendingDeleteRequests() {
+  const card = document.getElementById("pendingRequestsCard");
+  if (!card) return;
+
+  // If user does NOT have permission → hide card and stop
+  if (!window.can || !can("delete_requests.read")) {
+    card.style.display = "none";
+    return;
+  }
+
+  // User has permission → show card
+  card.style.display = "block";
+
+  // Load count from DB
+  const { data, error } = await supabase
+    .from("delete_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "pending");
+
+  if (error) {
+    console.error("Failed to load pending delete requests:", error);
+    return;
+  }
+
+  const count = data?.length ?? 0;
+
+  // Update UI
+  document.getElementById("pendingRequestsCount").textContent = count;
+
+  const badge = document.getElementById("pendingBadge");
+  if (count > 0) {
+    badge.textContent = count;
+    badge.classList.remove("hidden");
+  } else {
+    badge.classList.add("hidden");
+  }
+}
+
+// -------------------------------------------------------------
 // MODULE LOADER
 // -------------------------------------------------------------
 async function loadModule(moduleName) {
@@ -271,9 +312,10 @@ function startClock() {
 // -------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", async () => {
   await validateSession();
-  await loadRBACFromJWT();   // <-- Step 1: load roles/permissions/location from JWT
-  await loadUserProfile();   // header info from users table
-  applyDashboardTileAccess(); // Step 3: hide tiles by permission
+  await loadRBACFromJWT();
+  await loadUserProfile();
+  applyDashboardTileAccess();
+  await loadPendingDeleteRequests();   // <-- NEW
   setupTileNavigation();
   setupLogout();
   setupChangePassword();
