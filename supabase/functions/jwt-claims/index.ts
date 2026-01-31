@@ -1,6 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+function base64UrlToUint8Array(base64Url: string) {
+  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/") +
+    "=".repeat((4 - (base64Url.length % 4)) % 4);
+
+  return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+}
+
 serve(async (req) => {
   try {
     const signature = req.headers.get("X-Supabase-Signature");
@@ -12,9 +19,8 @@ serve(async (req) => {
 
     const body = await req.text();
 
-    // --- Correct Supabase HMAC SHA256 verification ---
+    // Correct HMAC verification
     const encoder = new TextEncoder();
-
     const key = await crypto.subtle.importKey(
       "raw",
       encoder.encode(secret),
@@ -23,10 +29,7 @@ serve(async (req) => {
       ["verify"]
     );
 
-    const signatureBytes = Uint8Array.from(
-      atob(signature),
-      (c) => c.charCodeAt(0)
-    );
+    const signatureBytes = base64UrlToUint8Array(signature);
 
     const valid = await crypto.subtle.verify(
       "HMAC",
@@ -38,7 +41,6 @@ serve(async (req) => {
     if (!valid) {
       return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 401 });
     }
-    // -------------------------------------------------
 
     const data = JSON.parse(body);
     const token = data?.jwt;
