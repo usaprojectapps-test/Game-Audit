@@ -1,12 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Webhook } from "https://esm.sh/@octokit/webhooks@12.0.10";
 
 serve(async (req) => {
   try {
     const signature = req.headers.get("X-Supabase-Signature");
     const secret = Deno.env.get("HOOK_SECRET")!;
-
 
     if (!signature) {
       return new Response(JSON.stringify({ error: "Missing signature" }), { status: 401 });
@@ -14,11 +12,37 @@ serve(async (req) => {
 
     const body = await req.text();
 
-    const webhook = new Webhook({ secret });
-    await webhook.verify(body, signature); // verify signature
+    // --- Correct Supabase HMAC SHA256 verification ---
+    const encoder = new TextEncoder();
+
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["verify"]
+    );
+
+    const signatureBytes = Uint8Array.from(
+      atob(signature),
+      (c) => c.charCodeAt(0)
+    );
+
+    const valid = await crypto.subtle.verify(
+      "HMAC",
+      key,
+      signatureBytes,
+      encoder.encode(body)
+    );
+
+    if (!valid) {
+      return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 401 });
+    }
+    // -------------------------------------------------
 
     const data = JSON.parse(body);
     const token = data?.jwt;
+
     if (!token) {
       return new Response(JSON.stringify({ error: "Missing JWT" }), { status: 401 });
     }
