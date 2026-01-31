@@ -5,7 +5,8 @@ import { Webhook } from "https://esm.sh/@octokit/webhooks@12.0.10";
 serve(async (req) => {
   try {
     const signature = req.headers.get("X-Supabase-Signature");
-    const secret = Deno.env.get("SUPABASE_HOOK_SECRET")!;
+    const secret = Deno.env.get("HOOK_SECRET")!;
+
 
     if (!signature) {
       return new Response(JSON.stringify({ error: "Missing signature" }), { status: 401 });
@@ -26,8 +27,8 @@ serve(async (req) => {
     const uid = payload.sub;
 
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get("PROJECT_URL")!,
+      Deno.env.get("SERVICE_ROLE_KEY")!
     );
 
     const { data: roles } = await supabase
