@@ -1,0 +1,2 @@
+[functions.jwt-claims]
+verify_jwt = false
