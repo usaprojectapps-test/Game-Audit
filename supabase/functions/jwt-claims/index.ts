@@ -4,16 +4,12 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 serve(async (req) => {
   try {
     const body = await req.text();
-    console.log("HOOK BODY:", body);
+    console.log("RAW BODY:", body);
 
-    let data: any;
-    try {
-      data = JSON.parse(body);
-    } catch {
-      return new Response(JSON.stringify({ error: "Invalid JSON body" }), { status: 400 });
-    }
+    // Parse form-encoded body
+    const params = new URLSearchParams(body);
+    const token = params.get("jwt");
 
-    const token = data?.jwt;
     if (!token) {
       return new Response(JSON.stringify({ error: "Missing JWT" }), { status: 400 });
     }
