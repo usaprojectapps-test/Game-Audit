@@ -1,54 +1,23 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-console.log("SECRET:", Deno.env.get("HOOK_SECRET"));
-
-function base64UrlToUint8Array(base64Url: string) {
-  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/") +
-    "=".repeat((4 - (base64Url.length % 4)) % 4);
-
-  return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-}
-
 serve(async (req) => {
   try {
-    const signature = req.headers.get("X-Supabase-Signature");
-    const secret = Deno.env.get("HOOK_SECRET")!;
-
-    if (!signature) {
-      return new Response(JSON.stringify({ error: "Missing signature" }), { status: 401 });
-    }
-
     const body = await req.text();
 
-    // Correct HMAC verification
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      "raw",
-      encoder.encode(secret),
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["verify"]
-    );
+    // Just log to confirm the hook is being called
+    console.log("HOOK BODY:", body);
 
-    const signatureBytes = base64UrlToUint8Array(signature);
-
-    const valid = await crypto.subtle.verify(
-      "HMAC",
-      key,
-      signatureBytes,
-      encoder.encode(body)
-    );
-
-    if (!valid) {
-      return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 401 });
+    let data: any;
+    try {
+      data = JSON.parse(body);
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), { status: 400 });
     }
 
-    const data = JSON.parse(body);
     const token = data?.jwt;
-
     if (!token) {
-      return new Response(JSON.stringify({ error: "Missing JWT" }), { status: 401 });
+      return new Response(JSON.stringify({ error: "Missing JWT" }), { status: 400 });
     }
 
     const payload = JSON.parse(atob(token.split(".")[1]));
@@ -85,7 +54,8 @@ serve(async (req) => {
       }),
       { headers: { "Content-Type": "application/json" } }
     );
-  } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+  } catch (err: any) {
+    console.error("HOOK ERROR:", err);
+    return new Response(JSON.stringify({ error: err.message ?? "Unknown error" }), { status: 500 });
   }
 });
