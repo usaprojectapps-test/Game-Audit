@@ -4,8 +4,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 serve(async (req) => {
   try {
     const body = await req.text();
-
-    // Just log to confirm the hook is being called
     console.log("HOOK BODY:", body);
 
     let data: any;
@@ -56,6 +54,6 @@ serve(async (req) => {
     );
   } catch (err: any) {
     console.error("HOOK ERROR:", err);
-    return new Response(JSON.stringify({ error: err.message ?? "Unknown error" }), { status: 500 });
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 });
